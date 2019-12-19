@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include barista *.css
+recursive-include barista *.csv
+recursive-include barista *.html
+recursive-include barista *.ico
+recursive-include barista *.js
+recursive-include barista *.json
+recursive-include barista *.md
+recursive-include barista *.png
+recursive-include barista *.py
+recursive-include barista *.svg
+recursive-include barista *.txt
+recursive-exclude barista *.pyc
