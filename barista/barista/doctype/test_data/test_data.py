@@ -5,28 +5,25 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-import random
-import datetime
 import ast, json, requests, urllib3, re, math, difflib, base64, operator, copy, traceback, urllib, ssl, binascii, six, html.parser, os
-import bs4, sys, pymysql, html2text, warnings, markdown2, csv, calendar, unittest
+import bs4, sys, pymysql, html2text, warnings, markdown2, csv, calendar, unittest,random, datetime,dateutil
 
-
-class PretestcaseData(Document):
-	def create_pretestdata(self,PretestcaseData):
-		pretestdata_doc = frappe.get_doc('Pretestcase Data', PretestcaseData )
+class TestData(Document):
+	def create_testdata(self,testdata):
+		testdata_doc = frappe.get_doc('Test Data', testdata )
 		#first check if use script is true
-		if (pretestdata_doc.use_script == 1):				
+		if (testdata_doc.use_script == 1):				
 		#if Yes run the script
-			insert_stmt = "frappe.db.sql(" + pretestdata_doc.insert_script + ")"
+			insert_stmt = "frappe.db.sql(" + testdata_doc.insert_script + ")"
 			# try:
 			exec(insert_stmt)
 			# except expression as identifier:
 			# 	pass
-		#else
+		else:
 			#start creating the insert statement
-			new_doc = frappe.get_doc({"doctype": pretestdata_doc.doctype_name})	
-			fields = frappe.get_list('DocField', filters={'parent': pretestdata_doc.doctype_name })
-			declared_fields = frappe.get_list('Testdatafield', filters={'parent': pretestdata_doc.name})
+			new_doc = frappe.get_doc({"doctype": testdata_doc.doctype_name})	
+			fields = frappe.get_list('DocField', filters={'parent': testdata_doc.doctype_name })
+			declared_fields = frappe.get_list('Testdatafield', filters={'parent': testdata_doc.name})
 			#for each field
 			for field in fields:					
 				#check if the feild values are in provided.. use it 
@@ -39,7 +36,7 @@ class PretestcaseData(Document):
 						if (field_doc.fieldtype == "Table"):
 							#if it is table then user will have to add multiple rows for multiple records.
 							#each test data field will link to one record.
-							child_doc = create_pretestdata(field_doc.linkfield_name)
+							child_doc = create_testdata(field_doc.linkfield_name)
 							child_doc.parentfield = field_doc.fieldname
 							new_doc[field_doc.fieldname].append(child_doc)
 
@@ -92,17 +89,20 @@ class PretestcaseData(Document):
  
 			#once all fields value are assigned
 			#insert
-			return new_doc
+		return new_doc
 
-	def create_testdata(self):
-		all_pretestdata = frappe.get_list('Pretestcase Data', order_by='seq')
-		for pretestdata in all_pretestdata:
-			new_doc = create_pretestdata(pretestdata['name'])
-			new_doc.save()
+	def create_pretest_data(self):
+		all_testdata = frappe.get_list('Test Data', order_by='seq')
+		for testdata in all_testdata:
+			new_doc = create_testdata(testdata['name'])
+			created_doc = new_doc.save()
+			testdata_doc = frappe.get_doc('Test Data', testdata['name'])
+			testdata_doc.test_record_name = created_doc.name
+			testdata_doc.save()
+
 	
 
-			
 
-			
-				
-			
+
+
+
