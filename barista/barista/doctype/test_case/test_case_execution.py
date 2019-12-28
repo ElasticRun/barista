@@ -96,6 +96,17 @@ class TestCaseExecution():
 					testdata_doc.save()
 				
 				apply_workflow(new_record_doc, testcase_doc.workflow_state)
+			
+			elif (testcase_doc.testcase_type == "FUNCTION"):
+				if(new_record_doc.name == None):
+					new_record_doc = new_record_doc.save()
+					testdata_doc.test_record_name = new_record_doc.test_record_name
+					testdata_doc.save()
+				
+				if ((not testcase_doc.testcase_type) or testcase_doc.testcase_type == None):
+					#empty paramter call function diretly.
+					pass
+				
 		
 		except Exception as e:
 			test_result_doc.test_case_execution = "Execution Failed"
