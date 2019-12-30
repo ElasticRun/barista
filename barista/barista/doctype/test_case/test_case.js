@@ -23,7 +23,10 @@ frappe.ui.form.on('Testdatafield', {
 					function (d) {
 					if (d.fieldname && frappe.model.no_value_type.indexOf(d.fieldtype) === -1) {
 						return d.fieldname;
+					} else if(d.fieldname && d.fieldtype == 'Table') {
+						return d.fieldname;
 					}
+				
 					return null;
 					}
 				);
