@@ -23,13 +23,19 @@ class TestCaseExecution():
 		TestDataGeneratorobj = TestDataGenerator()
 		#Test Data record doc
 		testdata_doc = frappe.get_doc("Test Data", testcase_doc.testdata)
+
+		#cannot use insert scritps in test case data generation as doctype.name will not be recorded
+		if (testdata_doc.use_script == 1):
+			test_result_doc.test_case_execution = "Execution Failed"
+			test_result_doc.execution_result = "The test data - " + testdata_doc.name + " selected is genereted using script for which record name cannot be recorded"						
+			test_result_doc.test_case_status = "Failed"
+
 		#get record document
-		new_record_doc = TestDataGeneratorobj.create_testdata(testcase_doc.testdata)			
+		new_record_doc = TestDataGeneratorobj.create_testdata(testcase_doc.testdata)
 
 		try:
 			if (testcase_doc.testcase_type == "CREATE"):
-				
-				
+								
 				record_created_doc = new_record_doc.save()
 				testdata_doc.test_record_name = record_created_doc.test_record_name
 				testdata_doc.save()
