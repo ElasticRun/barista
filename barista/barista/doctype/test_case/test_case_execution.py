@@ -35,9 +35,10 @@ class TestCaseExecution():
 
 		try:
 			if (testcase_doc.testcase_type == "CREATE"):
-								
+				
 				record_created_doc = new_record_doc.save()
 				testdata_doc.test_record_name = record_created_doc.test_record_name
+				testdata_doc.status = "CREATED"
 				testdata_doc.save()
 			
 				
@@ -48,6 +49,7 @@ class TestCaseExecution():
 				if(new_record_doc.name == None):
 					new_record_doc = new_record_doc.save()
 					testdata_doc.test_record_name = new_record_doc.test_record_name
+					testdata_doc.status = "CREATED"
 					testdata_doc.save()
 
 				#now take the fields to be updated 
@@ -63,6 +65,7 @@ class TestCaseExecution():
 						#if it is table then user will have to add multiple rows for multiple records.
 						#each test data field will link to one record.
 						child_doc = TestDataGeneratorobj.create_testdata(field_doc.linkfield_name)
+						#TODO: Fetch child test data doc and update child doc
 						child_doc.parentfield = field_doc.fieldname
 						new_record_doc[field_doc.fieldname].append(child_doc)
 
@@ -78,6 +81,7 @@ class TestCaseExecution():
 					elif (field_doc.fieldtype == "Link"):
 						child_doc = TestDataGeneratorobj.create_testdata(field_doc.linkfield_name)
 						created_child_doc = child_doc.save()
+						#TODO: Fetch child test data doc and update child doc
 						new_record_doc[field_doc.fieldname] = created_child_doc.name
 					
 					#for rest of data type.. either it should be code or fixed value
@@ -99,6 +103,7 @@ class TestCaseExecution():
 				if(new_record_doc.name == None):
 					new_record_doc = new_record_doc.save()
 					testdata_doc.test_record_name = new_record_doc.test_record_name
+					testdata_doc.status = "CREATED"
 					testdata_doc.save()
 				
 				apply_workflow(new_record_doc, testcase_doc.workflow_state)
@@ -107,6 +112,7 @@ class TestCaseExecution():
 				if(new_record_doc.name == None):
 					new_record_doc = new_record_doc.save()
 					testdata_doc.test_record_name = new_record_doc.test_record_name
+					testdata_doc.status = "CREATED"
 					testdata_doc.save()
 				
 				if ((not testcase_doc.testcase_type) or testcase_doc.testcase_type == None):

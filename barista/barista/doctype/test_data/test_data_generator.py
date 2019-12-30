@@ -13,7 +13,7 @@ class TestDataGenerator():
 	def create_testdata(self,testdata):
 		testdata_doc = frappe.get_doc('Test Data', testdata )
 
-		if (testdata_doc):
+		#if (testdata_doc):
 		#first check if use script is true
 		if (testdata_doc.use_script == 1):				
 		#if Yes run the script
@@ -46,7 +46,7 @@ class TestDataGenerator():
 							new_doc[field_doc.fieldname].append(child_doc)
 
 							#link parent to this record											
-						elif (if "Link" in field_doc.fieldtype and declared_field_doc.docfield_code_value == "Fixed Value"):
+						elif ("Link" in field_doc.fieldtype and declared_field_doc.docfield_code_value == "Fixed Value"):
 							new_doc[field_doc.fieldname] = declared_field_doc.docfield_value
 						elif ("Link" in field_doc.fieldtype):
 							child_doc = self.create_testdata(field_doc.linkfield_name)
@@ -79,7 +79,7 @@ class TestDataGenerator():
 						new_doc[declared_field_doc.docfield_fieldname] = round(random.uniform(0, 22000.34),2)
 					elif(field_doc.fieldtype == "Int"):
 						new_doc[declared_field_doc.docfield_fieldname] = random.randrange(0,200,1)
-					elif(field_doc.fieldtype == "Long Text" or field_doc.fieldtype == "Small Text" or field_doc.fieldtype = "Text"):
+					elif(field_doc.fieldtype == "Long Text" or field_doc.fieldtype == "Small Text" or field_doc.fieldtype == "Text"):
 						new_doc[declared_field_doc.docfield_fieldname] = (field_doc.label + random.randrange(0,20000,1))
 					elif(field_doc.fieldtype == "Password"):
 						new_doc[declared_field_doc.docfield_fieldname] = "Frappe@12345"
@@ -90,7 +90,7 @@ class TestDataGenerator():
 				#else create random data. 
  
 			#once all fields value are assigned
-			#insert
+			#insert		
 		return new_doc
 
 	def create_pretest_data(self):
