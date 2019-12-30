@@ -6,5 +6,5 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-class Testdummyparent(unittest.TestCase):
+class TestTestdataItem(unittest.TestCase):
 	pass

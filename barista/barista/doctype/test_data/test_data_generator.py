@@ -20,7 +20,7 @@ class TestDataGenerator():
 			#insert_stmt = frappe.db.sql( testdata_doc.insert_script )
 			# try:
 			frappe.db.sql( testdata_doc.insert_script )
-			frappe.db.commit
+			frappe.db.commit()
 			#exec(insert_stmt)
 			# except expression as identifier:
 			# 	pass
@@ -117,18 +117,14 @@ class TestDataGenerator():
 		#insert		
 		return new_doc
 
-	def create_pretest_data(self):
-		all_testdata = frappe.get_list('Test Data', order_by='seq')
+	def create_pretest_data(self,suite):
+		#select all the test data for a suite... 		
+		all_testdata = frappe.db.sql_list("""select td.name from `tabTest Data` td join `tabTestdata Item` tdi on tdi.test_data=td.name where tdi.parent=%(parent)s order by td.seq""",{'parent':suite})
+
 		for testdata in all_testdata:
-			new_doc = self.create_testdata(testdata['name'])
+			new_doc = self.create_testdata(testdata)
 			created_doc = new_doc.save()
-			testdata_doc = frappe.get_doc('Test Data', testdata['name'])
+			testdata_doc = frappe.get_doc('Test Data', testdata)
 			testdata_doc.test_record_name = created_doc.name
+			testdata_doc.status = 'CREATED'
 			testdata_doc.save()
-
-	
-
-
-
-
-
