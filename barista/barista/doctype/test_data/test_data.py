@@ -11,4 +11,9 @@ import bs4, sys, pymysql, html2text, warnings, markdown2, csv, calendar, unittes
 
 
 class TestData(Document):
-	pass
+	def validate(self):
+		docfields = [docfield.fieldname for docfield in frappe.get_doc("DocType",self.doctype_name).fields]
+		for row in self.docfield_value:
+			if row.docfield_fieldname not in docfields:
+				frappe.throw(f"Invalid DocField {row.docfield_fieldname} in {self.doctype_name}")
+		
