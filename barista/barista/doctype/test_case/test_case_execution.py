@@ -67,10 +67,10 @@ class TestCaseExecution():
 					if (field_doc.fieldtype == "Table"):
 						#if it is table then user will have to add multiple rows for multiple records.
 						#each test data field will link to one record.
-						child_doc = TestDataGeneratorobj.create_testdata(field_doc.linkfield_name)
+						child_doc = TestDataGeneratorobj.create_testdata(update_field_doc.linkfield_name)
 						#TODO: Fetch child test data doc and update child doc
 						child_doc.parentfield = field_doc.fieldname
-						new_record_doc[field_doc.fieldname].append(child_doc)
+						new_record_doc.get(field_doc.fieldname).append(child_doc)
 
 						#check the link for pretestdata
 						#create pretestdata
@@ -79,20 +79,20 @@ class TestCaseExecution():
 						#link parent to this record						
 							
 					elif (field_doc.fieldtype == "Link" and update_field_doc.docfield_code_value == "Fixed Value"):
-						new_record_doc[field_doc.fieldname] = update_field_doc.docfield_value
+						new_record_doc.set(field_doc.fieldname, update_field_doc.docfield_value)
 
 					elif (field_doc.fieldtype == "Link"):
 						child_doc = TestDataGeneratorobj.create_testdata(field_doc.linkfield_name)
 						created_child_doc = child_doc.save()
 						#TODO: Fetch child test data doc and update child doc
-						new_record_doc[field_doc.fieldname] = created_child_doc.name
+						new_record_doc.set(field_doc.fieldname,created_child_doc.name)
 					
 					#for rest of data type.. either it should be code or fixed value
-					elif (update_field_doc.docfield_code_value == "Code"):					
-						new_record_doc[field_doc.docfield_fieldname] = eval(update_field_doc.docfield_code)
+					elif (update_field_doc.docfield_code_value == "Code"):
+						new_record_doc.set(field_doc.docfield_fieldname, eval(update_field_doc.docfield_code))
 						
 					else:
-						new_record_doc[update_field_doc.docfield_fieldname] = update_field_doc.docfield_value
+						new_record_doc.set(update_field_doc.docfield_fieldname, update_field_doc.docfield_value) 
 					
 					print ("$$$$$$$$$$ - ")
 					new_record_doc.save()
@@ -122,18 +122,12 @@ class TestCaseExecution():
 				if ((not testcase_doc.testcase_type) or testcase_doc.testcase_type == None):
 					#empty paramter call function diretly.
 					pass
-				
-		
-		except Exception as e:
-			test_result_doc.test_case_execution = "Execution Failed"
-			test_result_doc.execution_result = str(e)		
-			test_result_doc.test_case_status = "Failed"
-			test_result_doc.save()
 
 
-		assertions = frappe.get_list("Assertion", filters={'parent': testcase})
 
-		for assertion in assertions:
+			assertions = frappe.get_list("Assertion", filters={'parent': testcase})
+
+			for assertion in assertions:
 				assertion_doc = frappe.get_doc("Assertion", assertion['name'])
 				assertion_result = frappe.new_doc("Assertion Result")
 				assertion_result.assertion = assertion_doc.name
@@ -197,6 +191,17 @@ class TestCaseExecution():
 					pass
 
 				assertion_result.parentfield = "assertion_results"
-				test_result_doc.get("assertion_results").append(assertion_result)				
+				test_result_doc.get("assertion_results").append(assertion_result)
 				test_result_doc.save()
 				print ("******************** ENDED  TEST RESULT SAVED******************")
+
+				
+		
+		except Exception as e:
+			test_result_doc.test_case_execution = "Execution Failed"
+			test_result_doc.execution_result = str(e)		
+			test_result_doc.test_case_status = "Failed"
+			test_result_doc.save()
+
+		
+		
