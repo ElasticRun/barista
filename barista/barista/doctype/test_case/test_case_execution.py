@@ -10,45 +10,49 @@ from frappe.model.workflow import apply_workflow
 
 class TestCaseExecution():
 	def run_testcase(self,testcase, test_suite):
-		testcase_doc = frappe.get_doc("Test Case", testcase)
-
-		#Populate generic test result fields
-		test_result_doc = frappe.new_doc("Test Result")
-		test_result_doc.test_suite = test_suite
-		test_result_doc.action = "Test Case"
-		test_result_doc.test_case =testcase_doc.name
-		test_result_doc.test_case_status = "Passed"
-		#test result fields ended 
-
-		TestDataGeneratorobj = TestDataGenerator()
-		#Test Data record doc
-		testdata_doc = frappe.get_doc("Test Data", testcase_doc.testdata)
-
-		#cannot use insert scritps in test case data generation as doctype.name will not be recorded
-		if (testdata_doc.use_script == 1):
-			test_result_doc.test_case_execution = "Execution Failed"
-			test_result_doc.execution_result = "The test data - " + testdata_doc.name + " selected is genereted using script for which record name cannot be recorded"						
-			test_result_doc.test_case_status = "Failed"
-
-		#get record document
-		new_record_doc = TestDataGeneratorobj.create_testdata(testcase_doc.testdata)
-
 		try:
+			testcase_doc = frappe.get_doc("Test Case", testcase)
+
+			#Populate generic test result fields
+			test_result_doc = frappe.new_doc("Test Result")
+			test_result_doc.test_suite = test_suite
+			test_result_doc.action = "Test Case"
+			test_result_doc.test_case =testcase_doc.name
+			test_result_doc.test_case_status = "Passed"
+			#test result fields ended 
+
+			TestDataGeneratorobj = TestDataGenerator()
+			#Test Data record doc
+			testdata_doc = frappe.get_doc("Test Data", testcase_doc.test_data)
+
+			#cannot use insert scritps in test case data generation as doctype.name will not be recorded
+			if (testdata_doc.use_script == 1):
+				test_result_doc.test_case_execution = "Execution Failed"
+				test_result_doc.execution_result = "The test data - " + testdata_doc.name + " selected is genereted using script for which record name cannot be recorded"
+				test_result_doc.test_case_status = "Failed"
+
+			#get record document
+			print ("$$$$$$$$ - before test data generator")
+			new_record_doc = TestDataGeneratorobj.create_testdata(testcase_doc.test_data)
+			print ("$$$$$$$ - before saving the created doc + " + str(new_record_doc.as_dict()))	
+
+		
 			if (testcase_doc.testcase_type == "CREATE"):
-				
-				record_created_doc = new_record_doc.save()
-				testdata_doc.test_record_name = record_created_doc.test_record_name
+				print ("$$$$$$$ -  inside create before saving the created doc + " + str(new_record_doc.as_dict()) )	
+				new_record_doc.save()
+				print ("Inside create after save")
+				print ("$$$$$$$$$$$ - new doc name - " + str(new_record_doc.name) )
+				testdata_doc.test_record_name = new_record_doc.name
 				testdata_doc.status = "CREATED"
-				testdata_doc.save()
-			
-				
+				testdata_doc.save()			
+				print("$$$$$$$ after test data save")
+
 			elif (testcase_doc.testcase_type == "UPDATE"):
 
-				
 				#create the record if already not created
 				if(new_record_doc.name == None):
 					new_record_doc = new_record_doc.save()
-					testdata_doc.test_record_name = new_record_doc.test_record_name
+					testdata_doc.test_record_name = new_record_doc.name
 					testdata_doc.status = "CREATED"
 					testdata_doc.save()
 
@@ -56,10 +60,9 @@ class TestCaseExecution():
 				update_fields = frappe.get_list("Testdatafield", filters={"parent":testcase_doc.name} )
 				for update_field in update_fields:				
 					update_field_doc = frappe.get_doc("Testdatafield", update_field['name'])
-					field_doc = frappe.get_doc("DocField", filters={'parent':update_field_doc.doctype_name, \
+					fields = frappe.get_all("DocField", filters={'parent':update_field_doc.doctype_name, \
 																	'fieldname': update_field_doc.docfield_fieldname } )
-
-					
+					field_doc = frappe.get_doc("DocField", fields[0].name)
 
 					if (field_doc.fieldtype == "Table"):
 						#if it is table then user will have to add multiple rows for multiple records.
@@ -91,6 +94,7 @@ class TestCaseExecution():
 					else:
 						new_record_doc[update_field_doc.docfield_fieldname] = update_field_doc.docfield_value
 					
+					print ("$$$$$$$$$$ - ")
 					new_record_doc.save()
 
 				
@@ -124,13 +128,14 @@ class TestCaseExecution():
 			test_result_doc.test_case_execution = "Execution Failed"
 			test_result_doc.execution_result = str(e)		
 			test_result_doc.test_case_status = "Failed"
+			test_result_doc.save()
 
 
 		assertions = frappe.get_list("Assertion", filters={'parent': testcase})
 
 		for assertion in assertions:
 				assertion_doc = frappe.get_doc("Assertion", assertion['name'])
-				assertion_result = frappe.get_doc("Assertion Result")
+				assertion_result = frappe.new_doc("Assertion Result")
 				assertion_result.assertion = assertion_doc.name
 				assertion_result.assertion_status = "Passed"
 				validation_doctype = frappe.get_all(assertion_doc.doctype_name, filters={assertion_doc.reference_field : testdata_doc.test_record_name })
@@ -148,21 +153,21 @@ class TestCaseExecution():
 					else:
 						 						
 						validation_doctype_doc = frappe.get_doc(assertion_doc.doctype_name, validation_doctype[0]['name'])
-						if(validation_doctype_doc[assertion_doc.docfield_name] == assertion_doc.docfield_value):
+						if(validation_doctype_doc.get(assertion_doc.docfield_name) == assertion_doc.docfield_value):
 							#Assertion is successful						
 							assertion_result.assertion_result = "Valued matched - " + validation_doctype_doc[assertion_doc.docfield_name]
 						else:
 							#Assertion failed
 							#test case also fails
 							assertion_result.assertion_status = "Failed"
-							assertion_result.assertion_result = "Valued Found - " + validation_doctype[assertion_doc.docfield_name]  \
-															+ ". Where as expected value is - " +  assertion_doc.docfield_value
+							assertion_result.assertion_result = "Valued Found - " + str(validation_doctype_doc.get(assertion_doc.docfield_name))  \
+															+ ". Where as expected value is - " +  str(assertion_doc.docfield_value)
 							test_result_doc.test_case_status = "Failed"
 
 				elif (assertion_doc.assertion_type == "RECORD VALIDATION"):
 					if (len(validation_doctype) == 1):
 						#Assertion is successful
-						assertion_result = frappe.get_doc("Assertion Result")
+						assertion_result = frappe.new_doc("Assertion Result")
 						assertion_result.assertion = assertion_doc.name
 						assertion_result.assertion_status = "Passed"
 						assertion_result.assertion_result = "record found - " + validation_doctype['name']
@@ -190,3 +195,8 @@ class TestCaseExecution():
 
 				elif (assertion_doc.assertion_type == "RESPONSE"):
 					pass
+
+				assertion_result.parentfield = "assertion_results"
+				test_result_doc.get("assertion_results").append(assertion_result)				
+				test_result_doc.save()
+				print ("******************** ENDED  TEST RESULT SAVED******************")

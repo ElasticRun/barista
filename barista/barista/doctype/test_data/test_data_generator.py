@@ -15,7 +15,7 @@ class TestDataGenerator():
 
 		#if (testdata_doc):
 		#first check if use script is true
-		if (testdata_doc.use_script == 1):				
+		if (testdata_doc.use_script == 1):
 		#if Yes run the script
 			#insert_stmt = frappe.db.sql( testdata_doc.insert_script )
 			# try:
@@ -34,97 +34,103 @@ class TestDataGenerator():
 				#check if the feild values are in provided.. use it 
 				field_doc = frappe.get_doc("DocField", field.name)
 				flag_field = False
+				print("##################" + str(field_doc.as_dict()))
 				for declared_field in declared_fields:
 					declared_field_doc = frappe.get_doc('Testdatafield', declared_field['name'])
+					print ("!!!!!!!!!!!!!!!!!!" + str(declared_field_doc.docfield_fieldname))
 					if (declared_field_doc.docfield_fieldname == field_doc.fieldname):
 						flag_field = True
 						if (field_doc.fieldtype == "Table"):
 							#if it is table then user will have to add multiple rows for multiple records.
 							#each test data field will link to one record.
-							child_doc = self.create_testdata(field_doc.linkfield_name)
+							child_doc = self.create_testdata(declared_field_doc.linkfield_name)
+							child_doc.save()
 							child_doc.parentfield = field_doc.fieldname
-							new_doc[field_doc.fieldname].append(child_doc)
-
+							new_doc.get(field_doc.fieldname).append(child_doc)
+							###new_doc[field_doc.fieldname].append(child_doc)
+							
 						#link parent to this record											
-					elif ("Link" in field_doc.fieldtype and declared_field_doc.docfield_code_value == "Fixed Value"):
-						new_doc[field_doc.fieldname] = declared_field_doc.docfield_value
-					elif ("Link" in field_doc.fieldtype):
-						child_doc = self.create_testdata(field_doc.linkfield_name)
-						created_child_doc = child_doc.save()
-						new_doc[field_doc.fieldname] = created_child_doc.name
+						elif ("Link" in field_doc.fieldtype and declared_field_doc.docfield_code_value == "Fixed Value"):
+							print (field_doc.name)
+							print ("@@@@@@@" + str(declared_field_doc.docfield_value))
+							new_doc.set(field_doc.fieldname,declared_field_doc.docfield_value)
+						elif ("Link" in field_doc.fieldtype):
 
-					elif (declared_field_doc.docfield_code_value == "Code"):
-						# try:
-						new_doc[declared_field_doc.docfield_fieldname] = eval(declared_field_doc.docfield_code)
-						# except expression as identifier:
-						# 	pass
-					else:
-						new_doc[declared_field_doc.docfield_fieldname] = declared_field_doc.docfield_value
+							child_doc = self.create_testdata(field_doc.linkfield_name)
+							created_child_doc = child_doc.save()
+							new_doc.set(field_doc.fieldname,created_child_doc)
+							new_doc.set(field_doc.fieldname,created_child_doc.name)
+							###new_doc[field_doc.fieldname] = created_child_doc.name
+
+						elif (declared_field_doc.docfield_code_value == "Code"):
+							# try:
+							new_doc.set(declared_field_doc.docfield_fieldname, eval(declared_field_doc.docfield_code))
+							###new_doc[declared_field_doc.docfield_fieldname] = eval(declared_field_doc.docfield_code)
+							# except expression as identifier:
+							# 	pass
+						else:
+							new_doc.set(declared_field_doc.docfield_fieldname, declared_field_doc.docfield_value)
+							###new_doc[declared_field_doc.docfield_fieldname] = declared_field_doc.docfield_value
 			
-			if(flag_field == False):
+			if(flag_field == False and not field_doc.fetch_from):
 				#no declared field necessary for the test case. Create random field.
+				value = None
 				if (field_doc.fieldtype == "Data"):
 					#its a string of 140							
-					new_doc[declared_field_doc.docfield_fieldname] = (field_doc.label.split()[0]	+ random.randrange(0,20000,1))[0:139]
+					value = (field_doc.label.split()[0]	+ random.randrange(0,20000,1))[0:139]					
+
+					###new_doc[declared_field_doc.docfield_fieldname] = (field_doc.label.split()[0]	+ random.randrange(0,20000,1))[0:139]
 				elif (field_doc.fieldtype == "Check"):
 					#its a check
-					new_doc[declared_field_doc.docfield_fieldname] = random.choice([0,1])
+					value = random.choice([0,1])					
+					###new_doc[declared_field_doc.docfield_fieldname] = random.choice([0,1])
 				elif(field_doc.fieldtype == "Currency"):
-					new_doc[declared_field_doc.docfield_fieldname] = round(random.uniform(500.12, 22000.34),2)
+					value = round(random.uniform(500.12, 22000.34),2)					
+					###new_doc[declared_field_doc.docfield_fieldname] = round(random.uniform(500.12, 22000.34),2)
 				elif(field_doc.fieldtype == "Date"):
-					new_doc[declared_field_doc.docfield_fieldname] = datetime.date.today() + datetime.timedelta(days=(random.randrange(0,15,1)))
+					value = datetime.date.today() + datetime.timedelta(days=(random.randrange(0,15,1)))					
+					###new_doc[declared_field_doc.docfield_fieldname] = datetime.date.today() + datetime.timedelta(days=(random.randrange(0,15,1)))
 				elif(field_doc.fieldtype == "Datetime"):
-					new_doc[declared_field_doc.docfield_fieldname] = datetime.datetime.now() + datetime.timedelta(minutes=(random.randrange(0,200,2)))
+					value = datetime.datetime.now() + datetime.timedelta(minutes=(random.randrange(0,200,2)))					
+					###new_doc[declared_field_doc.docfield_fieldname] = datetime.datetime.now() + datetime.timedelta(minutes=(random.randrange(0,20000,2)))
 				elif(field_doc.fieldtype == "Float"):
-					new_doc[declared_field_doc.docfield_fieldname] = round(random.uniform(0, 22000.34),2)
+					value = round(random.uniform(0, 22000.34),2)					
+					###new_doc[declared_field_doc.docfield_fieldname] = round(random.uniform(0, 22000.34),2)
 				elif(field_doc.fieldtype == "Int"):
-					new_doc[declared_field_doc.docfield_fieldname] = random.randrange(0,200,1)
+					value = random.randrange(0,200,1)
+					###new_doc[declared_field_doc.docfield_fieldname] = random.randrange(0,200,1)
 				elif(field_doc.fieldtype == "Long Text" or field_doc.fieldtype == "Small Text" or field_doc.fieldtype == "Text"):
-					new_doc[declared_field_doc.docfield_fieldname] = (field_doc.label + random.randrange(0,20000,1))
+					value = (field_doc.label + random.randrange(0,20000,1))
+					###new_doc[declared_field_doc.docfield_fieldname] = (field_doc.label + random.randrange(0,20000,1))
 				elif(field_doc.fieldtype == "Password"):
-					new_doc[declared_field_doc.docfield_fieldname] = "Frappe@12345"
+					value = "Frappe@12345"
+					###new_doc[declared_field_doc.docfield_fieldname] = "Frappe@12345"
 				elif (field_doc.fieldtype == "Percent"):
-					new_doc[declared_field_doc.docfield_fieldname] = round(random.uniform(0, 100),2)
-				
-				if(flag_field == False):
-					#no declared field necessary for the test case. Create random field.
-					if (field_doc.fieldtype == "Data"):
-						#its a string of 140							
-						new_doc[declared_field_doc.docfield_fieldname] = (field_doc.label.split()[0]	+ random.randrange(0,20000,1))[0:139]
-					elif (field_doc.fieldtype == "Check"):
-						#its a check
-						new_doc[declared_field_doc.docfield_fieldname] = random.choice([0,1])
-					elif(field_doc.fieldtype == "Currency"):
-						new_doc[declared_field_doc.docfield_fieldname] = round(random.uniform(500.12, 22000.34),2)
-					elif(field_doc.fieldtype == "Date"):
-						new_doc[declared_field_doc.docfield_fieldname] = datetime.date.today() + datetime.timedelta(days=(random.randrange(0,15,1)))
-					elif(field_doc.fieldtype == "Datetime"):
-						new_doc[declared_field_doc.docfield_fieldname] = datetime.datetime.now() + datetime.timedelta(minutes=(random.randrange(0,200,2)))
-					elif(field_doc.fieldtype == "Float"):
-						new_doc[declared_field_doc.docfield_fieldname] = round(random.uniform(0, 22000.34),2)
-					elif(field_doc.fieldtype == "Int"):
-						new_doc[declared_field_doc.docfield_fieldname] = random.randrange(0,200,1)
-					elif(field_doc.fieldtype == "Long Text" or field_doc.fieldtype == "Small Text" or field_doc.fieldtype == "Text"):
-						new_doc[declared_field_doc.docfield_fieldname] = (field_doc.label + random.randrange(0,20000,1))
-					elif(field_doc.fieldtype == "Password"):
-						new_doc[declared_field_doc.docfield_fieldname] = "Frappe@12345"
-					elif (field_doc.fieldtype == "Percent"):
-						new_doc[declared_field_doc.docfield_fieldname] = round(random.uniform(0, 100),2)
-					
-			#else create random data. 
+					value = round(random.uniform(0, 100),2)
+					###new_doc[declared_field_doc.docfield_fieldname] = round(random.uniform(0, 100),2)
+				elif ("Link" in field_doc.fieldtype or field_doc.fieldtype == "Table" ):
+					#it looks like table or link field is not declared by user... test data generation failed..
+					testdata_doc.status = "Failed"	
 
-		#once all fields value are assigned
-		#insert		
-		return new_doc
+				if (value != None):
+					new_doc.set(declared_field_doc.docfield_fieldname, value)
+					
+			#insert		
+			return new_doc
 
 	def create_pretest_data(self,suite):
 		#select all the test data for a suite... 		
-		all_testdata = frappe.db.sql_list("""select td.name from `tabTest Data` td join `tabTestdata Item` tdi on tdi.test_data=td.name where tdi.parent=%(parent)s order by td.seq""",{'parent':suite})
+		all_testdata = frappe.db.sql_list("""select distinct td.name from `tabTest Data` td join `tabTestdata Item` tdi on tdi.test_data=td.name where tdi.parent=%(parent)s order by td.seq""",{'parent':suite})
 
 		for testdata in all_testdata:
-			new_doc = self.create_testdata(testdata)
-			created_doc = new_doc.save()
-			testdata_doc = frappe.get_doc('Test Data', testdata)
-			testdata_doc.test_record_name = created_doc.name
-			testdata_doc.status = 'CREATED'
-			testdata_doc.save()
+			print(testdata)
+			testdata_doc = frappe.get_doc("Test Data", testdata)
+			if (testdata_doc.use_script == 1):
+				self.create_testdata(testdata)
+			else:
+				new_doc = self.create_testdata(testdata)
+				created_doc = new_doc.save()
+				testdata_doc = frappe.get_doc('Test Data', testdata)
+				testdata_doc.test_record_name = created_doc.name
+				testdata_doc.status = 'CREATED'
+				testdata_doc.save()

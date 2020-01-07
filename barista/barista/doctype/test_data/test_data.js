@@ -15,8 +15,8 @@ frappe.ui.form.on('Test Data', {
 				}
 			});
 			if(cur_frm.doc.doctype_name){
-				var row = locals[cdt][cdn];
-				row.doctype_name = cur_frm.doc.doctype_name;
+				//var row = locals[cdt][cdn];
+				//row.doctype_name = cur_frm.doc.doctype_name;
 				cur_frm.refresh_fields();
 				frappe.model.with_doctype(cur_frm.doc.doctype_name, function () {
 					var options = $.map(frappe.get_meta(cur_frm.doc.doctype_name).fields,
