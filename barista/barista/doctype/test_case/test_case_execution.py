@@ -40,7 +40,7 @@ class TestCaseExecution():
 			if (testdata_doc.new_record_doc and testcase_doc.testcase_type == "CREATE"):
 				testdata_doc.new_record_doc = None
 				testdata_doc.save()
-
+			
 			#get record document
 			new_record_doc = TestDataGeneratorobj.create_testdata(testcase_doc.test_data)
 			error_message = None
@@ -51,7 +51,11 @@ class TestCaseExecution():
 				testdata_doc.test_record_name = new_record_doc.name
 				testdata_doc.status = "CREATED"
 				print ("$$$$$$$$$$$$$$ before save test data")
-				testdata_doc.save()
+				try:
+					testdata_doc.save()
+				except Exception as e: 
+					error_message = str(e)
+
 				print ("$$$$$$$$$$$$$$ after save test data")
 			
 			elif (testcase_doc.testcase_type == "UPDATE"):
@@ -61,11 +65,9 @@ class TestCaseExecution():
 					new_record_doc = new_record_doc.save()
 					testdata_doc.test_record_name = new_record_doc.name
 					testdata_doc.status = "CREATED"
-					try:
-						testdata_doc.save()
-					except Exception as e: 
-						error_message = str(e)
-
+					
+					testdata_doc.save()
+					
 				#now take the fields to be updated 
 				update_fields = frappe.get_list("Testdatafield", filters={"parent":testcase_doc.name} )
 				for update_field in update_fields:
@@ -238,7 +240,7 @@ class TestCaseExecution():
 
 				elif (assertion_doc.assertion_type == "ERROR"):
 					if (error_message):
-						if (assertion_doc.error_message == error_message):
+						if (error_message in assertion_doc.error_message):
 							assertion_result.assertion_result = "error received as expected - " + error_message
 						else:
 							assertion_result.assertion_result = "error received - " + error_message + \
