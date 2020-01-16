@@ -1,0 +1,305 @@
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
+    <title>Coverage for /Users/shreembansal/git/test-framework/frappe-bench/apps/velocityduos/velocityduos/fuel_data/doctype/fuel_daily_data/fuel_daily_data.py: 0%</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.hotkeys.js"></script>
+    <script type="text/javascript" src="jquery.isonscreen.js"></script>
+    <script type="text/javascript" src="coverage_html.js"></script>
+    <script type="text/javascript">
+        jQuery(document).ready(coverage.pyfile_ready);
+    </script>
+</head>
+<body class="pyfile">
+
+<div id="header">
+    <div class="content">
+        <h1>Coverage for <b>/Users/shreembansal/git/test-framework/frappe-bench/apps/velocityduos/velocityduos/fuel_data/doctype/fuel_daily_data/fuel_daily_data.py</b> :
+            <span class="pc_cov">0%</span>
+        </h1>
+
+        <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
+
+        <h2 class="stats">
+            77 statements &nbsp;
+            <span class="run hide_run shortkey_r button_toggle_run">0 run</span>
+            <span class="mis shortkey_m button_toggle_mis">77 missing</span>
+            <span class="exc shortkey_x button_toggle_exc">0 excluded</span>
+
+            
+        </h2>
+    </div>
+</div>
+
+<div class="help_panel">
+    <img id="panel_icon" src="keybd_open.png" alt="Hide keyboard shortcuts" />
+    <p class="legend">Hot-keys on this page</p>
+    <div>
+    <p class="keyhelp">
+        <span class="key">r</span>
+        <span class="key">m</span>
+        <span class="key">x</span>
+        <span class="key">p</span> &nbsp; toggle line displays
+    </p>
+    <p class="keyhelp">
+        <span class="key">j</span>
+        <span class="key">k</span> &nbsp; next/prev highlighted chunk
+    </p>
+    <p class="keyhelp">
+        <span class="key">0</span> &nbsp; (zero) top of page
+    </p>
+    <p class="keyhelp">
+        <span class="key">1</span> &nbsp; (one) first highlighted chunk
+    </p>
+    </div>
+</div>
+
+<div id="source">
+    <table>
+        <tr>
+            <td class="linenos">
+<p id="n1" class="pln"><a href="#n1">1</a></p>
+<p id="n2" class="pln"><a href="#n2">2</a></p>
+<p id="n3" class="pln"><a href="#n3">3</a></p>
+<p id="n4" class="pln"><a href="#n4">4</a></p>
+<p id="n5" class="pln"><a href="#n5">5</a></p>
+<p id="n6" class="stm mis"><a href="#n6">6</a></p>
+<p id="n7" class="stm mis"><a href="#n7">7</a></p>
+<p id="n8" class="stm mis"><a href="#n8">8</a></p>
+<p id="n9" class="stm mis"><a href="#n9">9</a></p>
+<p id="n10" class="stm mis"><a href="#n10">10</a></p>
+<p id="n11" class="stm mis"><a href="#n11">11</a></p>
+<p id="n12" class="pln"><a href="#n12">12</a></p>
+<p id="n13" class="pln"><a href="#n13">13</a></p>
+<p id="n14" class="stm mis"><a href="#n14">14</a></p>
+<p id="n15" class="stm mis"><a href="#n15">15</a></p>
+<p id="n16" class="pln"><a href="#n16">16</a></p>
+<p id="n17" class="pln"><a href="#n17">17</a></p>
+<p id="n18" class="stm mis"><a href="#n18">18</a></p>
+<p id="n19" class="stm mis"><a href="#n19">19</a></p>
+<p id="n20" class="stm mis"><a href="#n20">20</a></p>
+<p id="n21" class="stm mis"><a href="#n21">21</a></p>
+<p id="n22" class="pln"><a href="#n22">22</a></p>
+<p id="n23" class="stm mis"><a href="#n23">23</a></p>
+<p id="n24" class="stm mis"><a href="#n24">24</a></p>
+<p id="n25" class="stm mis"><a href="#n25">25</a></p>
+<p id="n26" class="stm mis"><a href="#n26">26</a></p>
+<p id="n27" class="stm mis"><a href="#n27">27</a></p>
+<p id="n28" class="pln"><a href="#n28">28</a></p>
+<p id="n29" class="stm mis"><a href="#n29">29</a></p>
+<p id="n30" class="pln"><a href="#n30">30</a></p>
+<p id="n31" class="stm mis"><a href="#n31">31</a></p>
+<p id="n32" class="stm mis"><a href="#n32">32</a></p>
+<p id="n33" class="stm mis"><a href="#n33">33</a></p>
+<p id="n34" class="stm mis"><a href="#n34">34</a></p>
+<p id="n35" class="stm mis"><a href="#n35">35</a></p>
+<p id="n36" class="stm mis"><a href="#n36">36</a></p>
+<p id="n37" class="stm mis"><a href="#n37">37</a></p>
+<p id="n38" class="stm mis"><a href="#n38">38</a></p>
+<p id="n39" class="stm mis"><a href="#n39">39</a></p>
+<p id="n40" class="pln"><a href="#n40">40</a></p>
+<p id="n41" class="stm mis"><a href="#n41">41</a></p>
+<p id="n42" class="stm mis"><a href="#n42">42</a></p>
+<p id="n43" class="stm mis"><a href="#n43">43</a></p>
+<p id="n44" class="pln"><a href="#n44">44</a></p>
+<p id="n45" class="stm mis"><a href="#n45">45</a></p>
+<p id="n46" class="pln"><a href="#n46">46</a></p>
+<p id="n47" class="stm mis"><a href="#n47">47</a></p>
+<p id="n48" class="stm mis"><a href="#n48">48</a></p>
+<p id="n49" class="stm mis"><a href="#n49">49</a></p>
+<p id="n50" class="stm mis"><a href="#n50">50</a></p>
+<p id="n51" class="pln"><a href="#n51">51</a></p>
+<p id="n52" class="stm mis"><a href="#n52">52</a></p>
+<p id="n53" class="stm mis"><a href="#n53">53</a></p>
+<p id="n54" class="stm mis"><a href="#n54">54</a></p>
+<p id="n55" class="stm mis"><a href="#n55">55</a></p>
+<p id="n56" class="stm mis"><a href="#n56">56</a></p>
+<p id="n57" class="pln"><a href="#n57">57</a></p>
+<p id="n58" class="stm mis"><a href="#n58">58</a></p>
+<p id="n59" class="stm mis"><a href="#n59">59</a></p>
+<p id="n60" class="pln"><a href="#n60">60</a></p>
+<p id="n61" class="stm mis"><a href="#n61">61</a></p>
+<p id="n62" class="stm mis"><a href="#n62">62</a></p>
+<p id="n63" class="pln"><a href="#n63">63</a></p>
+<p id="n64" class="stm mis"><a href="#n64">64</a></p>
+<p id="n65" class="stm mis"><a href="#n65">65</a></p>
+<p id="n66" class="stm mis"><a href="#n66">66</a></p>
+<p id="n67" class="stm mis"><a href="#n67">67</a></p>
+<p id="n68" class="pln"><a href="#n68">68</a></p>
+<p id="n69" class="stm mis"><a href="#n69">69</a></p>
+<p id="n70" class="pln"><a href="#n70">70</a></p>
+<p id="n71" class="pln"><a href="#n71">71</a></p>
+<p id="n72" class="stm mis"><a href="#n72">72</a></p>
+<p id="n73" class="pln"><a href="#n73">73</a></p>
+<p id="n74" class="stm mis"><a href="#n74">74</a></p>
+<p id="n75" class="stm mis"><a href="#n75">75</a></p>
+<p id="n76" class="pln"><a href="#n76">76</a></p>
+<p id="n77" class="pln"><a href="#n77">77</a></p>
+<p id="n78" class="stm mis"><a href="#n78">78</a></p>
+<p id="n79" class="stm mis"><a href="#n79">79</a></p>
+<p id="n80" class="pln"><a href="#n80">80</a></p>
+<p id="n81" class="stm mis"><a href="#n81">81</a></p>
+<p id="n82" class="stm mis"><a href="#n82">82</a></p>
+<p id="n83" class="stm mis"><a href="#n83">83</a></p>
+<p id="n84" class="stm mis"><a href="#n84">84</a></p>
+<p id="n85" class="stm mis"><a href="#n85">85</a></p>
+<p id="n86" class="stm mis"><a href="#n86">86</a></p>
+<p id="n87" class="stm mis"><a href="#n87">87</a></p>
+<p id="n88" class="stm mis"><a href="#n88">88</a></p>
+<p id="n89" class="stm mis"><a href="#n89">89</a></p>
+<p id="n90" class="pln"><a href="#n90">90</a></p>
+<p id="n91" class="stm mis"><a href="#n91">91</a></p>
+<p id="n92" class="pln"><a href="#n92">92</a></p>
+<p id="n93" class="stm mis"><a href="#n93">93</a></p>
+<p id="n94" class="stm mis"><a href="#n94">94</a></p>
+<p id="n95" class="stm mis"><a href="#n95">95</a></p>
+<p id="n96" class="pln"><a href="#n96">96</a></p>
+<p id="n97" class="stm mis"><a href="#n97">97</a></p>
+<p id="n98" class="pln"><a href="#n98">98</a></p>
+<p id="n99" class="stm mis"><a href="#n99">99</a></p>
+<p id="n100" class="stm mis"><a href="#n100">100</a></p>
+<p id="n101" class="stm mis"><a href="#n101">101</a></p>
+<p id="n102" class="stm mis"><a href="#n102">102</a></p>
+<p id="n103" class="stm mis"><a href="#n103">103</a></p>
+<p id="n104" class="stm mis"><a href="#n104">104</a></p>
+<p id="n105" class="pln"><a href="#n105">105</a></p>
+<p id="n106" class="stm mis"><a href="#n106">106</a></p>
+<p id="n107" class="stm mis"><a href="#n107">107</a></p>
+<p id="n108" class="stm mis"><a href="#n108">108</a></p>
+
+            </td>
+            <td class="text">
+<p id="t1" class="pln"><span class="com"># -*- coding: utf-8 -*-</span><span class="strut">&nbsp;</span></p>
+<p id="t2" class="pln"><span class="com"># Copyright (c) 2018, ElasticRun and contributors</span><span class="strut">&nbsp;</span></p>
+<p id="t3" class="pln"><span class="com"># For license information, please see license.txt</span><span class="strut">&nbsp;</span></p>
+<p id="t4" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t5" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t6" class="stm mis"><span class="key">import</span> <span class="nam">frappe</span><span class="strut">&nbsp;</span></p>
+<p id="t7" class="stm mis"><span class="key">from</span> <span class="nam">frappe</span><span class="op">.</span><span class="nam">model</span><span class="op">.</span><span class="nam">document</span> <span class="key">import</span> <span class="nam">Document</span><span class="strut">&nbsp;</span></p>
+<p id="t8" class="stm mis"><span class="key">from</span> <span class="nam">datetime</span> <span class="key">import</span> <span class="nam">datetime</span><span class="strut">&nbsp;</span></p>
+<p id="t9" class="stm mis"><span class="key">import</span> <span class="nam">json</span><span class="strut">&nbsp;</span></p>
+<p id="t10" class="stm mis"><span class="key">import</span> <span class="nam">requests</span><span class="strut">&nbsp;</span></p>
+<p id="t11" class="stm mis"><span class="key">import</span> <span class="nam">traceback</span><span class="strut">&nbsp;</span></p>
+<p id="t12" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t13" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t14" class="stm mis"><span class="key">class</span> <span class="nam">FuelDailyData</span><span class="op">(</span><span class="nam">Document</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t15" class="stm mis">    <span class="key">pass</span><span class="strut">&nbsp;</span></p>
+<p id="t16" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t17" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t18" class="stm mis"><span class="key">def</span> <span class="nam">update_daily_price_new</span><span class="op">(</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t19" class="stm mis">    <span class="nam">print</span><span class="op">(</span><span class="str">"######## cron running ###########"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t20" class="stm mis">    <span class="nam">azure_function_url</span> <span class="op">=</span> <span class="str">"https://fueldataextractor.azurewebsites.net/api/indianOilScraper?code=CfDJ8AAAAAAAAAAAAAAAAAAAAAC70w9340xRgATaAxH3cIw0e4QYGl5iIASmwX9Iz9fDfP9rlAI4RgHTp9NDMsVg3SJPkYqKoQqk9wmqsSjYNs-hpwE0YMFiPHXUnuYYlI6kMXf85nZSD9jaw4ZpEbvm4bhOBcpUAOLKs_FXz75_ZKPe7ssGjPR_ED15jzR-zYXtHXss-MTMdhLYFwiSM3Fm_09yOblPDwKaxsrDjf5ITF-tpTgqnI5dZ5qOv2lRy3fY06ces_1hLovpEzg6Kf4NUi4bedwSJQn2v1BoTMlvdulxdFDWMaT1rTKC5z8IV5hKreDgcItISPG0J_i3_KtNa4dI1X-37umVWMEOEjui06SwGZ8sIT24u7cegaEFbQOcGuK3nLOnsdKFRAGzzb8WNh3x7_Z7DSKoW0F4OFPEZsYhQB4jk8k5i-awzqDVGpMrfnrpqDHEVAcDI2MRG61_ldGewAGKHAEOCmC6dQCodAmrUmv4YdXVaGcFIIISeYt3l5VWcErEgFLpVcBxl44LU6oJsqX3a72QkHsGKmyE8ACE4DknnhSR5gODDc5lDiRZdX3eO-G_R_hvRyGSHNUkIIA9FMLPFL4eFmMc41oDmPhCYOp1wGUK5EdGiWgzS7IWoj37pp6onNjoxbcxCrlmpLyqizj5khYRsHOAYpcrxC9p9baQ9RxrJ0BvPAnB-PY_cnnDV8x_ta8NFOfjmiNAZvm3Iid2C0s7devHSXQkIDM-nO3gavlJQpGTJQL6hvrMBvEsoVy1Zvo2djbzCsGNqSUyiNW7wAE3C5vTLrueiQQ4FUDcHRJGt5FxCf0XPgqlM8a1kMw4MdLeLZysactSUqGuGnNlRbDyYRGKEuygTjiqCI6p0C9Z9ds9ZD0wtiwR8WGJ7hb6YdVUZF5avN-Tdjz1IPmEUxH9xk8Qb37f9neTraR9sdpMhlpiCCjBMui23-bEhYTRF26A8KERNYSZbhpJjjryYmpeze82a2IF9xn6r-kC-euVCpWhIxGY5orRtnm0_MLq3yGSPIgdQ4hwBOce7s_bKlBeNwYmZa5JrdCocO-mGie-kX29i8hcm42P2AbkHj-cJtpy_nXOTOifmtCzBuY6k1nTKMsBIihBuLPmhdHpS0txEU0oJPi_8u94SL_-kUXoTUp-tt9ipKg0y3O_t4NMb5na00xLe1_9GgAaHyujNFlk6Dbve9_9X8C_U8V3A_ZqSyYkTU4JTIcVOoGQEG727UC14Z7syvNIz0hxyKHV4k4_uvs89kSQ4lYT4lgPiQDwwuFVn_InipiTdafGEK7eQ7dYTw4GmzwyHwIWYOwCh5pQVIhSgaCHYlOXWEQJjXfMiCAP5LoFCxgt2qgFZOfDT7XUj6H3ixQ63sW53tG7Vl_yRGnJPuObGXdLKMn4aFlswRt70eL9H3UUu6Dpt1lLf9hy6SKIOfOShQikSCRWRut4tCjvo7f3Nx8zDgWW7NiY4G0rGHlQL5DDYl27WyASONikmhdqKoRFGZE0wVa4toCyuj31CN-jOMPHvP1njNU_e95HeQrPdHzP8nkOpLiXH6gFqTU9XLNDGOV01zXfs9NZu-xvDYhgHE2z9jD1M1mtB2nPpNZ2iZW9Kfi-LMoAXCQj7GpTfXUpKeJ23MPxgFSSfiSkV4OzoMzgvq2OAtra1jXr3IsGvVwWy8O8PK_wSHyc2jHs-l-nbWmCvI5KF0x8qPOoClZANQd1x9688ilenfpFdXx_o-W8r9UOvvaMrDUK6eYLjdodhKF7GeYV3-nXnJrwNyq-qNOfeKAWGCTsGRcTMn-qtNCdomh9XaV38NP15c1TA_Nrp4ltBPKZX1ZKY-98DKtvH9nzpJ5uvGLwXFRfhhlzXk4n_AaBa5PpMZPZuTlSifbATjZYd3iiRy2_LxaMb_oJ-1oOQ5KDdh-JjhpQXDGs771PtEDO1MaZ_y1t95JOZd0Ar7H2nB2d-JDESlN3qAEcK1AyCFvGYb8cH3GFlfjzfh_lsUvMi9DVlr_JSMCoZWM4bAz7Ft5xEOnht6_T0TfkKdl6jIfh1y2gCA_bXEbiJ4-7Jx-xtzqml3If5199RIMgA8_bOzh3d8IsUJMCAvaFa_jTjeoprxxyGwRENHojFI9S-h8W_cQIGy_BFLXkpUM3ffplyCL0gYunG1ZAjku7Xi7fNo5Pml_0fxBSW5ejh_8DXpXfQDy5-dg9qd_l9xZSGoLlrhdqr2WuPfK9OMagNhqRh2SWKeFCAnOSMflN1g2FFTkgU2_qX_3bNVgSpIhRFVHmEEevTV2U66YV5mop22COzXMv8w_a4ZYMHDRBZ4kGWcv3KflUsFouUCYVjiDCd82wDQXe_FwQF22K8t6G6cjS2c0VDsKK0Bt-ZCqLnLOBmJIaUc0ULQBMal-DfX3Us-YI_EeeW8nKTikwA2WJ2NZEjWf2ceg-3ZRBiKLBRV22bma_BHZ1qj_b1neVJiGIdhJMcy6rwzQxlzskTdrnq9jRd241HxQHzxhjCk9JCRHmpXZFAqNOHoKV44_K7vU-l9_GmbVJmvAWrwSOOQ8_JwWnRiTWns9jZ_13ZYrWnkfs93P_oVkA8baXJFZojMSe_dLB2lUP5lAHbHjuDPe79ZNcD7H3jIhDkuprJmip7sDQzNdddqYZkVRR_k-suzycvXeO_QvD6GNd6mv4FhkFFR95PK1uhki0HdJNvWGd4wp6GNlKbnZxWa_8aPzuYz7XWsdmuRoHwu2EHxwqevFGPuGXk1GSHk1ND6MveYiElA25DBzQcAF9swO1yIGG1yUcCYdnhRgYmDK2yz506vhXGMh6AnAAwnneO_zTy2CvS6lAkaDdAvKUYxZQVitPFusk3DZUgiWJweru7zQ7o0bVidlj4YJUjZONuCFJ0RyeOW6bGLcXV6SEX84ECWe-bO3fyyrkEE8f0Tx2Zc8OwoSUVrdy4EknhiR7HJ-47-UVr0XxqSOBswhxPlm7LzkiFWI2v1e5IXe0LsvqixHogwiBaV_l9YfC7cpdQawNlecO-OAzl5pWFVZau-KBuX5vr1NH2y7BiJHlDlk6IWrZQuE3LTbv4Ha_ailz5LLEXpq9jMQlpK4Ph9tUU4K9s5lWdvFou-BWvzKkWAeHt1c1445uVsamWJWyNz1rNBYcQ5lz6gyfxE0oAHUUzsahUIf23cRC4UDSA9wSAB1FqbdElwVsTsWYtImflvUCvPauAlTO2tkHiNwsdI4FAaRu7HYAQ24LBePZUvul30X6A7SU1KfZ6lW4hBb9-x4bvlzEHjCJ9UN63rkBVdb1x-r91ZN_BG6C0Rn48n7t91_vWjmhO77NW0_nd5e6O77xWWWMAk3TQNpdptvyxo5JVPy4TTuAHhf2S40p_ZaJZ458HW0gMLy_75-pPjeyqKXyubI7GUEjJkiKFo5EhSMfMjfQE5AOToA2IKhvuDbWaK7ULgoT2AN6RG5-OTd8Q63NMhWXKFlEGiGm-OYbnLEl0WSn4h4GnGgTDoo2m0mv3n1zQutm-tlCJNobyL3rnb3TxkelWultpKqxEAISiMvCZlyY6N7tzG2jF9Y5lZUA7FEZ5t1q1dz5-MfKneZpxjd_AOQ-a6Q92dQQnKXw7Qo49-iIpBqhRYHUWzPaLDYuPwD3vMTlLn1my1_SlmRrqGnZuJVwFXi9Lr2LPElp6cmwV9y-s_PDhf1bG_upBlMRsgM-5aHblCSBeK_yyX-ZcsnUvuClz8CXEmVXyL1W5hetsSFTZaG_Xq9SrY3R-xMG7QRmS-Q878a5I2cMOvRXfA9UCejY_aVhh46XdqOXEAdz1wc5WAHrUmIvCuRMnj4Hsxbyf2qrKx9gGlyekgLHdHSb4SfT736OWQBi35_87JN5Gib_TjUE1zYi0xQHqFTIP620GpZSGa6XHl0LRw"</span><span class="strut">&nbsp;</span></p>
+<p id="t21" class="stm mis">    <span class="nam">fuel_points</span> <span class="op">=</span> <span class="nam">frappe</span><span class="op">.</span><span class="nam">get_all</span><span class="op">(</span><span class="str">'Fuel Daily Data'</span><span class="op">,</span> <span class="nam">fields</span><span class="op">=</span><span class="op">[</span><span class="strut">&nbsp;</span></p>
+<p id="t22" class="pln">                                 <span class="str">"name"</span><span class="op">,</span> <span class="str">"latitude"</span><span class="op">,</span> <span class="str">"longitude"</span><span class="op">]</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t23" class="stm mis">    <span class="nam">send_error_mail</span> <span class="op">=</span> <span class="key">False</span><span class="strut">&nbsp;</span></p>
+<p id="t24" class="stm mis">    <span class="nam">locations_with_error</span> <span class="op">=</span> <span class="str">""</span><span class="strut">&nbsp;</span></p>
+<p id="t25" class="stm mis">    <span class="key">for</span> <span class="nam">j</span> <span class="key">in</span> <span class="nam">range</span><span class="op">(</span><span class="num">0</span><span class="op">,</span> <span class="nam">len</span><span class="op">(</span><span class="nam">fuel_points</span><span class="op">)</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t26" class="stm mis">        <span class="key">try</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t27" class="stm mis">            <span class="nam">payload</span> <span class="op">=</span> <span class="op">{</span><span class="strut">&nbsp;</span></p>
+<p id="t28" class="pln">                <span class="str">"latitude"</span><span class="op">:</span> <span class="nam">fuel_points</span><span class="op">[</span><span class="nam">j</span><span class="op">]</span><span class="op">[</span><span class="str">'latitude'</span><span class="op">]</span><span class="op">,</span> <span class="str">"longitude"</span><span class="op">:</span> <span class="nam">fuel_points</span><span class="op">[</span><span class="nam">j</span><span class="op">]</span><span class="op">[</span><span class="str">'longitude'</span><span class="op">]</span><span class="op">}</span><span class="strut">&nbsp;</span></p>
+<p id="t29" class="stm mis">            <span class="nam">response</span> <span class="op">=</span> <span class="nam">requests</span><span class="op">.</span><span class="nam">request</span><span class="op">(</span><span class="str">"POST"</span><span class="op">,</span> <span class="nam">azure_function_url</span><span class="op">,</span> <span class="nam">data</span><span class="op">=</span><span class="nam">json</span><span class="op">.</span><span class="nam">dumps</span><span class="op">(</span><span class="strut">&nbsp;</span></p>
+<p id="t30" class="pln">                <span class="nam">payload</span><span class="op">)</span><span class="op">,</span> <span class="nam">headers</span><span class="op">=</span><span class="op">{</span><span class="str">"content-type"</span><span class="op">:</span> <span class="str">"application/json"</span><span class="op">}</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t31" class="stm mis">            <span class="nam">individual_fuel_pumps</span> <span class="op">=</span> <span class="nam">response</span><span class="op">.</span><span class="nam">text</span><span class="op">.</span><span class="nam">split</span><span class="op">(</span><span class="str">"|"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t32" class="stm mis">            <span class="nam">average_petrol_price</span> <span class="op">=</span> <span class="num">0.0</span><span class="strut">&nbsp;</span></p>
+<p id="t33" class="stm mis">            <span class="nam">average_diesel_price</span> <span class="op">=</span> <span class="num">0.0</span><span class="strut">&nbsp;</span></p>
+<p id="t34" class="stm mis">            <span class="nam">petrol_stations_considered</span> <span class="op">=</span> <span class="num">0</span><span class="strut">&nbsp;</span></p>
+<p id="t35" class="stm mis">            <span class="nam">diesel_stations_considered</span> <span class="op">=</span> <span class="num">0</span><span class="strut">&nbsp;</span></p>
+<p id="t36" class="stm mis">            <span class="key">for</span> <span class="nam">i</span> <span class="key">in</span> <span class="nam">range</span><span class="op">(</span><span class="num">0</span><span class="op">,</span> <span class="nam">len</span><span class="op">(</span><span class="nam">individual_fuel_pumps</span><span class="op">)</span><span class="op">-</span><span class="num">1</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t37" class="stm mis">                <span class="nam">fuel_prices</span> <span class="op">=</span> <span class="nam">individual_fuel_pumps</span><span class="op">[</span><span class="nam">i</span><span class="op">]</span><span class="op">.</span><span class="nam">split</span><span class="op">(</span><span class="str">","</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t38" class="stm mis">                <span class="key">if</span> <span class="nam">fuel_prices</span><span class="op">[</span><span class="num">25</span><span class="op">]</span> <span class="op">!=</span> <span class="str">'Not Available'</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t39" class="stm mis">                    <span class="nam">average_petrol_price</span> <span class="op">=</span> <span class="nam">average_petrol_price</span> <span class="op">+</span> <span class="xx">\</span><span class="strut">&nbsp;</span></p>
+<p id="t40" class="pln">                        <span class="nam">float</span><span class="op">(</span><span class="nam">fuel_prices</span><span class="op">[</span><span class="num">25</span><span class="op">]</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t41" class="stm mis">                    <span class="nam">petrol_stations_considered</span> <span class="op">=</span> <span class="nam">petrol_stations_considered</span> <span class="op">+</span> <span class="num">1</span><span class="strut">&nbsp;</span></p>
+<p id="t42" class="stm mis">                <span class="key">if</span> <span class="nam">fuel_prices</span><span class="op">[</span><span class="num">26</span><span class="op">]</span> <span class="op">!=</span> <span class="str">'Not Available'</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t43" class="stm mis">                    <span class="nam">average_diesel_price</span> <span class="op">=</span> <span class="nam">average_diesel_price</span> <span class="op">+</span> <span class="xx">\</span><span class="strut">&nbsp;</span></p>
+<p id="t44" class="pln">                        <span class="nam">float</span><span class="op">(</span><span class="nam">fuel_prices</span><span class="op">[</span><span class="num">26</span><span class="op">]</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t45" class="stm mis">                    <span class="nam">diesel_stations_considered</span> <span class="op">=</span> <span class="nam">diesel_stations_considered</span> <span class="op">+</span> <span class="num">1</span><span class="strut">&nbsp;</span></p>
+<p id="t46" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t47" class="stm mis">            <span class="nam">location</span> <span class="op">=</span> <span class="nam">fuel_points</span><span class="op">[</span><span class="nam">j</span><span class="op">]</span><span class="op">[</span><span class="str">'name'</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
+<p id="t48" class="stm mis">            <span class="nam">date</span> <span class="op">=</span> <span class="nam">datetime</span><span class="op">.</span><span class="nam">today</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">strftime</span><span class="op">(</span><span class="str">'%Y-%m-%d'</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t49" class="stm mis">            <span class="nam">existing_doctype</span> <span class="op">=</span> <span class="nam">frappe</span><span class="op">.</span><span class="nam">get_doc</span><span class="op">(</span><span class="str">'Fuel Daily Data'</span><span class="op">,</span> <span class="nam">location</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t50" class="stm mis">            <span class="nam">existing_doctype</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="str">"price"</span><span class="op">,</span> <span class="op">{</span><span class="str">"doctype"</span><span class="op">:</span> <span class="str">"Fuel Price"</span><span class="op">,</span> <span class="str">"date"</span><span class="op">:</span> <span class="nam">date</span><span class="op">,</span> <span class="str">"diesel_price"</span><span class="op">:</span> <span class="nam">average_diesel_price</span> <span class="op">/</span><span class="strut">&nbsp;</span></p>
+<p id="t51" class="pln">                                              <span class="nam">diesel_stations_considered</span><span class="op">,</span> <span class="str">"petrol_price"</span><span class="op">:</span> <span class="nam">average_petrol_price</span> <span class="op">/</span> <span class="nam">petrol_stations_considered</span><span class="op">}</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t52" class="stm mis">            <span class="nam">existing_doctype</span><span class="op">.</span><span class="nam">save</span><span class="op">(</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t53" class="stm mis">        <span class="key">except</span> <span class="nam">Exception</span> <span class="key">as</span> <span class="nam">e</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t54" class="stm mis">            <span class="nam">print</span><span class="op">(</span><span class="nam">e</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t55" class="stm mis">            <span class="nam">send_error_mail</span> <span class="op">=</span> <span class="key">True</span><span class="strut">&nbsp;</span></p>
+<p id="t56" class="stm mis">            <span class="nam">locations_with_error</span> <span class="op">=</span> <span class="nam">locations_with_error</span> <span class="op">+</span> <span class="xx">\</span><span class="strut">&nbsp;</span></p>
+<p id="t57" class="pln">                <span class="nam">fuel_points</span><span class="op">[</span><span class="nam">j</span><span class="op">]</span><span class="op">[</span><span class="str">'name'</span><span class="op">]</span> <span class="op">+</span> <span class="str">"\n"</span><span class="strut">&nbsp;</span></p>
+<p id="t58" class="stm mis">    <span class="key">if</span> <span class="nam">send_error_mail</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t59" class="stm mis">        <span class="nam">recipients</span> <span class="op">=</span> <span class="nam">recipients</span> <span class="op">=</span> <span class="nam">sum</span><span class="op">(</span><span class="nam">frappe</span><span class="op">.</span><span class="nam">db</span><span class="op">.</span><span class="nam">sql</span><span class="op">(</span><span class="strut">&nbsp;</span></p>
+<p id="t60" class="pln">            <span class="str">"""select distinct t2.email from `tabHas Role` t1 LEFT JOIN `tabUser` t2 ON t1.parent  = t2.name WHERE t1.role = "Administrator" AND t1.parent != "Administrator";"""</span><span class="op">,</span> <span class="nam">as_list</span><span class="op">=</span><span class="num">1</span><span class="op">)</span><span class="op">,</span> <span class="op">[</span><span class="op">]</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t61" class="stm mis">        <span class="nam">subject</span> <span class="op">=</span> <span class="str">"Fuel Data Job Failure"</span><span class="strut">&nbsp;</span></p>
+<p id="t62" class="stm mis">        <span class="nam">message</span> <span class="op">=</span> <span class="str">"Error for following cities \n"</span> <span class="op">+</span> <span class="xx">\</span><span class="strut">&nbsp;</span></p>
+<p id="t63" class="pln">            <span class="nam">locations_with_error</span> <span class="op">+</span> <span class="str">"\n"</span> <span class="op">+</span> <span class="nam">traceback</span><span class="op">.</span><span class="nam">format_exc</span><span class="op">(</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t64" class="stm mis">        <span class="nam">print</span><span class="op">(</span><span class="nam">message</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t65" class="stm mis">        <span class="nam">reference_doctype</span> <span class="op">=</span> <span class="str">"Fuel Daily Data"</span><span class="strut">&nbsp;</span></p>
+<p id="t66" class="stm mis">        <span class="nam">reference_name</span> <span class="op">=</span> <span class="str">"Unknown"</span><span class="strut">&nbsp;</span></p>
+<p id="t67" class="stm mis">        <span class="nam">frappe</span><span class="op">.</span><span class="nam">sendmail</span><span class="op">(</span><span class="nam">recipients</span><span class="op">=</span><span class="nam">recipients</span><span class="op">,</span> <span class="nam">subject</span><span class="op">=</span><span class="nam">subject</span><span class="op">,</span> <span class="nam">message</span><span class="op">=</span><span class="nam">message</span><span class="op">,</span><span class="strut">&nbsp;</span></p>
+<p id="t68" class="pln">                        <span class="nam">reference_doctype</span><span class="op">=</span><span class="nam">reference_doctype</span><span class="op">,</span> <span class="nam">reference_name</span><span class="op">=</span><span class="nam">reference_name</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t69" class="stm mis">    <span class="key">return</span> <span class="key">True</span><span class="strut">&nbsp;</span></p>
+<p id="t70" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t71" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t72" class="stm mis"><span class="op">@</span><span class="nam">frappe</span><span class="op">.</span><span class="nam">whitelist</span><span class="op">(</span><span class="nam">allow_guest</span><span class="op">=</span><span class="key">True</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t73" class="pln"><span class="key">def</span> <span class="nam">get_spacetime_fuel_average</span><span class="op">(</span><span class="nam">cities</span><span class="op">,</span> <span class="nam">start_date</span><span class="op">,</span> <span class="nam">end_date</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t74" class="stm mis">    <span class="nam">start_year</span><span class="op">,</span> <span class="nam">start_month</span><span class="op">,</span> <span class="nam">start_day</span> <span class="op">=</span> <span class="nam">start_date</span><span class="op">.</span><span class="nam">split</span><span class="op">(</span><span class="str">"-"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t75" class="stm mis">    <span class="nam">query_start_date</span> <span class="op">=</span> <span class="nam">datetime</span><span class="op">(</span><span class="strut">&nbsp;</span></p>
+<p id="t76" class="pln">        <span class="nam">int</span><span class="op">(</span><span class="nam">start_year</span><span class="op">)</span><span class="op">,</span> <span class="nam">int</span><span class="op">(</span><span class="nam">start_month</span><span class="op">)</span><span class="op">,</span> <span class="nam">int</span><span class="op">(</span><span class="nam">start_day</span><span class="op">)</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t77" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t78" class="stm mis">    <span class="nam">end_year</span><span class="op">,</span> <span class="nam">end_month</span><span class="op">,</span> <span class="nam">end_day</span> <span class="op">=</span> <span class="nam">end_date</span><span class="op">.</span><span class="nam">split</span><span class="op">(</span><span class="str">"-"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t79" class="stm mis">    <span class="nam">query_end_date</span> <span class="op">=</span> <span class="nam">datetime</span><span class="op">(</span><span class="nam">int</span><span class="op">(</span><span class="nam">end_year</span><span class="op">)</span><span class="op">,</span> <span class="nam">int</span><span class="op">(</span><span class="nam">end_month</span><span class="op">)</span><span class="op">,</span> <span class="nam">int</span><span class="op">(</span><span class="nam">end_day</span><span class="op">)</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t80" class="pln"><span class="strut">&nbsp;</span></p>
+<p id="t81" class="stm mis">    <span class="nam">city_list</span> <span class="op">=</span> <span class="nam">cities</span><span class="op">.</span><span class="nam">split</span><span class="op">(</span><span class="str">","</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t82" class="stm mis">    <span class="nam">data_points_considered</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span><span class="strut">&nbsp;</span></p>
+<p id="t83" class="stm mis">    <span class="nam">cumulative_petrol_price</span> <span class="op">=</span> <span class="num">0.0</span><span class="strut">&nbsp;</span></p>
+<p id="t84" class="stm mis">    <span class="nam">cumulative_diesel_price</span> <span class="op">=</span> <span class="num">0.0</span><span class="strut">&nbsp;</span></p>
+<p id="t85" class="stm mis">    <span class="key">for</span> <span class="nam">city</span> <span class="key">in</span> <span class="nam">city_list</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t86" class="stm mis">        <span class="key">try</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t87" class="stm mis">            <span class="nam">fuel_price_data</span> <span class="op">=</span> <span class="nam">frappe</span><span class="op">.</span><span class="nam">get_doc</span><span class="op">(</span><span class="str">'Fuel Daily Data'</span><span class="op">,</span> <span class="nam">city</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t88" class="stm mis">            <span class="key">for</span> <span class="nam">fuel_price</span> <span class="key">in</span> <span class="nam">fuel_price_data</span><span class="op">.</span><span class="nam">price</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t89" class="stm mis">                <span class="nam">current_year</span><span class="op">,</span> <span class="nam">current_month</span><span class="op">,</span> <span class="nam">current_day</span> <span class="op">=</span> <span class="nam">fuel_price</span><span class="op">.</span><span class="nam">date</span><span class="op">.</span><span class="nam">split</span><span class="op">(</span><span class="strut">&nbsp;</span></p>
+<p id="t90" class="pln">                    <span class="str">"-"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t91" class="stm mis">                <span class="nam">current_date</span> <span class="op">=</span> <span class="nam">datetime</span><span class="op">(</span><span class="nam">int</span><span class="op">(</span><span class="nam">current_year</span><span class="op">)</span><span class="op">,</span> <span class="nam">int</span><span class="op">(</span><span class="strut">&nbsp;</span></p>
+<p id="t92" class="pln">                    <span class="nam">current_month</span><span class="op">)</span><span class="op">,</span> <span class="nam">int</span><span class="op">(</span><span class="nam">current_day</span><span class="op">)</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t93" class="stm mis">                <span class="key">if</span> <span class="op">(</span><span class="nam">current_date</span> <span class="op">></span> <span class="nam">query_start_date</span> <span class="key">and</span> <span class="nam">current_date</span> <span class="op">&lt;=</span> <span class="nam">query_end_date</span><span class="op">)</span> <span class="key">or</span> <span class="nam">current_date</span> <span class="op">==</span> <span class="nam">query_end_date</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t94" class="stm mis">                    <span class="nam">data_points_considered</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="nam">city</span> <span class="op">+</span> <span class="str">":"</span> <span class="op">+</span> <span class="nam">fuel_price</span><span class="op">.</span><span class="nam">date</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t95" class="stm mis">                    <span class="nam">cumulative_diesel_price</span> <span class="op">=</span> <span class="nam">cumulative_diesel_price</span> <span class="op">+</span> <span class="xx">\</span><span class="strut">&nbsp;</span></p>
+<p id="t96" class="pln">                        <span class="nam">float</span><span class="op">(</span><span class="nam">fuel_price</span><span class="op">.</span><span class="nam">diesel_price</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t97" class="stm mis">                    <span class="nam">cumulative_petrol_price</span> <span class="op">=</span> <span class="nam">cumulative_petrol_price</span> <span class="op">+</span> <span class="xx">\</span><span class="strut">&nbsp;</span></p>
+<p id="t98" class="pln">                        <span class="nam">float</span><span class="op">(</span><span class="nam">fuel_price</span><span class="op">.</span><span class="nam">petrol_price</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t99" class="stm mis">        <span class="key">except</span> <span class="nam">Exception</span> <span class="key">as</span> <span class="nam">e</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t100" class="stm mis">            <span class="nam">print</span><span class="op">(</span><span class="nam">e</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t101" class="stm mis">            <span class="key">pass</span><span class="strut">&nbsp;</span></p>
+<p id="t102" class="stm mis">    <span class="key">if</span> <span class="nam">len</span><span class="op">(</span><span class="nam">data_points_considered</span><span class="op">)</span> <span class="op">==</span> <span class="num">0</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t103" class="stm mis">        <span class="nam">petrol_average</span> <span class="op">=</span> <span class="num">0</span><span class="strut">&nbsp;</span></p>
+<p id="t104" class="stm mis">        <span class="nam">diesel_average</span> <span class="op">=</span> <span class="num">0</span><span class="strut">&nbsp;</span></p>
+<p id="t105" class="pln">    <span class="key">else</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t106" class="stm mis">        <span class="nam">petrol_average</span> <span class="op">=</span> <span class="nam">cumulative_petrol_price</span> <span class="op">/</span> <span class="nam">len</span><span class="op">(</span><span class="nam">data_points_considered</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t107" class="stm mis">        <span class="nam">diesel_average</span> <span class="op">=</span> <span class="nam">cumulative_diesel_price</span> <span class="op">/</span> <span class="nam">len</span><span class="op">(</span><span class="nam">data_points_considered</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t108" class="stm mis">    <span class="key">return</span> <span class="op">{</span><span class="str">"petrol_average_price"</span><span class="op">:</span> <span class="nam">petrol_average</span><span class="op">,</span> <span class="str">"diesel_average_price"</span><span class="op">:</span> <span class="nam">diesel_average</span><span class="op">,</span> <span class="str">"total_datapoints_considered"</span><span class="op">:</span> <span class="nam">len</span><span class="op">(</span><span class="nam">data_points_considered</span><span class="op">)</span><span class="op">}</span><span class="strut">&nbsp;</span></p>
+
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div id="footer">
+    <div class="content">
+        <p>
+            <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
+            created at 2020-01-14 22:51
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

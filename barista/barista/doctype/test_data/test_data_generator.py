@@ -25,26 +25,49 @@ class TestDataGenerator():
 			# except expression as identifier:
 			# 	pass
 		else:
+
+			if (testdata_doc.test_record_name and testdata_doc):
+				#this means test data already created.... 
+				#send the created doc
+				created_doc_earlier = frappe.get_doc( testdata_doc.doctype_name , testdata_doc.test_record_name)
+				return created_doc_earlier
+
 			#start creating the insert statement
-			new_doc = frappe.get_doc({"doctype": testdata_doc.doctype_name})
+			new_doc  = frappe.get_doc({"doctype": testdata_doc.doctype_name})
 			fields = frappe.get_list('DocField', filters={'parent': testdata_doc.doctype_name })
 			declared_fields = frappe.get_list('Testdatafield', filters={'parent': testdata_doc.name})
 			#for each field
-			for field in fields:					
-				#check if the feild values are in provided.. use it 
+			for field in fields:
+				#check if the field values are in provided.. use it 
 				field_doc = frappe.get_doc("DocField", field.name)
 				flag_field = False
-				print("##################" + str(field_doc.as_dict()))
+				
 				for declared_field in declared_fields:
 					declared_field_doc = frappe.get_doc('Testdatafield', declared_field['name'])
-					print ("!!!!!!!!!!!!!!!!!!" + str(declared_field_doc.docfield_fieldname))
 					if (declared_field_doc.docfield_fieldname == field_doc.fieldname):
 						flag_field = True
-						if (field_doc.fieldtype == "Table"):
+						if (declared_field_doc.is_default):
+							#ignore
+							pass 
+
+						elif (field_doc.fieldtype == "Table"):
 							#if it is table then user will have to add multiple rows for multiple records.
-							#each test data field will link to one record.
+
+							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)
+
+							if (child_testdata_doc.doctype_type == "Transaction"):
+								#since transaction remove existing record ref if any
+								child_testdata_doc.test_record_name = None
+								child_testdata_doc.save()
+
+							#each test data field will link to one record. create a new record
 							child_doc = self.create_testdata(declared_field_doc.linkfield_name)
 							child_doc.save()
+							
+							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)
+							child_testdata_doc.test_record_name = child_doc.name
+							child_testdata_doc.save()
+
 							child_doc.parentfield = field_doc.fieldname
 							new_doc.get(field_doc.fieldname).append(child_doc)
 							###new_doc[field_doc.fieldname].append(child_doc)
@@ -56,15 +79,27 @@ class TestDataGenerator():
 							new_doc.set(field_doc.fieldname,declared_field_doc.docfield_value)
 						elif ("Link" in field_doc.fieldtype):
 
-							child_doc = self.create_testdata(field_doc.linkfield_name)
-							created_child_doc = child_doc.save()
-							new_doc.set(field_doc.fieldname,created_child_doc)
-							new_doc.set(field_doc.fieldname,created_child_doc.name)
+							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)
+							
+							if (child_testdata_doc.doctype_type == "Transaction"):
+								#since transaction remove existing record ref if any
+								child_testdata_doc.test_record_name = None
+								child_testdata_doc.save()
+
+							child_doc = self.create_testdata(declared_field_doc.linkfield_name)
+							child_doc.save()
+
+							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)							
+							child_testdata_doc.test_record_name = child_doc.name
+							child_testdata_doc.save()
+
+							#new_doc.set(field_doc.fieldname,created_child_doc)
+							new_doc.set(field_doc.fieldname, child_doc.name)
 							###new_doc[field_doc.fieldname] = created_child_doc.name
 
 						elif (declared_field_doc.docfield_code_value == "Code"):
 							# try:
-							new_doc.set(declared_field_doc.docfield_fieldname, eval(declared_field_doc.docfield_code))
+							new_doc.set(declared_field_doc.docfield_fieldname, eval( str(declared_field_doc.docfield_code) ) )
 							###new_doc[declared_field_doc.docfield_fieldname] = eval(declared_field_doc.docfield_code)
 							# except expression as identifier:
 							# 	pass
@@ -110,7 +145,10 @@ class TestDataGenerator():
 					###new_doc[declared_field_doc.docfield_fieldname] = round(random.uniform(0, 100),2)
 				elif ("Link" in field_doc.fieldtype or field_doc.fieldtype == "Table" ):
 					#it looks like table or link field is not declared by user... test data generation failed..
-					testdata_doc.status = "Failed"	
+					pass					
+
+				elif("Attach" in field_doc.fieldtype):
+					value = "assets/barista/sample-file.html"	
 
 				if (value != None):
 					new_doc.set(declared_field_doc.docfield_fieldname, value)

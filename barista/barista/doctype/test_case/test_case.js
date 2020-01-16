@@ -59,7 +59,7 @@ frappe.ui.form.on('Test Case', {
 					}
 				);
 				options.push("docstatus");
-				frappe.meta.get_docfield("Assertion","reference_field", cur_frm.doc.name).options = options;
+				frappe.meta.get_docfield("Assertion","docfield_name", cur_frm.doc.name).options = options;
 			});
 			cur_frm.refresh_fields();
 		}
@@ -117,7 +117,7 @@ frappe.ui.form.on("Assertion",{
 					}
 				);
 				options.push("docstatus");
-				frappe.meta.get_docfield("Assertion","reference_field", cur_frm.doc.name).options = options;
+				frappe.meta.get_docfield("Assertion","docfield_name", cur_frm.doc.name).options = options;
 			});
 			cur_frm.refresh_fields();
 		}
