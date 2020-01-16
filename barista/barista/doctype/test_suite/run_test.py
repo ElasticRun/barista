@@ -10,5 +10,5 @@ from frappe.model.workflow import apply_workflow
 
 
 class RunTest():
-
     def run_complete_suite(self):
+        pass
