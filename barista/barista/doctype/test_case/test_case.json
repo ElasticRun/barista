@@ -436,11 +436,7 @@
  "issingle": 0,
  "istable": 0,
  "max_attachments": 0,
-<<<<<<< HEAD
- "modified": "2020-01-15 00:30:19.709901",
-=======
  "modified": "2020-01-16 08:45:25.262664",
->>>>>>> a24797a37749719e26f50b21a5216f5429dd540e
  "modified_by": "Administrator",
  "module": "Barista",
  "name": "Test Case",
