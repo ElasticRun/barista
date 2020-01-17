@@ -127,4 +127,4 @@ frappe.ui.form.on("Assertion",{
 			cur_frm.refresh_fields();
 		}
 	}
-});
+}); 

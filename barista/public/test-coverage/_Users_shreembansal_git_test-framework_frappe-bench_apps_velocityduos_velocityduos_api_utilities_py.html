@@ -8,7 +8,7 @@
     
     
     <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-    <title>Coverage for /Users/shreembansal/git/test-framework/frappe-bench/apps/velocityduos/velocityduos/api/utilities.py: 17%</title>
+    <title>Coverage for /Users/shreembansal/git/test-framework/frappe-bench/apps/velocityduos/velocityduos/api/utilities.py: 24%</title>
     <link rel="stylesheet" href="style.css" type="text/css">
     
     <script type="text/javascript" src="jquery.min.js"></script>
@@ -24,15 +24,15 @@
 <div id="header">
     <div class="content">
         <h1>Coverage for <b>/Users/shreembansal/git/test-framework/frappe-bench/apps/velocityduos/velocityduos/api/utilities.py</b> :
-            <span class="pc_cov">17%</span>
+            <span class="pc_cov">24%</span>
         </h1>
 
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
 
         <h2 class="stats">
             178 statements &nbsp;
-            <span class="run hide_run shortkey_r button_toggle_run">31 run</span>
-            <span class="mis shortkey_m button_toggle_mis">147 missing</span>
+            <span class="run hide_run shortkey_r button_toggle_run">43 run</span>
+            <span class="mis shortkey_m button_toggle_mis">135 missing</span>
             <span class="exc shortkey_x button_toggle_exc">0 excluded</span>
 
             
@@ -338,20 +338,20 @@
 <p id="n269" class="stm mis"><a href="#n269">269</a></p>
 <p id="n270" class="pln"><a href="#n270">270</a></p>
 <p id="n271" class="stm run hide_run"><a href="#n271">271</a></p>
-<p id="n272" class="stm mis"><a href="#n272">272</a></p>
-<p id="n273" class="stm mis"><a href="#n273">273</a></p>
-<p id="n274" class="stm mis"><a href="#n274">274</a></p>
-<p id="n275" class="stm mis"><a href="#n275">275</a></p>
-<p id="n276" class="stm mis"><a href="#n276">276</a></p>
+<p id="n272" class="stm run hide_run"><a href="#n272">272</a></p>
+<p id="n273" class="stm run hide_run"><a href="#n273">273</a></p>
+<p id="n274" class="stm run hide_run"><a href="#n274">274</a></p>
+<p id="n275" class="stm run hide_run"><a href="#n275">275</a></p>
+<p id="n276" class="stm run hide_run"><a href="#n276">276</a></p>
 <p id="n277" class="pln"><a href="#n277">277</a></p>
 <p id="n278" class="stm run hide_run"><a href="#n278">278</a></p>
-<p id="n279" class="stm mis"><a href="#n279">279</a></p>
-<p id="n280" class="stm mis"><a href="#n280">280</a></p>
-<p id="n281" class="stm mis"><a href="#n281">281</a></p>
-<p id="n282" class="stm mis"><a href="#n282">282</a></p>
-<p id="n283" class="stm mis"><a href="#n283">283</a></p>
-<p id="n284" class="stm mis"><a href="#n284">284</a></p>
-<p id="n285" class="stm mis"><a href="#n285">285</a></p>
+<p id="n279" class="stm run hide_run"><a href="#n279">279</a></p>
+<p id="n280" class="stm run hide_run"><a href="#n280">280</a></p>
+<p id="n281" class="stm run hide_run"><a href="#n281">281</a></p>
+<p id="n282" class="stm run hide_run"><a href="#n282">282</a></p>
+<p id="n283" class="stm run hide_run"><a href="#n283">283</a></p>
+<p id="n284" class="stm run hide_run"><a href="#n284">284</a></p>
+<p id="n285" class="stm run hide_run"><a href="#n285">285</a></p>
 <p id="n286" class="pln"><a href="#n286">286</a></p>
 <p id="n287" class="stm run hide_run"><a href="#n287">287</a></p>
 <p id="n288" class="pln"><a href="#n288">288</a></p>
@@ -679,20 +679,20 @@
 <p id="t269" class="stm mis">        <span class="nam">assign_owner2</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">reference_doctype</span><span class="op">,</span><span class="nam">self</span><span class="op">.</span><span class="nam">reference_name</span><span class="op">,</span><span class="nam">self</span><span class="op">.</span><span class="nam">comment_type</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t270" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t271" class="stm run hide_run"><span class="key">def</span> <span class="nam">assign_owner2</span><span class="op">(</span><span class="nam">ref_doctype</span><span class="op">,</span><span class="nam">ref_docname</span><span class="op">,</span><span class="nam">comment_type</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t272" class="stm mis">        <span class="key">from</span> <span class="nam">velocityduos</span><span class="op">.</span><span class="nam">api</span> <span class="key">import</span> <span class="nam">user_utils</span><span class="strut">&nbsp;</span></p>
-<p id="t273" class="stm mis">        <span class="key">if</span> <span class="nam">ref_doctype</span> <span class="op">==</span> <span class="str">'Trip'</span> <span class="key">and</span> <span class="nam">comment_type</span> <span class="op">==</span> <span class="str">"Workflow"</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t274" class="stm mis">                <span class="nam">trip</span> <span class="op">=</span> <span class="nam">frappe</span><span class="op">.</span><span class="nam">get_doc</span><span class="op">(</span><span class="str">'Trip'</span><span class="op">,</span> <span class="nam">ref_docname</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t275" class="stm mis">                <span class="nam">user_utils</span><span class="op">.</span><span class="nam">assign_owner</span><span class="op">(</span><span class="nam">trip</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t276" class="stm mis">                <span class="nam">trip</span><span class="op">.</span><span class="nam">save</span><span class="op">(</span><span class="key">True</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t272" class="stm run hide_run">        <span class="key">from</span> <span class="nam">velocityduos</span><span class="op">.</span><span class="nam">api</span> <span class="key">import</span> <span class="nam">user_utils</span><span class="strut">&nbsp;</span></p>
+<p id="t273" class="stm run hide_run">        <span class="key">if</span> <span class="nam">ref_doctype</span> <span class="op">==</span> <span class="str">'Trip'</span> <span class="key">and</span> <span class="nam">comment_type</span> <span class="op">==</span> <span class="str">"Workflow"</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t274" class="stm run hide_run">                <span class="nam">trip</span> <span class="op">=</span> <span class="nam">frappe</span><span class="op">.</span><span class="nam">get_doc</span><span class="op">(</span><span class="str">'Trip'</span><span class="op">,</span> <span class="nam">ref_docname</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t275" class="stm run hide_run">                <span class="nam">user_utils</span><span class="op">.</span><span class="nam">assign_owner</span><span class="op">(</span><span class="nam">trip</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t276" class="stm run hide_run">                <span class="nam">trip</span><span class="op">.</span><span class="nam">save</span><span class="op">(</span><span class="key">True</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t277" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t278" class="stm run hide_run"><span class="key">def</span> <span class="nam">assign_owner</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span><span class="nam">method</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t279" class="stm mis">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">ref_doctype</span> <span class="op">==</span> <span class="str">'Trip'</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t280" class="stm mis">                <span class="nam">data</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">data</span><span class="strut">&nbsp;</span></p>
-<p id="t281" class="stm mis">                <span class="key">if</span> <span class="nam">type</span><span class="op">(</span><span class="nam">data</span><span class="op">)</span> <span class="key">is</span> <span class="key">not</span> <span class="nam">dict</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t282" class="stm mis">                        <span class="nam">data</span> <span class="op">=</span> <span class="nam">json</span><span class="op">.</span><span class="nam">loads</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">data</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t283" class="stm mis">                <span class="nam">comment_type</span> <span class="op">=</span> <span class="nam">data</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">"comment_type"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
-<p id="t284" class="stm mis">                <span class="key">if</span> <span class="nam">comment_type</span> <span class="key">and</span> <span class="nam">comment_type</span> <span class="op">==</span> <span class="str">'Workflow'</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
-<p id="t285" class="stm mis">                        <span class="nam">assign_owner2</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">ref_doctype</span><span class="op">,</span><span class="nam">self</span><span class="op">.</span><span class="nam">docname</span><span class="op">,</span><span class="str">"Workflow"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t279" class="stm run hide_run">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">ref_doctype</span> <span class="op">==</span> <span class="str">'Trip'</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t280" class="stm run hide_run">                <span class="nam">data</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">data</span><span class="strut">&nbsp;</span></p>
+<p id="t281" class="stm run hide_run">                <span class="key">if</span> <span class="nam">type</span><span class="op">(</span><span class="nam">data</span><span class="op">)</span> <span class="key">is</span> <span class="key">not</span> <span class="nam">dict</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t282" class="stm run hide_run">                        <span class="nam">data</span> <span class="op">=</span> <span class="nam">json</span><span class="op">.</span><span class="nam">loads</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">data</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t283" class="stm run hide_run">                <span class="nam">comment_type</span> <span class="op">=</span> <span class="nam">data</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">"comment_type"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
+<p id="t284" class="stm run hide_run">                <span class="key">if</span> <span class="nam">comment_type</span> <span class="key">and</span> <span class="nam">comment_type</span> <span class="op">==</span> <span class="str">'Workflow'</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
+<p id="t285" class="stm run hide_run">                        <span class="nam">assign_owner2</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">ref_doctype</span><span class="op">,</span><span class="nam">self</span><span class="op">.</span><span class="nam">docname</span><span class="op">,</span><span class="str">"Workflow"</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t286" class="pln"><span class="strut">&nbsp;</span></p>
 <p id="t287" class="stm run hide_run"><span class="op">@</span><span class="nam">frappe</span><span class="op">.</span><span class="nam">whitelist</span><span class="op">(</span><span class="op">)</span><span class="strut">&nbsp;</span></p>
 <p id="t288" class="pln"><span class="key">def</span> <span class="nam">send_email</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span><span class="nam">method</span><span class="op">)</span><span class="op">:</span><span class="strut">&nbsp;</span></p>
@@ -756,7 +756,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
-            created at 2020-01-15 18:17
+            created at 2020-01-16 22:16
         </p>
     </div>
 </div>

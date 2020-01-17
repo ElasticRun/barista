@@ -16,6 +16,8 @@ class RunTest():
     #Run all the suites for the given app
     def run_complete_suite(self, app_name):
 
+        print("************ Running all test cases for App - " + app_name + "*************\n\n")
+
         suites = frappe.get_all("Test Suite", filters={'app_name' : app_name})
         generatorObj = TestDataGenerator()        
         
@@ -25,12 +27,11 @@ class RunTest():
         for suite in suites:
             try:
                 generatorObj.create_pretest_data(suite['name'])            
-                testcases = frappe.get_all('Testcase Item' , filters={'parent': suite['name']}, fields=["testcase"])
-                
-                print(testcases[0])
-                for testcase in testcases:
-                    print(testcase)
+                testcases = frappe.get_list('Testcase Item' , filters={'parent': suite['name']}, fields=["testcase"],order_by="idx")
+                            
+                for testcase in testcases:                    
                     self.run_testcase(testcase,suite)
+
             except Exception as e:
                 print("An Error occurred which will cause false test case result in the suite - " + str(suite.name) )
                 print("*************ERROR****************")
@@ -46,10 +47,9 @@ class RunTest():
         objCoverage.html_report(directory=frappe.get_app_path('barista') + '/public/test-coverage/')
 
         objCoverage.erase()
-        
+        print("************ Execution ends. Verify coverage at - " + "/assets/barista/test-coverage/index.html")
     
     def run_testcase(self, testcase, suite):
-        executionObj = TestCaseExecution()
-        print ("$$$$$$$$$$$$ " + str(testcase))
+        executionObj = TestCaseExecution()        
         executionObj.run_testcase(testcase['testcase'], suite['name'])
         frappe.db.commit()

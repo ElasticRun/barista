@@ -26,7 +26,7 @@ class TestDataGenerator():
 			# 	pass
 		else:
 
-			if (testdata_doc.test_record_name and testdata_doc):
+			if (testdata_doc.test_record_name):
 				#this means test data already created.... 
 				#send the created doc
 				created_doc_earlier = frappe.get_doc( testdata_doc.doctype_name , testdata_doc.test_record_name)
@@ -53,16 +53,10 @@ class TestDataGenerator():
 						elif (field_doc.fieldtype == "Table"):
 							#if it is table then user will have to add multiple rows for multiple records.
 
-							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)
-
-							if (child_testdata_doc.doctype_type == "Transaction"):
-								#since transaction remove existing record ref if any
-								child_testdata_doc.test_record_name = None
-								child_testdata_doc.save()
-
+							
 							#each test data field will link to one record. create a new record
 							child_doc = self.create_testdata(declared_field_doc.linkfield_name)
-							child_doc.save()
+							#child_doc.save()
 							
 							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)
 							child_testdata_doc.test_record_name = child_doc.name
@@ -74,13 +68,10 @@ class TestDataGenerator():
 							
 						#link parent to this record											
 						elif ("Link" in field_doc.fieldtype and declared_field_doc.docfield_code_value == "Fixed Value"):
-							print (field_doc.name)
-							print ("@@@@@@@" + str(declared_field_doc.docfield_value))
 							new_doc.set(field_doc.fieldname,declared_field_doc.docfield_value)
 						elif ("Link" in field_doc.fieldtype):
 
 							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)
-							
 							if (child_testdata_doc.doctype_type == "Transaction"):
 								#since transaction remove existing record ref if any
 								child_testdata_doc.test_record_name = None
@@ -161,7 +152,7 @@ class TestDataGenerator():
 		all_testdata = frappe.db.sql_list("""select distinct td.name from `tabTest Data` td join `tabTestdata Item` tdi on tdi.test_data=td.name where tdi.parent=%(parent)s order by td.seq""",{'parent':suite})
 
 		for testdata in all_testdata:
-			print(testdata)
+			
 			testdata_doc = frappe.get_doc("Test Data", testdata)
 			if (testdata_doc.use_script == 1):
 				self.create_testdata(testdata)
