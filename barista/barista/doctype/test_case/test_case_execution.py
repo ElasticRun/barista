@@ -13,9 +13,11 @@ class TestCaseExecution():
 		try:
 			
 			testcase_doc = frappe.get_doc("Test Case", testcase)
-
+			print("Test case doc---",testcase_doc.name)
 			#Populate generic test result fields
+			print("creating Test Result---")
 			test_result_doc = frappe.new_doc("Test Result")
+			print("frappe.new_doc---",test_result_doc)
 			test_result_doc.test_suite = test_suite
 			test_result_doc.action = "Test Case"
 			test_result_doc.test_case =testcase_doc.name
@@ -26,7 +28,7 @@ class TestCaseExecution():
 			TestDataGeneratorobj = TestDataGenerator()
 			#Test Data record doc
 			testdata_doc = frappe.get_doc("Test Data", testcase_doc.test_data)
-			
+			print("testdata_doc===",testdata_doc.as_dict())
 			#print (testdata_doc.as_dict())
 			print (">> Test Case : " + str(testcase_doc.name))
 
@@ -38,17 +40,18 @@ class TestCaseExecution():
 
 			#check if test case is create and test data already created then recreate the data
 			
-			if (testdata_doc.test_record_name and testcase_doc.testcase_type == "CREATE"):				
-				testdata_doc.test_record_name = None
-				testdata_doc.save()
+			# if (testdata_doc.test_record_name and testcase_doc.testcase_type == "CREATE"):		
+			# 	testdata_doc.test_record_name = None
+			# 	testdata_doc.save()
 			
 			#get record document
 			new_record_doc = TestDataGeneratorobj.create_testdata(testcase_doc.test_data)
 			error_message = None
 			if (testcase_doc.testcase_type == "CREATE"):
-
+				print("CREATE===")
 				#check if it is old test data - 
 				new_record_doc.save()
+				print("new_doc.name---",new_record_doc.name)
 				testdata_doc.test_record_name = new_record_doc.name
 				testdata_doc.status = "CREATED"				
 				try:
@@ -60,7 +63,7 @@ class TestCaseExecution():
 
 			
 			elif (testcase_doc.testcase_type == "UPDATE"):
-				
+				print("UPDATE===")
 				#create the record if already not created
 				if(new_record_doc.name == None):
 					new_record_doc = new_record_doc.save()
@@ -71,20 +74,23 @@ class TestCaseExecution():
 					
 				#now take the fields to be updated 
 				update_fields = frappe.get_list("Testdatafield", filters={"parent":testcase_doc.name} )
+				print("update_fields===",update_fields)
 				for update_field in update_fields:
 					
 					update_field_doc = frappe.get_doc("Testdatafield", update_field['name'])
-					
+					print("update_field_doc---",update_field_doc.as_dict())
 					fields = frappe.get_all("DocField", filters={'parent':update_field_doc.doctype_name, \
 																	'fieldname': update_field_doc.docfield_fieldname } )
+					print("fields====",fields)
 					field_doc = frappe.get_doc("DocField", fields[0].name)
 
 					if (field_doc.fieldtype == "Table"):
 						#if it is table then user will have to add multiple rows for multiple records.
 						#each test data field will link to one record.
 						
-						
+						print("If Fieldtype is Table")
 						child_doc = TestDataGeneratorobj.create_testdata(update_field_doc.linkfield_name)
+						print("child_doc---",child_doc.as_dict())
 						#TODO: Fetch child test data doc and update child doc
 						child_doc.parentfield = field_doc.fieldname
 						new_record_doc.get(field_doc.fieldname).append(child_doc)
@@ -95,19 +101,24 @@ class TestCaseExecution():
 						#link parent to this record						
 							
 					elif (field_doc.fieldtype == "Link" and update_field_doc.docfield_code_value == "Fixed Value"):
+						print("Link and Fixed VAlue")
+						print("field_doc.fieldname---",field_doc.fieldname)
+						print("update_field_doc.docfield_value===",update_field_doc.docfield_value)
 						new_record_doc.set(field_doc.fieldname, update_field_doc.docfield_value)
 
 					elif (field_doc.fieldtype == "Link"):						
 						
-
+						print("Link===")
 						child_testdata_doc = frappe.get_doc('Test Data',update_field_doc.linkfield_name)
+						print("child_testdata_doc--",child_testdata_doc)
 						if (child_testdata_doc.doctype_type == "Transaction"):
-						
+							print("Transaction---")
 							#since transaction remove existing record ref if any
 							child_testdata_doc.test_record_name = None
 							child_testdata_doc.save()
 						
 						child_doc = TestDataGeneratorobj.create_testdata(update_field_doc.linkfield_name)
+						print("child_doc name--",child_doc.name)
 						child_doc.save()
 
 						child_testdata_doc = frappe.get_doc('Test Data', update_field_doc.linkfield_name)
@@ -138,6 +149,7 @@ class TestCaseExecution():
 			elif (testcase_doc.testcase_type == "DELETE"):
 				pass
 			elif (testcase_doc.testcase_type == "WORKFLOW"):
+				print("testcase_doc.testcase_type == WORKFLOW")
 				if(new_record_doc.name == None):
 					new_record_doc = new_record_doc.save()
 					testdata_doc.test_record_name = new_record_doc.test_record_name
@@ -145,6 +157,7 @@ class TestCaseExecution():
 					testdata_doc.save()
 				
 				try:
+					print("inside try---")
 					apply_workflow(new_record_doc, testcase_doc.workflow_state)
 				except Exception as e: 
 					error_message = str(e)
@@ -175,8 +188,11 @@ class TestCaseExecution():
 				assertion_result.assertion = assertion_doc.name
 				assertion_result.assertion_status = "Passed"
 				if(assertion_doc.assertion_type != "RESPONSE" and assertion_doc.assertion_type != "ERROR"):
+					print("assertion_doc.doctype_name---",assertion_doc.doctype_name)
+					print("assertion_doc.reference_field---",assertion_doc.reference_field)
+					print("testdata_doc.test_record_name---",testdata_doc.test_record_name)
 					validation_doctype = frappe.get_all(assertion_doc.doctype_name, filters={assertion_doc.reference_field : testdata_doc.test_record_name })
-				
+					print("validation_doctype====",validation_doctype)
 				if (assertion_doc.assertion_type == "FIELD VALUE"):					
 					if (len(validation_doctype) != 1):
 						assertion_result.assertion_status = "Failed"
@@ -240,10 +256,11 @@ class TestCaseExecution():
 
 				elif (assertion_doc.assertion_type == "WORKFLOW"):
 					if (len(validation_doctype) != 1):
+						print("validation_doctype--",validation_doctype)
 						assertion_result.assertion_status = "Failed"
-						assertion_result.assertion_result = "Actual number of record(s) found - " + len(validation_doctype) + \
-															". For Doctype - " + assertion_doc.doctype_name + " . Name - " + assertion_doc.reference_field +\
-																". Value - " + testdata_doc.test_record_name
+						assertion_result.assertion_result = "Actual number of record(s) found - " + str(len(validation_doctype)) + \
+															". For Doctype - " + str(assertion_doc.doctype_name) + " . Name - " + assertion_doc.reference_field +\
+																". Value - " + str(testdata_doc.test_record_name)
 						test_result_doc.test_case_status = "Failed"
 						print("       >>>> Assertion Failed")
 						if(error_message):
@@ -292,12 +309,13 @@ class TestCaseExecution():
 				assertion_result.parentfield = "assertion_results"
 				test_result_doc.get("assertion_results").append(assertion_result)
 				test_result_doc.save()
+				print("saving the test_result_doc ===name",test_result_doc.name)
 
 
 				
 		
 		except Exception as e:
-			
+			print("Exception coz of which TC failed===",e)
 			test_result_doc.test_case_execution = "Execution Failed"
 			test_result_doc.execution_result = str(e)		
 			test_result_doc.test_case_status = "Failed"

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+	# -*- coding: utf-8 -*-
 # Copyright (c) 2019, elasticrun and contributors
 # For license information, please see license.txt
 
@@ -11,11 +11,13 @@ import bs4, sys, pymysql, html2text, warnings, markdown2, csv, calendar, unittes
 
 class TestDataGenerator():
 	def create_testdata(self,testdata):
+		print("*********Inside TestDataGenerator******")
 		testdata_doc = frappe.get_doc('Test Data', testdata )
 
 		#if (testdata_doc):
 		#first check if use script is true
 		if (testdata_doc.use_script == 1):
+			print("use script trueee===",1)
 		#if Yes run the script
 			#insert_stmt = frappe.db.sql( testdata_doc.insert_script )
 			# try:
@@ -26,36 +28,50 @@ class TestDataGenerator():
 			# 	pass
 		else:
 
-			if (testdata_doc.test_record_name):
+			if testdata_doc.test_record_name!="":
 				#this means test data already created.... 
 				#send the created doc
-				created_doc_earlier = frappe.get_doc( testdata_doc.doctype_name , testdata_doc.test_record_name)
-				return created_doc_earlier
+				print("--- Doc is already created ---")
+				print("testdata_doc.test_record_name==",testdata_doc.test_record_name)
+				if testdata_doc.test_record_name!="":
+					created_doc_earlier = frappe.get_doc(testdata_doc.doctype_name , testdata_doc.test_record_name)
+					print("created_doc_eariliuer==",created_doc_earlier)
+					return created_doc_earlier
 
 			#start creating the insert statement
+			print("testdata_doc---",testdata_doc)
+			print("name----",testdata_doc.name)
 			new_doc  = frappe.get_doc({"doctype": testdata_doc.doctype_name})
+			print("new_doc",new_doc)
+			print("new_doc name---",new_doc.name)
 			fields = frappe.get_list('DocField', filters={'parent': testdata_doc.doctype_name })
+			print("fields===",fields)
 			declared_fields = frappe.get_list('Testdatafield', filters={'parent': testdata_doc.name})
+			print("declared_field===",declared_fields)
 			#for each field
 			for field in fields:
 				#check if the field values are in provided.. use it 
 				field_doc = frappe.get_doc("DocField", field.name)
 				flag_field = False
-				
+				print("field_doc---",field_doc.fieldname)
 				for declared_field in declared_fields:
 					declared_field_doc = frappe.get_doc('Testdatafield', declared_field['name'])
 					if (declared_field_doc.docfield_fieldname == field_doc.fieldname):
+						print("fieldname match---",declared_field_doc.docfield_fieldname)
 						flag_field = True
 						if (declared_field_doc.is_default):
 							#ignore
+							print("is_default",declared_field_doc.is_default)
 							pass 
 
 						elif (field_doc.fieldtype == "Table"):
+							print("field_doc.fieldtype===Table")
 							#if it is table then user will have to add multiple rows for multiple records.
 
 							
 							#each test data field will link to one record. create a new record
 							child_doc = self.create_testdata(declared_field_doc.linkfield_name)
+							print("again create testdata---")
 							#child_doc.save()
 							
 							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)
@@ -68,19 +84,24 @@ class TestDataGenerator():
 							
 						#link parent to this record											
 						elif ("Link" in field_doc.fieldtype and declared_field_doc.docfield_code_value == "Fixed Value"):
+							print("Link field=== and Fixed Valuee")
 							new_doc.set(field_doc.fieldname,declared_field_doc.docfield_value)
 						elif ("Link" in field_doc.fieldtype):
-
+							print("Link fieldtype---")
 							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)
+							print("child_testdata_doc====",child_testdata_doc)
 							if (child_testdata_doc.doctype_type == "Transaction"):
+								print("child_testdata_doc.doctype_type == Transaction")
 								#since transaction remove existing record ref if any
 								child_testdata_doc.test_record_name = None
 								child_testdata_doc.save()
 
 							child_doc = self.create_testdata(declared_field_doc.linkfield_name)
 							child_doc.save()
+							print("child doc created---",child_doc.name)
 
-							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)							
+							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)	
+							print("child_testdata_doc",child_testdata_doc)						
 							child_testdata_doc.test_record_name = child_doc.name
 							child_testdata_doc.save()
 
@@ -89,29 +110,36 @@ class TestDataGenerator():
 							###new_doc[field_doc.fieldname] = created_child_doc.name
 
 						elif (declared_field_doc.docfield_code_value == "Code"):
+							print("declared_field_doc.docfield_code_value == Code",eval(str(declared_field_doc.docfield_code)))
 							# try:
 							new_doc.set(declared_field_doc.docfield_fieldname, eval( str(declared_field_doc.docfield_code) ) )
 							###new_doc[declared_field_doc.docfield_fieldname] = eval(declared_field_doc.docfield_code)
 							# except expression as identifier:
 							# 	pass
 						else:
+							print("inside elsee===")
+							print("declared_field_doc.docfield_value==",declared_field_doc.docfield_value)
+							print("declared_field_doc.docfield_fieldname---",declared_field_doc.docfield_fieldname)
 							new_doc.set(declared_field_doc.docfield_fieldname, declared_field_doc.docfield_value)
 							###new_doc[declared_field_doc.docfield_fieldname] = declared_field_doc.docfield_value
 			
 			if(flag_field == False and not field_doc.fetch_from):
+				print("field_doc.fetch_from---",field_doc.fetch_from)
 				#no declared field necessary for the test case. Create random field.
 				value = None
 				if (field_doc.fieldtype == "Data"):
-					#its a string of 140							
-					value = (field_doc.label.split()[0]	+ random.randrange(0,20000,1))[0:139]					
-
+					#its a string of 140		
+					value = (field_doc.label.split()[0]	+ str(random.randrange(0,20000,1))[0:139])					
+					print("If fieldtype data value is===",value)					
+					
 					###new_doc[declared_field_doc.docfield_fieldname] = (field_doc.label.split()[0]	+ random.randrange(0,20000,1))[0:139]
 				elif (field_doc.fieldtype == "Check"):
 					#its a check
 					value = random.choice([0,1])					
 					###new_doc[declared_field_doc.docfield_fieldname] = random.choice([0,1])
 				elif(field_doc.fieldtype == "Currency"):
-					value = round(random.uniform(500.12, 22000.34),2)					
+					value = round(random.uniform(500.12, 22000.34),2)
+					print("Currency--",value)					
 					###new_doc[declared_field_doc.docfield_fieldname] = round(random.uniform(500.12, 22000.34),2)
 				elif(field_doc.fieldtype == "Date"):
 					value = datetime.date.today() + datetime.timedelta(days=(random.randrange(0,15,1)))					
@@ -120,7 +148,8 @@ class TestDataGenerator():
 					value = datetime.datetime.now() + datetime.timedelta(minutes=(random.randrange(0,200,2)))					
 					###new_doc[declared_field_doc.docfield_fieldname] = datetime.datetime.now() + datetime.timedelta(minutes=(random.randrange(0,20000,2)))
 				elif(field_doc.fieldtype == "Float"):
-					value = round(random.uniform(0, 22000.34),2)					
+					value = round(random.uniform(0, 22000.34),2)
+					print("if fieldtype FLoat value---",value)					
 					###new_doc[declared_field_doc.docfield_fieldname] = round(random.uniform(0, 22000.34),2)
 				elif(field_doc.fieldtype == "Int"):
 					value = random.randrange(0,200,1)
@@ -141,25 +170,40 @@ class TestDataGenerator():
 				elif("Attach" in field_doc.fieldtype):
 					value = "assets/barista/sample-file.html"	
 
-				if (value != None):
-					new_doc.set(declared_field_doc.docfield_fieldname, value)
-					
-			#insert		
+				# if (value != None):
+				# 	new_doc.set(declared_field_doc.docfield_fieldname, value)
+				# 	print("new_doc=== declared_field_doc.docfield_fieldname",declared_field_doc.docfield_fieldname)	
+				# 	print("new_doc=== value",value)
+			#insert
+			print("new_doc doctype---",new_doc.doctype)
+			#new_doc.save()	
+			
 			return new_doc
 
 	def create_pretest_data(self,suite):
 		#select all the test data for a suite... 		
 		all_testdata = frappe.db.sql_list("""select distinct td.name from `tabTest Data` td join `tabTestdata Item` tdi on tdi.test_data=td.name where tdi.parent=%(parent)s order by td.seq""",{'parent':suite})
-
+		print("Inside Create Pretest data===")
+		print("all_testdata==",all_testdata)
 		for testdata in all_testdata:
-			
+			print("test data---",testdata)
 			testdata_doc = frappe.get_doc("Test Data", testdata)
+			print("testdata_doc----",testdata_doc)
 			if (testdata_doc.use_script == 1):
 				self.create_testdata(testdata)
+				print("use_script true")
 			else:
+				print("inside else===")
 				new_doc = self.create_testdata(testdata)
-				created_doc = new_doc.save()
-				testdata_doc = frappe.get_doc('Test Data', testdata)
-				testdata_doc.test_record_name = created_doc.name
-				testdata_doc.status = 'CREATED'
-				testdata_doc.save()
+				new_doc.save()
+				print("new_doc after create_testdata name==",new_doc.name)
+				created_doc = new_doc
+				print("created_doc name---",created_doc.name)
+				if created_doc.name!=None:
+					testdata_doc = frappe.get_doc('Test Data', testdata)
+					print("testdata_doc==",testdata_doc.name)
+					testdata_doc.test_record_name = created_doc.name
+					print("testdata_doc.test_record_name---",testdata_doc.test_record_name)
+					testdata_doc.status = 'CREATED'
+					print("Status testdata_doc	---",testdata_doc.status)
+					testdata_doc.save()

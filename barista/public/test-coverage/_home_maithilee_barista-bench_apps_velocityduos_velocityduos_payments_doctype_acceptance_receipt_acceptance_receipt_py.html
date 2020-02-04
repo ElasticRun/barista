@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
+    <title>Coverage for /home/maithilee/barista-bench/apps/velocityduos/velocityduos/payments/doctype/acceptance_receipt/acceptance_receipt.py: 0%</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.hotkeys.js"></script>
+    <script type="text/javascript" src="jquery.isonscreen.js"></script>
+    <script type="text/javascript" src="coverage_html.js"></script>
+    <script type="text/javascript">
+        jQuery(document).ready(coverage.pyfile_ready);
+    </script>
+</head>
+<body class="pyfile">
+<div id="header">
+    <div class="content">
+        <h1>Coverage for <b>/home/maithilee/barista-bench/apps/velocityduos/velocityduos/payments/doctype/acceptance_receipt/acceptance_receipt.py</b> :
+            <span class="pc_cov">0%</span>
+        </h1>
+        <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
+        <h2 class="stats">
+            28 statements &nbsp;
+            <span class="run shortkey_r button_toggle_run">0 run</span>
+            <span class="mis show_mis shortkey_m button_toggle_mis">28 missing</span>
+            <span class="exc show_exc shortkey_x button_toggle_exc">0 excluded</span>
+        </h2>
+    </div>
+</div>
+<div class="help_panel">
+    <img id="panel_icon" src="keybd_open.png" alt="Hide keyboard shortcuts" />
+    <p class="legend">Hot-keys on this page</p>
+    <div>
+    <p class="keyhelp">
+        <span class="key">r</span>
+        <span class="key">m</span>
+        <span class="key">x</span>
+        <span class="key">p</span> &nbsp; toggle line displays
+    </p>
+    <p class="keyhelp">
+        <span class="key">j</span>
+        <span class="key">k</span> &nbsp; next/prev highlighted chunk
+    </p>
+    <p class="keyhelp">
+        <span class="key">0</span> &nbsp; (zero) top of page
+    </p>
+    <p class="keyhelp">
+        <span class="key">1</span> &nbsp; (one) first highlighted chunk
+    </p>
+    </div>
+</div>
+<div id="source">
+    <p id="t1" class="pln"><span class="n"><a href="#t1">1</a></span><span class="t"><span class="com"># -*- coding: utf-8 -*-</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t2" class="pln"><span class="n"><a href="#t2">2</a></span><span class="t"><span class="com"># Copyright (c) 2020, Elasticrun and contributors</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t3" class="pln"><span class="n"><a href="#t3">3</a></span><span class="t"><span class="com"># For license information, please see license.txt</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t4" class="pln"><span class="n"><a href="#t4">4</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t5" class="mis show_mis"><span class="n"><a href="#t5">5</a></span><span class="t"><span class="key">from</span> <span class="nam">__future__</span> <span class="key">import</span> <span class="nam">unicode_literals</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t6" class="mis show_mis"><span class="n"><a href="#t6">6</a></span><span class="t"><span class="key">import</span> <span class="nam">frappe</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t7" class="mis show_mis"><span class="n"><a href="#t7">7</a></span><span class="t"><span class="key">from</span> <span class="nam">frappe</span><span class="op">.</span><span class="nam">model</span><span class="op">.</span><span class="nam">document</span> <span class="key">import</span> <span class="nam">Document</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t8" class="pln"><span class="n"><a href="#t8">8</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t9" class="mis show_mis"><span class="n"><a href="#t9">9</a></span><span class="t"><span class="key">from</span> <span class="nam">frappe</span><span class="op">.</span><span class="nam">model</span><span class="op">.</span><span class="nam">workflow</span> <span class="key">import</span> <span class="nam">apply_workflow</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t10" class="mis show_mis"><span class="n"><a href="#t10">10</a></span><span class="t"><span class="key">from</span> <span class="nam">velocityduos</span><span class="op">.</span><span class="nam">api</span><span class="op">.</span><span class="nam">utilities</span> <span class="key">import</span> <span class="nam">attach_invoice</span><span class="op">,</span><span class="nam">get_financial_year_dates</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t11" class="pln"><span class="n"><a href="#t11">11</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t12" class="mis show_mis"><span class="n"><a href="#t12">12</a></span><span class="t"><span class="key">class</span> <span class="nam">AcceptanceReceipt</span><span class="op">(</span><span class="nam">Document</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t13" class="mis show_mis"><span class="n"><a href="#t13">13</a></span><span class="t">        <span class="key">def</span> <span class="nam">on_submit</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t14" class="mis show_mis"><span class="n"><a href="#t14">14</a></span><span class="t">                <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">document_type</span> <span class="op">==</span> <span class="str">"Purchase Invoice"</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t15" class="mis show_mis"><span class="n"><a href="#t15">15</a></span><span class="t">                        <span class="nam">vendor_invoice</span> <span class="op">=</span> <span class="nam">frappe</span><span class="op">.</span><span class="nam">get_doc</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">document_type</span><span class="op">,</span><span class="nam">self</span><span class="op">.</span><span class="nam">document_name</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t16" class="mis show_mis"><span class="n"><a href="#t16">16</a></span><span class="t">                        <span class="nam">vendor_invoice</span><span class="op">.</span><span class="nam">populate_tds</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t17" class="mis show_mis"><span class="n"><a href="#t17">17</a></span><span class="t">                        <span class="nam">file</span> <span class="op">=</span> <span class="nam">attach_invoice</span><span class="op">(</span><span class="nam">vendor_invoice</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t18" class="mis show_mis"><span class="n"><a href="#t18">18</a></span><span class="t">                        <span class="key">if</span> <span class="key">not</span> <span class="nam">vendor_invoice</span><span class="op">.</span><span class="nam">invoice_copy</span> <span class="key">or</span> <span class="key">not</span> <span class="nam">vendor_invoice</span><span class="op">.</span><span class="nam">invoice_copy</span><span class="op">.</span><span class="nam">strip</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t19" class="mis show_mis"><span class="n"><a href="#t19">19</a></span><span class="t">                                <span class="nam">vendor_invoice</span><span class="op">.</span><span class="nam">invoice_copy</span> <span class="op">=</span> <span class="nam">file</span><span class="op">.</span><span class="nam">file_url</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t20" class="mis show_mis"><span class="n"><a href="#t20">20</a></span><span class="t">                        <span class="nam">print</span><span class="op">(</span><span class="nam">file</span><span class="op">.</span><span class="nam">as_dict</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t21" class="mis show_mis"><span class="n"><a href="#t21">21</a></span><span class="t">                        <span class="nam">apply_workflow</span><span class="op">(</span><span class="nam">vendor_invoice</span><span class="op">,</span><span class="str">"Accept Invoice"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t22" class="mis show_mis"><span class="n"><a href="#t22">22</a></span><span class="t">                <span class="key">elif</span> <span class="nam">self</span><span class="op">.</span><span class="nam">document_type</span> <span class="op">==</span> <span class="str">"Tds Declaration"</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t23" class="mis show_mis"><span class="n"><a href="#t23">23</a></span><span class="t">                        <span class="nam">tds_declaration</span> <span class="op">=</span> <span class="nam">frappe</span><span class="op">.</span><span class="nam">get_doc</span><span class="op">(</span><span class="str">"Tds Declaration"</span><span class="op">,</span><span class="nam">self</span><span class="op">.</span><span class="nam">document_name</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t24" class="mis show_mis"><span class="n"><a href="#t24">24</a></span><span class="t">                        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">status</span> <span class="op">==</span> <span class="str">"Reject"</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t25" class="mis show_mis"><span class="n"><a href="#t25">25</a></span><span class="t">                                <span class="nam">tds_declaration</span><span class="op">.</span><span class="nam">status</span> <span class="op">=</span> <span class="str">"InActive"</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t26" class="pln"><span class="n"><a href="#t26">26</a></span><span class="t">                        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t27" class="mis show_mis"><span class="n"><a href="#t27">27</a></span><span class="t">                                <span class="key">if</span> <span class="key">not</span> <span class="nam">tds_declaration</span><span class="op">.</span><span class="nam">declaration_certificate</span> <span class="key">or</span> <span class="key">not</span> <span class="nam">tds_declaration</span><span class="op">.</span><span class="nam">declaration_certificate</span><span class="op">.</span><span class="nam">strip</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t28" class="mis show_mis"><span class="n"><a href="#t28">28</a></span><span class="t">                                        <span class="nam">file</span> <span class="op">=</span> <span class="nam">attach_invoice</span><span class="op">(</span><span class="nam">tds_declaration</span><span class="op">,</span><span class="nam">format</span><span class="op">=</span><span class="str">"TDS Acceptance"</span><span class="op">,</span><span class="nam">parenttype</span><span class="op">=</span><span class="str">"Transporter"</span><span class="op">,</span><span class="nam">parent</span><span class="op">=</span><span class="nam">tds_declaration</span><span class="op">.</span><span class="nam">parent</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t29" class="mis show_mis"><span class="n"><a href="#t29">29</a></span><span class="t">                                        <span class="nam">frappe</span><span class="op">.</span><span class="nam">db</span><span class="op">.</span><span class="nam">set_value</span><span class="op">(</span><span class="str">"Tds Declaration"</span><span class="op">,</span><span class="nam">tds_declaration</span><span class="op">.</span><span class="nam">name</span><span class="op">,</span><span class="str">"declaration_certificate"</span><span class="op">,</span><span class="nam">file</span><span class="op">.</span><span class="nam">file_url</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t30" class="mis show_mis"><span class="n"><a href="#t30">30</a></span><span class="t">                                        <span class="nam">tds_declaration</span> <span class="op">=</span> <span class="nam">frappe</span><span class="op">.</span><span class="nam">get_doc</span><span class="op">(</span><span class="str">"Tds Declaration"</span><span class="op">,</span><span class="nam">self</span><span class="op">.</span><span class="nam">document_name</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t31" class="mis show_mis"><span class="n"><a href="#t31">31</a></span><span class="t">                                <span class="nam">tds_declaration</span><span class="op">.</span><span class="nam">status</span> <span class="op">=</span> <span class="str">"Active"</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t32" class="mis show_mis"><span class="n"><a href="#t32">32</a></span><span class="t">                        <span class="nam">tds_declaration</span><span class="op">.</span><span class="nam">save</span><span class="op">(</span><span class="key">True</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t33" class="mis show_mis"><span class="n"><a href="#t33">33</a></span><span class="t">                        <span class="key">if</span> <span class="nam">tds_declaration</span><span class="op">.</span><span class="nam">parent</span> <span class="key">and</span> <span class="nam">tds_declaration</span><span class="op">.</span><span class="nam">parent</span><span class="op">.</span><span class="nam">strip</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t34" class="mis show_mis"><span class="n"><a href="#t34">34</a></span><span class="t">                                <span class="nam">frappe</span><span class="op">.</span><span class="nam">db</span><span class="op">.</span><span class="nam">sql</span><span class="op">(</span><span class="str">"""update `tabTransporter` set modified=%(date)s where name=%(name)s"""</span><span class="op">,</span><span class="op">{</span><span class="str">"date"</span><span class="op">:</span><span class="nam">frappe</span><span class="op">.</span><span class="nam">utils</span><span class="op">.</span><span class="nam">now_datetime</span><span class="op">(</span><span class="op">)</span><span class="op">,</span><span class="str">"name"</span><span class="op">:</span><span class="nam">tds_declaration</span><span class="op">.</span><span class="nam">parent</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t35" class="pln"><span class="n"><a href="#t35">35</a></span><span class="t">                <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t36" class="mis show_mis"><span class="n"><a href="#t36">36</a></span><span class="t">                        <span class="nam">frappe</span><span class="op">.</span><span class="nam">throw</span><span class="op">(</span><span class="str">"Invalid Document Type"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+</div>
+<div id="footer">
+    <div class="content">
+        <p>
+            <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.0.3</a>,
+            created at 2020-01-29 11:14
+        </p>
+    </div>
+</div>
+</body>
+</html>
