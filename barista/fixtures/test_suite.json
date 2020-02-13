@@ -3,7 +3,7 @@
   "app_name": "velocityduos",
   "docstatus": 0,
   "doctype": "Test Suite",
-  "modified": "2020-02-03 18:42:40.137498",
+  "modified": "2020-02-13 11:36:51.239542",
   "name": "Trip Creation",
   "parent": null,
   "parentfield": null,
@@ -44,6 +44,12 @@
     "parent": "Trip Creation",
     "parentfield": "test_data",
     "parenttype": "Test Suite",
+    "test_data": "TestData-0027"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
     "test_data": "TestData-0015"
    },
    {
@@ -51,12 +57,6 @@
     "parentfield": "test_data",
     "parenttype": "Test Suite",
     "test_data": "TestData-0018"
-   },
-   {
-    "parent": "Trip Creation",
-    "parentfield": "test_data",
-    "parenttype": "Test Suite",
-    "test_data": "TestData-0027"
    },
    {
     "parent": "Trip Creation",
@@ -126,20 +126,6 @@
     "parent": "Trip Creation",
     "parentfield": "testcase",
     "parenttype": "Test Suite",
-    "testcase": "TestCase-0014",
-    "testcase_name": "Loaded to In-Transit CSMT"
-   },
-   {
-    "parent": "Trip Creation",
-    "parentfield": "testcase",
-    "parenttype": "Test Suite",
-    "testcase": "TestCase-0019",
-    "testcase_name": "add document details in Transporter"
-   },
-   {
-    "parent": "Trip Creation",
-    "parentfield": "testcase",
-    "parenttype": "Test Suite",
     "testcase": "TestCase-0018",
     "testcase_name": "Update Vehicle add data for validation"
    },
@@ -147,8 +133,22 @@
     "parent": "Trip Creation",
     "parentfield": "testcase",
     "parenttype": "Test Suite",
+    "testcase": "TestCase-0014",
+    "testcase_name": "Loaded to In-Transit CSMT"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
     "testcase": "TestCase-0017",
     "testcase_name": "Change workflow Trip from LR created to Assign Vehicle"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0019",
+    "testcase_name": "add document details in Transporter"
    },
    {
     "parent": "Trip Creation",
