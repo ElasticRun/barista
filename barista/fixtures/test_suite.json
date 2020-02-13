@@ -3,7 +3,7 @@
   "app_name": "velocityduos",
   "docstatus": 0,
   "doctype": "Test Suite",
-  "modified": "2020-02-13 19:11:30.260995",
+  "modified": "2020-02-13 19:50:21.217402",
   "name": "Trip Creation",
   "parent": null,
   "parentfield": null,
@@ -90,6 +90,13 @@
    }
   ],
   "testcase": [
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0001",
+    "testcase_name": "Vehicle status to active from Pending Verification"
+   },
    {
     "parent": "Trip Creation",
     "parentfield": "testcase",
