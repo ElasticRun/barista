@@ -8,9 +8,9 @@ from frappe.model.document import Document
 
 class TestCase(Document):
 	def validate(self):
-		if self.test_data:
-			if frappe.db.get_value("Test Data",self.test_data,"doctype_name") != self.testcase_doctype:
-				frappe.throw("Invalid Test Data Doctype")
+		# if self.test_data:
+		# 	if frappe.db.get_value("Test Data",self.test_data,"doctype_name") != self.testcase_doctype:
+		# 		frappe.throw("Invalid Test Data Doctype")
 		if self.testcase_doctype:
 			docfields = [docfield.fieldname for docfield in frappe.get_doc("DocType",self.testcase_doctype).fields]
 			for row in self.update_fields:
