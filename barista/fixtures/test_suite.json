@@ -3,7 +3,7 @@
   "app_name": "velocityduos",
   "docstatus": 0,
   "doctype": "Test Suite",
-  "modified": "2020-02-13 19:50:21.217402",
+  "modified": "2020-02-13 21:55:01.662730",
   "name": "Trip Creation",
   "parent": null,
   "parentfield": null,
@@ -69,6 +69,12 @@
     "parentfield": "test_data",
     "parenttype": "Test Suite",
     "test_data": "TestData-0027"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
+    "test_data": "TestData-0014"
    },
    {
     "parent": "Trip Creation",
