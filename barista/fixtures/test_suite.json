@@ -3,13 +3,25 @@
   "app_name": "velocityduos",
   "docstatus": 0,
   "doctype": "Test Suite",
-  "modified": "2020-02-13 11:36:51.239542",
+  "modified": "2020-02-13 19:11:30.260995",
   "name": "Trip Creation",
   "parent": null,
   "parentfield": null,
   "parenttype": null,
   "suite_name": "Trip Creation",
   "test_data": [
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
+    "test_data": "TestData-0042"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
+    "test_data": "TestData-0043"
+   },
    {
     "parent": "Trip Creation",
     "parentfield": "test_data",
@@ -32,6 +44,12 @@
     "parent": "Trip Creation",
     "parentfield": "test_data",
     "parenttype": "Test Suite",
+    "test_data": "TestData-0008"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
     "test_data": "TestData-0011"
    },
    {
@@ -39,6 +57,12 @@
     "parentfield": "test_data",
     "parenttype": "Test Suite",
     "test_data": "TestData-0012"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
+    "test_data": "TestData-0028"
    },
    {
     "parent": "Trip Creation",
@@ -66,6 +90,13 @@
    }
   ],
   "testcase": [
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0021",
+    "testcase_name": "Adding Freight Proof To CSMT"
+   },
    {
     "parent": "Trip Creation",
     "parentfield": "testcase",
