@@ -14,6 +14,60 @@
     "parent": "Trip Creation",
     "parentfield": "test_data",
     "parenttype": "Test Suite",
+    "test_data": "TestData-0012"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
+    "test_data": "TestData-0027"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
+    "test_data": "TestData-0018"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
+    "test_data": "TestData-0004"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
+    "test_data": "TestData-0011"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
+    "test_data": "TestData-0015"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
+    "test_data": "TestData-0007"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
+    "test_data": "TestData-0006"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
+    "test_data": "TestData-0031"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
     "test_data": "TestData-0004"
    },
    {
@@ -66,6 +120,97 @@
    }
   ],
   "testcase": [
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0009",
+    "testcase_name": "Create Lorry Receipt after vehicle allocation"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0018",
+    "testcase_name": "Update Vehicle add data for validation"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0005",
+    "testcase_name": "Add  Trip Cost To Confirmed Trip"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0007",
+    "testcase_name": "Change Trip from CNF to Transporter"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0020",
+    "testcase_name": "Change trip status from vehicle assigned to Vehicle Details Verified"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0014",
+    "testcase_name": "Loaded to In-Transit CSMT"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0017",
+    "testcase_name": "Change workflow Trip from LR created to Assign Vehicle"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0019",
+    "testcase_name": "add document details in Transporter"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0004",
+    "testcase_name": "Saved to Confirm Trip"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0006",
+    "testcase_name": "change confirmed to loaded CSMT"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0008",
+    "testcase_name": "Add Driver and Vehicle Details in Trip"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0010",
+    "testcase_name": "Change Workflow state in LR"
+   },
+   {
+    "parent": "Trip Creation",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0016",
+    "testcase_name": "Create Sales Order against consignment"
+   },
    {
     "parent": "Trip Creation",
     "parentfield": "testcase",
