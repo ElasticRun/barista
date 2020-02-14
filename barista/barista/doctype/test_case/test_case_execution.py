@@ -225,7 +225,7 @@ class TestCaseExecution():
 						print("       >>>> Assertion passed")
 					else:
 						assertion_result.assertion_status = "Failed"
-						assertion_result.assertion_result = "Actual number of record(s) found - " + len(validation_doctype) + \
+						assertion_result.assertion_result = "Actual number of record(s) found - " + str(len(validation_doctype)) + \
 															". For Doctype - " + assertion_doc.doctype_name + " . Name - " + assertion_doc.reference_field +\
 																". Value - " + testdata_doc.test_record_name
 						test_result_doc.test_case_status = "Failed"
@@ -241,7 +241,7 @@ class TestCaseExecution():
 				elif (assertion_doc.assertion_type == "WORKFLOW"):
 					if (len(validation_doctype) != 1):
 						assertion_result.assertion_status = "Failed"
-						assertion_result.assertion_result = "Actual number of record(s) found - " + len(validation_doctype) + \
+						assertion_result.assertion_result = "Actual number of record(s) found - " + str(len(validation_doctype)) + \
 															". For Doctype - " + assertion_doc.doctype_name + " . Name - " + assertion_doc.reference_field +\
 																". Value - " + testdata_doc.test_record_name
 						test_result_doc.test_case_status = "Failed"
