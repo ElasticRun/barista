@@ -15,7 +15,7 @@ class TestCase(Document):
 			docfields = [docfield.fieldname for docfield in frappe.get_doc("DocType",self.testcase_doctype).fields]
 			docfields.append('docstatus')
 			docfields.append('name')
-			print("docfields---",docfields)
+			
 			for row in self.update_fields:
 				if row.docfield_fieldname not in docfields:
 					frappe.throw(f"Invalid DocField {row.docfield_fieldname} in {self.testcase_doctype}")
