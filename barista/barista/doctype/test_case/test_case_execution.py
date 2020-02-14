@@ -222,7 +222,7 @@ class TestCaseExecution():
 						assertion_result = frappe.new_doc("Assertion Result")
 						assertion_result.assertion = assertion_doc.name
 						assertion_result.assertion_status = "Passed"
-						assertion_result.assertion_result = "record found - " + validation_doctype['name']
+						assertion_result.assertion_result = "record found - " + validation_doctype[0]['name']
 						print("       >>>> Assertion passed")
 					else:
 						assertion_result.assertion_status = "Failed"
