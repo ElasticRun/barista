@@ -87,6 +87,7 @@ class TestCaseExecution():
 						child_doc = TestDataGeneratorobj.create_testdata(update_field_doc.linkfield_name)
 						#TODO: Fetch child test data doc and update child doc
 						child_doc.parentfield = field_doc.fieldname
+						child_doc.parenttype=testcase_doc.testcase_doctype
 						new_record_doc.get(field_doc.fieldname).append(child_doc)
 						#check the link for pretestdata
 						#create pretestdata
