@@ -103,7 +103,7 @@ class TestDataGenerator():
 				value = None
 				if (field_doc.fieldtype == "Data"):
 					#its a string of 140							
-					value = (field_doc.label.split()[0]	+ random.randrange(0,20000,1))[0:139]					
+					value = (field_doc.label.split()[0]	+ str(random.randrange(0,20000,1)))[0:139]					
 
 					###new_doc[declared_field_doc.docfield_fieldname] = (field_doc.label.split()[0]	+ random.randrange(0,20000,1))[0:139]
 				elif (field_doc.fieldtype == "Check"):
@@ -126,7 +126,7 @@ class TestDataGenerator():
 					value = random.randrange(0,200,1)
 					###new_doc[declared_field_doc.docfield_fieldname] = random.randrange(0,200,1)
 				elif(field_doc.fieldtype == "Long Text" or field_doc.fieldtype == "Small Text" or field_doc.fieldtype == "Text"):
-					value = (field_doc.label + random.randrange(0,20000,1))
+					value = (field_doc.label + str(random.randrange(0,20000,1)))
 					###new_doc[declared_field_doc.docfield_fieldname] = (field_doc.label + random.randrange(0,20000,1))
 				elif(field_doc.fieldtype == "Password"):
 					value = "Frappe@12345"
@@ -141,8 +141,8 @@ class TestDataGenerator():
 				elif("Attach" in field_doc.fieldtype):
 					value = "assets/barista/sample-file.html"	
 
-				if (value != None):
-					new_doc.set(declared_field_doc.docfield_fieldname, value)
+				# if (value != None):
+				# 	new_doc.set(declared_field_doc.docfield_fieldname, value) # commented by us
 					
 			#insert		
 			return new_doc
@@ -158,7 +158,8 @@ class TestDataGenerator():
 				self.create_testdata(testdata)
 			else:
 				new_doc = self.create_testdata(testdata)
-				created_doc = new_doc.save()
+				new_doc.save()
+				created_doc = new_doc
 				testdata_doc = frappe.get_doc('Test Data', testdata)
 				testdata_doc.test_record_name = created_doc.name
 				testdata_doc.status = 'CREATED'
