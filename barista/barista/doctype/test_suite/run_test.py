@@ -20,7 +20,6 @@ class RunTest():
 
         suites = frappe.get_all("Test Suite", filters={'app_name' : app_name})
         generatorObj = TestDataGenerator()        
-        print("suitesss===",suites)
         objCoverage = coverage.Coverage(source=[frappe.get_app_path(app_name)] )
         objCoverage.start()
         
@@ -50,7 +49,6 @@ class RunTest():
         print("************ Execution ends. Verify coverage at - " + "/assets/barista/test-coverage/index.html")
     
     def run_testcase(self, testcase, suite):
-        print("inside run_testcase---",testcase['testcase'])
         executionObj = TestCaseExecution()        
         executionObj.run_testcase(testcase['testcase'], suite['name'])
         frappe.db.commit()
