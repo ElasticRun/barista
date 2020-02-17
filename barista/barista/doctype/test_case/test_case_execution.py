@@ -199,15 +199,15 @@ class TestCaseExecution():
 					else:
 						
 						validation_doctype_doc = frappe.get_doc(assertion_doc.doctype_name, validation_doctype[0]['name'])
-						if(validation_doctype_doc.get(assertion_doc.docfield_name) == assertion_doc.docfield_value):
+						if(str(validation_doctype_doc.get(assertion_doc.docfield_name)) == str(assertion_doc.docfield_value)):
 							#Assertion is successful						
-							assertion_result.assertion_result = "Valued matched - " + validation_doctype_doc.get(assertion_doc.docfield_name)
+							assertion_result.assertion_result = "Value matched - " + str(validation_doctype_doc.get(assertion_doc.docfield_name))
 							print("       >>>> Assertion Passed")
 						else:
 							#Assertion failed
 							#test case also fails
 							assertion_result.assertion_status = "Failed"
-							assertion_result.assertion_result = "Valued Found - " + str(validation_doctype_doc.get(assertion_doc.docfield_name))  \
+							assertion_result.assertion_result = "Value Found - " + str(validation_doctype_doc.get(assertion_doc.docfield_name))  \
 															+ ". Where as expected value is - " +  str(assertion_doc.docfield_value )
 
 							if(error_message):
