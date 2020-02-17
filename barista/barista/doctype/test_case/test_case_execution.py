@@ -55,7 +55,7 @@ class TestCaseExecution():
 					testdata_doc.save()
 				except Exception as e: 
 					error_message = str(e)
-				
+					print('Error occurred ---',str(e))
 				print("    >>> test data created")
 
 			
@@ -88,7 +88,8 @@ class TestCaseExecution():
 						#TODO: Fetch child test data doc and update child doc
 						child_doc.parentfield = field_doc.fieldname
 						child_doc.parenttype=testcase_doc.testcase_doctype
-						new_record_doc.get(field_doc.fieldname).append(child_doc)
+						new_record_doc.append(field_doc.fieldname,child_doc)
+						# new_record_doc.get(field_doc.fieldname).append(child_doc)
 						#check the link for pretestdata
 						#create pretestdata
 						#create_pretestdata(field_doc.linkfield_name)
@@ -131,6 +132,7 @@ class TestCaseExecution():
 						new_record_doc.save()
 					except Exception as e: 
 						error_message = str(e)
+						print('Error occurred ---',str(e))
 					print("    >>> Test data updated")
 				
 

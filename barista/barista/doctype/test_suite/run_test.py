@@ -27,7 +27,7 @@ class RunTest():
             try:
                 generatorObj.create_pretest_data(suite['name'])            
                 testcases = frappe.get_list('Testcase Item' , filters={'parent': suite['name']}, fields=["testcase"],order_by="idx")
-                print("\n \ntestcases---",testcases)  
+                # print("\n \ntestcases---",testcases)  
                 for testcase in testcases:                    
                     self.run_testcase(testcase,suite)
 
