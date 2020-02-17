@@ -44,7 +44,12 @@ class TestDataGenerator():
 				
 				for declared_field in declared_fields:
 					declared_field_doc = frappe.get_doc('Testdatafield', declared_field['name'])
-					if (declared_field_doc.docfield_fieldname == field_doc.fieldname):
+
+					if (declared_field_doc.docfield_fieldname == "docstatus"):
+						if (declared_field_doc.docfield_value is None):
+							declared_field_doc.docfield_value =0
+						new_doc.set(declared_field_doc.docfield_fieldname, declared_field_doc.docfield_value)
+					elif(declared_field_doc.docfield_fieldname == field_doc.fieldname):
 						flag_field = True
 						if (declared_field_doc.is_default):
 							#ignore
