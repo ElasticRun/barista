@@ -60,7 +60,18 @@ class TestCaseExecution():
 
 			
 			elif (testcase_doc.testcase_type == "UPDATE"):
-				
+				if testcase_doc.testcase_doctype != testdata_doc.doctype_name:
+					value_from_test_record_doc = frappe.db.get_value(testdata_doc.doctype_name,testdata_doc.test_record_name,testcase_doc.test_data_docfield)
+					all_existing_docs = frappe.get_all(testcase_doc.testcase_doctype,filters={testcase_doc.test_case_docfield : value_from_test_record_doc})
+					if len(all_existing_docs)==1:
+						existing_doc_name = all_existing_docs[0]['name']
+						new_record_doc = frappe.get_doc(testcase_doc.testcase_doctype,existing_doc_name)
+					else:
+						test_result_doc.test_case_execution = "Execution Failed"
+						test_result_doc.execution_result = "The test case doctype - " + testcase_doc.testcase_doctype + " with reference field "+ testcase_doc.test_case_docfield + " value "+ testdata_doc.test_record_name +" records found "+str(len(all_existing_docs))
+						test_result_doc.test_case_status = "Failed"
+						return
+
 				#create the record if already not created
 				if(new_record_doc.name == None):
 					new_record_doc = new_record_doc.save()
@@ -134,7 +145,7 @@ class TestCaseExecution():
 						error_message = str(e)
 						print('Error occurred ---',str(e))
 					print("    >>> Test data updated")
-				
+			
 
 			elif (testcase_doc.testcase_type == "READ"):
 				pass
