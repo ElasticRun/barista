@@ -78,6 +78,14 @@ frappe.ui.form.on('Test Case', {
 		}
 		$("[data-fieldname=dummy_chkbox]").find("i.disabled-check").css("display","none");
 		$("[data-fieldname=dummy_chkbox]").find("label").css("min-height","16px");
+
+		if(cur_frm.doc.testcase_doctype){
+			addTestCaseDocFields(cur_frm);
+		}
+
+		if(cur_frm.doc.test_data){
+			addTestDataDocFields(cur_frm);
+		}
 	},
 	testcase_doctype: function (cur_frm) {
 		if (cur_frm.doc.testcase_doctype) {
@@ -117,6 +125,7 @@ frappe.ui.form.on('Testdatafield', {
 					}
 				);
 				options.push("docstatus");
+				options.push("name");
 				frappe.meta.get_docfield("Testdatafield", "docfield_fieldname", cur_frm.doc.name).options = options;
 			});
 		} else {
@@ -171,7 +180,7 @@ function addTestCaseDocFields(cur_frm) {
 		cur_frm.refresh_field("test_case_docfield")
 
 	});
-	cur_frm.refresh_fields();
+	// cur_frm.refresh_fields();
 
 }
 
@@ -204,6 +213,6 @@ function addTestDataDocFields(cur_frm) {
 
 	})
 
-	cur_frm.refresh_fields();
+	// cur_frm.refresh_fields();
 }
 
