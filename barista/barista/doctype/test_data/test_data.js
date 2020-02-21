@@ -75,6 +75,7 @@ frappe.ui.form.on('Testdatafield', {
 });
 
 frappe.ui.form.on("Test Data", "doctype_name", function (frm, cdt, cdn) {
+	docFields = [];
 	cur_frm.doc.docfield_value = [];
 	cur_frm.doc.existing_record = '';
 	cur_frm.refresh_fields();
