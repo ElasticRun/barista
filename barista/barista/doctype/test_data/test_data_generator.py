@@ -163,7 +163,8 @@ class TestDataGenerator():
 				self.create_testdata(testdata)
 			else:
 				new_doc = self.create_testdata(testdata)
-				created_doc = new_doc.save()
+				new_doc.save()
+				created_doc = new_doc
 				testdata_doc = frappe.get_doc('Test Data', testdata)
 				testdata_doc.test_record_name = created_doc.name
 				testdata_doc.status = 'CREATED'
