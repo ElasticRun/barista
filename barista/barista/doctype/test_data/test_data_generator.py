@@ -95,7 +95,12 @@ class TestDataGenerator():
 							# except expression as identifier:
 							# 	pass
 						else:
-							new_doc.set(declared_field_doc.docfield_fieldname, declared_field_doc.docfield_value)
+							if field_doc.fieldtype in ['Currency','Float','Percent']:
+								new_doc.set(declared_field_doc.docfield_fieldname, float(declared_field_doc.docfield_value))
+							elif field_doc.fieldtype=='Int':
+								new_doc.set(declared_field_doc.docfield_fieldname, int(declared_field_doc.docfield_value))
+							else:
+								new_doc.set(declared_field_doc.docfield_fieldname, str(declared_field_doc.docfield_value))
 							###new_doc[declared_field_doc.docfield_fieldname] = declared_field_doc.docfield_value
 			
 			if(flag_field == False and not field_doc.fetch_from):
