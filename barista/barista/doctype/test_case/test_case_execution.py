@@ -32,7 +32,7 @@ class TestCaseExecution():
 			testdata_doc = frappe.get_doc("Test Data", testcase_doc.test_data)
 			
 			#print (testdata_doc.as_dict())
-			print ("\033[0;36;40m>> Test Case : " + str(testcase_doc.name))
+			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name))
 
 			#cannot use insert scritps in test case data generation as doctype.name will not be recorded
 			if (testdata_doc.use_script == 1):
@@ -60,7 +60,7 @@ class TestCaseExecution():
 				except Exception as e: 
 					error_message = str(e)
 					print('Error occurred ---',str(e))
-				print("\033[0;33;40m    >>> test data created")
+				print("\033[0;33;93m    >>> test data created")
 
 			
 			elif (testcase_doc.testcase_type == "UPDATE"):
@@ -152,7 +152,7 @@ class TestCaseExecution():
 						except Exception as e: 
 							error_message = str(e)
 							print('Error occurred ---',str(e))
-						print("\033[0;36;40m    >>> Test data updated")
+						print("\033[0;33;93m    >>> Test data updated")
 			
 
 			elif (testcase_doc.testcase_type == "READ"):
@@ -170,7 +170,7 @@ class TestCaseExecution():
 					apply_workflow(new_record_doc, testcase_doc.workflow_state)
 				except Exception as e: 
 					error_message = str(e)
-				print("\033[0;32;40m    >>> workflow applied")
+				print("\033[0;32;92m    >>> workflow applied")
 
 			
 			elif (testcase_doc.testcase_type == "FUNCTION"):
@@ -198,7 +198,7 @@ class TestCaseExecution():
 			for assertion in assertions:
 
 				assertion_doc = frappe.get_doc("Assertion", assertion['name'])
-				print("\033[0;37;40m       >>>> Applying assertion : " + str(assertion['name'])) 
+				print("\033[0;37;97m       >>>> Applying assertion : " + str(assertion['name'])) 
 				assertion_result = frappe.new_doc("Assertion Result")
 				assertion_result.assertion = assertion_doc.name
 				assertion_result.assertion_status = "Passed"
@@ -218,7 +218,7 @@ class TestCaseExecution():
 															+ error_message
 
 						test_result_doc.test_case_status = "Failed"					
-						print("\033[0;31;40m       >>>> Assertion failed")
+						print("\033[0;31;91m       >>>> Assertion failed")
 					
 
 					else:
@@ -227,7 +227,7 @@ class TestCaseExecution():
 						if(str(validation_doctype_doc.get(assertion_doc.docfield_name)) == str(assertion_doc.docfield_value)):
 							#Assertion is successful						
 							assertion_result.assertion_result = "Value matched - " + str(validation_doctype_doc.get(assertion_doc.docfield_name))
-							print("\033[0;32;40m       >>>> Assertion Passed")
+							print("\033[0;32;92m       >>>> Assertion Passed")
 							
 						else:
 							#Assertion failed
@@ -242,7 +242,7 @@ class TestCaseExecution():
 															+ error_message
 							 
 							test_result_doc.test_case_status = "Failed"
-							print("\033[0;31;40m       >>>> Assertion Failed")
+							print("\033[0;31;91m       >>>> Assertion Failed")
 							
 
 				elif (assertion_doc.assertion_type == "RECORD VALIDATION"):
@@ -252,14 +252,14 @@ class TestCaseExecution():
 						assertion_result.assertion = assertion_doc.name
 						assertion_result.assertion_status = "Passed"
 						assertion_result.assertion_result = "record found - " + validation_doctype[0]['name']
-						print("\033[0;32;40m       >>>> Assertion Passed")
+						print("\033[0;32;92m       >>>> Assertion Passed")
 					else:
 						assertion_result.assertion_status = "Failed"
 						assertion_result.assertion_result = "Actual number of record(s) found - " + str(len(validation_doctype)) + \
 															". For Doctype - " + assertion_doc.doctype_name + " . Name - " + assertion_doc.reference_field +\
 																". Value - " + testdata_doc.test_record_name
 						test_result_doc.test_case_status = "Failed"
-						print("\033[0;31;40m       >>>> Assertion Failed")
+						print("\033[0;31;91m       >>>> Assertion Failed")
 
 						if(error_message):
 								#there was some error as well. 
@@ -275,7 +275,7 @@ class TestCaseExecution():
 															". For Doctype - " + assertion_doc.doctype_name + " . Name - " + assertion_doc.reference_field +\
 																". Value - " + testdata_doc.test_record_name
 						test_result_doc.test_case_status = "Failed"
-						print("\033[0;31;40m       >>>> Assertion Failed")
+						print("\033[0;31;91m       >>>> Assertion Failed")
 						if(error_message):
 							#there was some error as well. 
 							assertion_result.assertion_result = assertion_result.assertion_result + "\n\nError Encountered : " \
@@ -284,7 +284,7 @@ class TestCaseExecution():
 						validation_doctype_doc = frappe.get_doc(assertion_doc.doctype_name, validation_doctype[0]['name'])
 						if (assertion_doc.workflow_state == validation_doctype_doc.workflow_state):
 							assertion_result.assertion_result = "Workflow matched - " + assertion_doc.workflow_state
-							print("\033[0;32;40m       >>>> Assertion Passed")
+							print("\033[0;32;92m       >>>> Assertion Passed")
 						else:
 							assertion_result.assertion_status = "Failed"
 							assertion_result.assertion_result = "Workflow State found - " + str(validation_doctype_doc.workflow_state) \
@@ -294,25 +294,25 @@ class TestCaseExecution():
 								assertion_result.assertion_result = assertion_result.assertion_result + "\n\nError Encountered : " \
 															+ error_message
 							test_result_doc.test_case_status = "Failed"
-							print("\033[0;31;40m       >>>> Assertion Failed")
+							print("\033[0;31;91m       >>>> Assertion Failed")
 
 
 				elif (assertion_doc.assertion_type == "ERROR"):
 					if (error_message):
 						if (error_message in assertion_doc.error_message):
 							assertion_result.assertion_result = "error received as expected - " + error_message
-							print("\033[0;32;40m       >>>> Assertion Passed")
+							print("\033[0;32;92m       >>>> Assertion Passed")
 						else:
 							assertion_result.assertion_result = "error received - " + error_message + \
 																"\n\nExcepted error - " + assertion_doc.error_message
 							assertion_result.assertion_status = "Failed"
 							test_result_doc.test_case_status = "Failed"
-							print("\033[0;31;40m       >>>> Assertion Failed")
+							print("\033[0;31;91m       >>>> Assertion Failed")
 					else:
 						assertion_result.assertion_result = "No Error received however following error was expected - " + assertion_doc.error_message
 						assertion_result.assertion_status = "Failed"
 						test_result_doc.test_case_status = "Failed"
-						print("\033[0;31;40m       >>>> Assertion Failed") 
+						print("\033[0;31;91m       >>>> Assertion Failed") 
 															
  					
 
@@ -334,6 +334,6 @@ class TestCaseExecution():
 			test_result_doc.save()
 			raise e
 		finally:
-			print ("\033[0;36;40m>> Test Case : " + str(testcase_doc.name) + " Execution Ended \n\n")	
+			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name) + " Execution Ended \n\n")	
 		
 		
