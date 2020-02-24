@@ -32,7 +32,7 @@ class TestCaseExecution():
 			testdata_doc = frappe.get_doc("Test Data", testcase_doc.test_data)
 			
 			#print (testdata_doc.as_dict())
-			print (">> Test Case : " + str(testcase_doc.name))
+			print ("\033[0;36;40m>> Test Case : " + str(testcase_doc.name))
 
 			#cannot use insert scritps in test case data generation as doctype.name will not be recorded
 			if (testdata_doc.use_script == 1):
@@ -60,7 +60,7 @@ class TestCaseExecution():
 				except Exception as e: 
 					error_message = str(e)
 					print('Error occurred ---',str(e))
-				print("    >>> test data created")
+				print("\033[0;33;40m    >>> test data created")
 
 			
 			elif (testcase_doc.testcase_type == "UPDATE"):
@@ -152,7 +152,7 @@ class TestCaseExecution():
 						except Exception as e: 
 							error_message = str(e)
 							print('Error occurred ---',str(e))
-						print("    >>> Test data updated")
+						print("\033[0;36;40m    >>> Test data updated")
 			
 
 			elif (testcase_doc.testcase_type == "READ"):
@@ -170,7 +170,7 @@ class TestCaseExecution():
 					apply_workflow(new_record_doc, testcase_doc.workflow_state)
 				except Exception as e: 
 					error_message = str(e)
-				print("    >>> workflow applied")
+				print("\033[0;32;40m    >>> workflow applied")
 
 			
 			elif (testcase_doc.testcase_type == "FUNCTION"):
@@ -198,7 +198,7 @@ class TestCaseExecution():
 			for assertion in assertions:
 
 				assertion_doc = frappe.get_doc("Assertion", assertion['name'])
-				print("       >>>> Applying assertion : " + str(assertion['name'])) 
+				print("\033[0;37;40m       >>>> Applying assertion : " + str(assertion['name'])) 
 				assertion_result = frappe.new_doc("Assertion Result")
 				assertion_result.assertion = assertion_doc.name
 				assertion_result.assertion_status = "Passed"
@@ -218,7 +218,7 @@ class TestCaseExecution():
 															+ error_message
 
 						test_result_doc.test_case_status = "Failed"					
-						print("       >>>> Assertion failed")
+						print("\033[0;31;40m       >>>> Assertion failed")
 					
 
 					else:
@@ -334,6 +334,6 @@ class TestCaseExecution():
 			test_result_doc.save()
 			raise e
 		finally:
-			print (">> Test Case : " + str(testcase_doc.name) + " Execution Ended \n\n")	
+			print ("\033[0;36;40m>> Test Case : " + str(testcase_doc.name) + " Execution Ended \n\n")	
 		
 		

@@ -16,7 +16,7 @@ class RunTest():
     #Run all the suites for the given app
     def run_complete_suite(self, app_name):
 
-        print("************ Running all test cases for App - " + app_name + "*************\n\n")
+        print("\033[0;33;40m************ Running all test cases for App - " + app_name + "*************\n\n")
 
         suites = frappe.get_all("Test Suite", filters={'app_name' : app_name})
         generatorObj = TestDataGenerator()        
@@ -32,10 +32,10 @@ class RunTest():
                     self.run_testcase(testcase,suite)
 
             except Exception as e:
-                print("An Error occurred which will cause false test case result in the suite - " + str(suite.name) )
-                print("*************ERROR****************")
-                print(" The error encountered is - " + str(e)  + "\n")
-                print("*************ERROR****************")
+                print("\033[0;31;40mAn Error occurred which will cause false test case result in the suite - " + str(suite.name) )
+                print("\033[0;31;40m*************ERROR****************")
+                print("\033[0;31;40m The error encountered is - " + str(e)  + "\n")
+                print("\033[0;31;40m*************ERROR****************")
                 raise e
 
 
@@ -46,7 +46,7 @@ class RunTest():
         objCoverage.html_report(directory=frappe.get_app_path('barista') + '/public/test-coverage/')
 
         objCoverage.erase()
-        print("************ Execution ends. Verify coverage at - " + "/assets/barista/test-coverage/index.html")
+        print("\033[0;33;40m************ Execution ends. Verify coverage at - " + "/assets/barista/test-coverage/index.html")
     
     def run_testcase(self, testcase, suite):
         executionObj = TestCaseExecution()        
