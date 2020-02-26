@@ -16,11 +16,10 @@ class RunTest():
     #Run all the suites for the given app
     def run_complete_suite(self, app_name):
 
-        print("************ Running all test cases for App - " + app_name + "*************\n\n")
+        print("\033[0;33;93m************ Running all test cases for App - " + app_name + "*************\n\n")
 
         suites = frappe.get_all("Test Suite", filters={'app_name' : app_name})
         generatorObj = TestDataGenerator()        
-        
         objCoverage = coverage.Coverage(source=[frappe.get_app_path(app_name)] )
         objCoverage.start()
         
@@ -28,15 +27,15 @@ class RunTest():
             try:
                 generatorObj.create_pretest_data(suite['name'])            
                 testcases = frappe.get_list('Testcase Item' , filters={'parent': suite['name']}, fields=["testcase"],order_by="idx")
-                            
+                # print("\n \ntestcases---",testcases)  
                 for testcase in testcases:                    
                     self.run_testcase(testcase,suite)
 
             except Exception as e:
-                print("An Error occurred which will cause false test case result in the suite - " + str(suite.name) )
-                print("*************ERROR****************")
-                print(" The error encountered is - " + str(e)  + "\n")
-                print("*************ERROR****************")
+                print("\033[0;31;91mAn Error occurred which will cause false test case result in the suite - " + str(suite.name) )
+                print("\033[0;31;91m*************ERROR****************")
+                print("\033[0;31;91m The error encountered is - " + str(e)  + "\n")
+                print("\033[0;31;91m*************ERROR****************")
                 raise e
 
 
@@ -47,7 +46,7 @@ class RunTest():
         objCoverage.html_report(directory=frappe.get_app_path('barista') + '/public/test-coverage/')
 
         objCoverage.erase()
-        print("************ Execution ends. Verify coverage at - " + "/assets/barista/test-coverage/index.html")
+        print("\033[0;33;93m************ Execution ends. Verify coverage at - " + "/assets/barista/test-coverage/index.html")
     
     def run_testcase(self, testcase, suite):
         executionObj = TestCaseExecution()        

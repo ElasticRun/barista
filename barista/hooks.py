@@ -119,4 +119,12 @@ app_license = "MIT"
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "barista.event.get_events"
 # }
-fixtures = ["Test Data", "Test Case", "Test Suite", "Testcase Item", "Testdata Item", "Assertion", "Testdatafield"]
+fixtures = [
+    "Test Data", 
+    "Test Case", 
+    "Test Suite", 
+        # "Testcase Item", 
+        # "Testdata Item", 
+        # "Assertion", 
+        # "Testdatafield"
+        ]

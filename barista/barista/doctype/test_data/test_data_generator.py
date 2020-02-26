@@ -44,7 +44,12 @@ class TestDataGenerator():
 				
 				for declared_field in declared_fields:
 					declared_field_doc = frappe.get_doc('Testdatafield', declared_field['name'])
-					if (declared_field_doc.docfield_fieldname == field_doc.fieldname):
+
+					if (declared_field_doc.docfield_fieldname == "docstatus"):
+						if (declared_field_doc.docfield_value is None):
+							declared_field_doc.docfield_value =0
+						new_doc.set(declared_field_doc.docfield_fieldname, int(declared_field_doc.docfield_value))
+					elif(declared_field_doc.docfield_fieldname == field_doc.fieldname):
 						flag_field = True
 						if (declared_field_doc.is_default):
 							#ignore
@@ -108,7 +113,7 @@ class TestDataGenerator():
 				value = None
 				if (field_doc.fieldtype == "Data"):
 					#its a string of 140							
-					value = (field_doc.label.split()[0]	+ random.randrange(0,20000,1))[0:139]					
+					value = (field_doc.label.split()[0]	+ str(random.randrange(0,20000,1)))[0:139]					
 
 					###new_doc[declared_field_doc.docfield_fieldname] = (field_doc.label.split()[0]	+ random.randrange(0,20000,1))[0:139]
 				elif (field_doc.fieldtype == "Check"):
@@ -131,7 +136,7 @@ class TestDataGenerator():
 					value = random.randrange(0,200,1)
 					###new_doc[declared_field_doc.docfield_fieldname] = random.randrange(0,200,1)
 				elif(field_doc.fieldtype == "Long Text" or field_doc.fieldtype == "Small Text" or field_doc.fieldtype == "Text"):
-					value = (field_doc.label + random.randrange(0,20000,1))
+					value = (field_doc.label + str(random.randrange(0,20000,1)))
 					###new_doc[declared_field_doc.docfield_fieldname] = (field_doc.label + random.randrange(0,20000,1))
 				elif(field_doc.fieldtype == "Password"):
 					value = "Frappe@12345"
@@ -146,8 +151,8 @@ class TestDataGenerator():
 				elif("Attach" in field_doc.fieldtype):
 					value = "assets/barista/sample-file.html"	
 
-				if (value != None):
-					new_doc.set(declared_field_doc.docfield_fieldname, value)
+				# if (value != None):
+				# 	new_doc.set(declared_field_doc.docfield_fieldname, value) # commented by us
 					
 			#insert		
 			return new_doc

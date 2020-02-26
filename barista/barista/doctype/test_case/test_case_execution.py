@@ -7,6 +7,10 @@ import frappe
 from frappe.model.document import Document
 from barista.barista.doctype.test_data.test_data_generator import TestDataGenerator
 from frappe.model.workflow import apply_workflow
+import frappe.model.rename_doc as rd
+import ast, json, requests, urllib3, re, math, difflib, base64, operator, copy, traceback, urllib, ssl, binascii, six, html.parser, os
+import bs4, sys, pymysql, html2text, warnings, markdown2, csv, calendar, unittest,random, datetime,dateutil
+
 
 class TestCaseExecution():
 	def run_testcase(self,testcase, test_suite):
@@ -28,7 +32,7 @@ class TestCaseExecution():
 			testdata_doc = frappe.get_doc("Test Data", testcase_doc.test_data)
 			
 			#print (testdata_doc.as_dict())
-			print (">> Test Case : " + str(testcase_doc.name))
+			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name))
 
 			#cannot use insert scritps in test case data generation as doctype.name will not be recorded
 			if (testdata_doc.use_script == 1):
@@ -55,12 +59,23 @@ class TestCaseExecution():
 					testdata_doc.save()
 				except Exception as e: 
 					error_message = str(e)
-				
-				print("    >>> test data created")
+					print('Error occurred ---',str(e))
+				print("\033[0;33;93m    >>> test data created")
 
 			
 			elif (testcase_doc.testcase_type == "UPDATE"):
-				
+				if testcase_doc.testcase_doctype != testdata_doc.doctype_name:
+					value_from_test_record_doc = frappe.db.get_value(testdata_doc.doctype_name,testdata_doc.test_record_name,testcase_doc.test_data_docfield)
+					all_existing_docs = frappe.get_all(testcase_doc.testcase_doctype,filters={testcase_doc.test_case_docfield : value_from_test_record_doc})
+					if len(all_existing_docs)==1:
+						existing_doc_name = all_existing_docs[0]['name']
+						new_record_doc = frappe.get_doc(testcase_doc.testcase_doctype,existing_doc_name)
+					else:
+						test_result_doc.test_case_execution = "Execution Failed"
+						test_result_doc.execution_result = "The test case doctype - " + testcase_doc.testcase_doctype + " with reference field "+ testcase_doc.test_case_docfield + " value "+ testdata_doc.test_record_name +" records found "+str(len(all_existing_docs))
+						test_result_doc.test_case_status = "Failed"
+						return
+
 				#create the record if already not created
 				if(new_record_doc.name == None):
 					new_record_doc = new_record_doc.save()
@@ -75,63 +90,70 @@ class TestCaseExecution():
 					
 					update_field_doc = frappe.get_doc("Testdatafield", update_field['name'])
 					
-					fields = frappe.get_all("DocField", filters={'parent':update_field_doc.doctype_name, \
-																	'fieldname': update_field_doc.docfield_fieldname } )
-					field_doc = frappe.get_doc("DocField", fields[0].name)
-
-					if (field_doc.fieldtype == "Table"):
-						#if it is table then user will have to add multiple rows for multiple records.
-						#each test data field will link to one record.
-						
-						
-						child_doc = TestDataGeneratorobj.create_testdata(update_field_doc.linkfield_name)
-						#TODO: Fetch child test data doc and update child doc
-						child_doc.parentfield = field_doc.fieldname
-						new_record_doc.get(field_doc.fieldname).append(child_doc)
-						#check the link for pretestdata
-						#create pretestdata
-						#create_pretestdata(field_doc.linkfield_name)
-
-						#link parent to this record						
-							
-					elif (field_doc.fieldtype == "Link" and update_field_doc.docfield_code_value == "Fixed Value"):
-						new_record_doc.set(field_doc.fieldname, update_field_doc.docfield_value)
-
-					elif (field_doc.fieldtype == "Link"):						
-						
-
-						child_testdata_doc = frappe.get_doc('Test Data',update_field_doc.linkfield_name)
-						if (child_testdata_doc.doctype_type == "Transaction"):
-						
-							#since transaction remove existing record ref if any
-							child_testdata_doc.test_record_name = None
-							child_testdata_doc.save()
-						
-						child_doc = TestDataGeneratorobj.create_testdata(update_field_doc.linkfield_name)
-						child_doc.save()
-
-						child_testdata_doc = frappe.get_doc('Test Data', update_field_doc.linkfield_name)
-						child_testdata_doc.test_record_name = child_doc.name
-						child_testdata_doc.save()
-
-
-						#TODO: Fetch child test data doc and update child doc
-						new_record_doc.set(field_doc.fieldname,child_doc.name)
-					
-					#for rest of data type.. either it should be code or fixed value
-					elif (update_field_doc.docfield_code_value == "Code"):
-						new_record_doc.set(field_doc.docfield_fieldname, eval(update_field_doc.docfield_code))
-						
+					if update_field_doc.docfield_fieldname == "name":
+						rd.rename_doc(update_field_doc.doctype_name,testdata_doc.test_record_name,update_field_doc.docfield_value,force=True)
+					elif update_field_doc.docfield_fieldname == "docstatus":
+						new_record_doc.set(update_field_doc.docfield_fieldname, int(update_field_doc.docfield_value))
 					else:
-						new_record_doc.set(update_field_doc.docfield_fieldname, update_field_doc.docfield_value) 
+						fields = frappe.get_all("DocField", filters={'parent':update_field_doc.doctype_name, 'fieldname': update_field_doc.docfield_fieldname } )
+						field_doc = frappe.get_doc("DocField", fields[0].name)
+
+						if (field_doc.fieldtype == "Table"):
+							#if it is table then user will have to add multiple rows for multiple records.
+							#each test data field will link to one record.
+							
+							
+							child_doc = TestDataGeneratorobj.create_testdata(update_field_doc.linkfield_name)
+							#TODO: Fetch child test data doc and update child doc
+							child_doc.parentfield = field_doc.fieldname
+							child_doc.parenttype=testcase_doc.testcase_doctype
+							new_record_doc.append(field_doc.fieldname,child_doc)
+							# new_record_doc.get(field_doc.fieldname).append(child_doc)
+							#check the link for pretestdata
+							#create pretestdata
+							#create_pretestdata(field_doc.linkfield_name)
+
+							#link parent to this record						
+								
+						elif (field_doc.fieldtype == "Link" and update_field_doc.docfield_code_value == "Fixed Value"):
+							new_record_doc.set(field_doc.fieldname, update_field_doc.docfield_value)
+
+						elif (field_doc.fieldtype == "Link"):						
+							
+
+							child_testdata_doc = frappe.get_doc('Test Data',update_field_doc.linkfield_name)
+							if (child_testdata_doc.doctype_type == "Transaction"):
+							
+								#since transaction remove existing record ref if any
+								child_testdata_doc.test_record_name = None
+								child_testdata_doc.save()
+							
+							child_doc = TestDataGeneratorobj.create_testdata(update_field_doc.linkfield_name)
+							child_doc.save()
+
+							child_testdata_doc = frappe.get_doc('Test Data', update_field_doc.linkfield_name)
+							child_testdata_doc.test_record_name = child_doc.name
+							child_testdata_doc.save()
 
 
-					try:
-						new_record_doc.save()
-					except Exception as e: 
-						error_message = str(e)
-					print("    >>> Test data updated")
-				
+							#TODO: Fetch child test data doc and update child doc
+							new_record_doc.set(field_doc.fieldname,child_doc.name)
+						
+						#for rest of data type.. either it should be code or fixed value
+						elif (update_field_doc.docfield_code_value == "Code"):
+							new_record_doc.set(field_doc.fieldname, eval(update_field_doc.docfield_code))
+							
+						else:
+							new_record_doc.set(update_field_doc.docfield_fieldname, update_field_doc.docfield_value) 
+
+
+						try:
+							new_record_doc.save()
+						except Exception as e: 
+							error_message = str(e)
+							print('Error occurred ---',str(e))
+						print("\033[0;33;93m    >>> Test data updated")
+			
 
 			elif (testcase_doc.testcase_type == "READ"):
 				pass
@@ -148,7 +170,7 @@ class TestCaseExecution():
 					apply_workflow(new_record_doc, testcase_doc.workflow_state)
 				except Exception as e: 
 					error_message = str(e)
-				print("    >>> workflow applied")
+				print("\033[0;32;92m    >>> workflow applied")
 
 			
 			elif (testcase_doc.testcase_type == "FUNCTION"):
@@ -161,8 +183,14 @@ class TestCaseExecution():
 				if ((not testcase_doc.testcase_type) or testcase_doc.testcase_type == None):
 					#empty paramter call function diretly.
 					pass
-
-				print("    >>> function executed")
+				# Executes the function  block in test case
+				# try:
+				# 	print("Function--",testcase_doc.function_name)
+				# 	print("Type of--",type(testcase_doc.function_name))
+				# 	exec(testcase_doc.function_name)
+				# except Exception as e:
+				# 	error_message = str(e)
+				# print("    >>> function executed")
 
 			assertions = frappe.get_list("Assertion", filters={'parent': testcase})
 
@@ -170,7 +198,7 @@ class TestCaseExecution():
 			for assertion in assertions:
 
 				assertion_doc = frappe.get_doc("Assertion", assertion['name'])
-				print("       >>>> Applying assertion : " + str(assertion['name'])) 
+				print("\033[0;37;97m       >>>> Applying assertion : " + str(assertion['name'])) 
 				assertion_result = frappe.new_doc("Assertion Result")
 				assertion_result.assertion = assertion_doc.name
 				assertion_result.assertion_status = "Passed"
@@ -190,21 +218,22 @@ class TestCaseExecution():
 															+ error_message
 
 						test_result_doc.test_case_status = "Failed"					
-						print("       >>>> Assertion failed")
+						print("\033[0;31;91m       >>>> Assertion failed")
 					
 
 					else:
 						
 						validation_doctype_doc = frappe.get_doc(assertion_doc.doctype_name, validation_doctype[0]['name'])
-						if(validation_doctype_doc.get(assertion_doc.docfield_name) == assertion_doc.docfield_value):
+						if(str(validation_doctype_doc.get(assertion_doc.docfield_name)) == str(assertion_doc.docfield_value)):
 							#Assertion is successful						
-							assertion_result.assertion_result = "Valued matched - " + validation_doctype_doc.get(assertion_doc.docfield_name)
-							print("       >>>> Assertion Passed")
+							assertion_result.assertion_result = "Value matched - " + str(validation_doctype_doc.get(assertion_doc.docfield_name))
+							print("\033[0;32;92m       >>>> Assertion Passed")
+							
 						else:
 							#Assertion failed
 							#test case also fails
 							assertion_result.assertion_status = "Failed"
-							assertion_result.assertion_result = "Valued Found - " + str(validation_doctype_doc.get(assertion_doc.docfield_name))  \
+							assertion_result.assertion_result = "Value Found - " + str(validation_doctype_doc.get(assertion_doc.docfield_name))  \
 															+ ". Where as expected value is - " +  str(assertion_doc.docfield_value )
 
 							if(error_message):
@@ -213,7 +242,8 @@ class TestCaseExecution():
 															+ error_message
 							 
 							test_result_doc.test_case_status = "Failed"
-							print("       >>>> Assertion Failed")
+							print("\033[0;31;91m       >>>> Assertion Failed")
+							
 
 				elif (assertion_doc.assertion_type == "RECORD VALIDATION"):
 					if (len(validation_doctype) == 1):
@@ -221,15 +251,15 @@ class TestCaseExecution():
 						assertion_result = frappe.new_doc("Assertion Result")
 						assertion_result.assertion = assertion_doc.name
 						assertion_result.assertion_status = "Passed"
-						assertion_result.assertion_result = "record found - " + validation_doctype['name']
-						print("       >>>> Assertion passed")
+						assertion_result.assertion_result = "record found - " + validation_doctype[0]['name']
+						print("\033[0;32;92m       >>>> Assertion Passed")
 					else:
 						assertion_result.assertion_status = "Failed"
-						assertion_result.assertion_result = "Actual number of record(s) found - " + len(validation_doctype) + \
+						assertion_result.assertion_result = "Actual number of record(s) found - " + str(len(validation_doctype)) + \
 															". For Doctype - " + assertion_doc.doctype_name + " . Name - " + assertion_doc.reference_field +\
 																". Value - " + testdata_doc.test_record_name
 						test_result_doc.test_case_status = "Failed"
-						print("       >>>> Assertion Failed")
+						print("\033[0;31;91m       >>>> Assertion Failed")
 
 						if(error_message):
 								#there was some error as well. 
@@ -241,11 +271,11 @@ class TestCaseExecution():
 				elif (assertion_doc.assertion_type == "WORKFLOW"):
 					if (len(validation_doctype) != 1):
 						assertion_result.assertion_status = "Failed"
-						assertion_result.assertion_result = "Actual number of record(s) found - " + len(validation_doctype) + \
+						assertion_result.assertion_result = "Actual number of record(s) found - " + str(len(validation_doctype)) + \
 															". For Doctype - " + assertion_doc.doctype_name + " . Name - " + assertion_doc.reference_field +\
 																". Value - " + testdata_doc.test_record_name
 						test_result_doc.test_case_status = "Failed"
-						print("       >>>> Assertion Failed")
+						print("\033[0;31;91m       >>>> Assertion Failed")
 						if(error_message):
 							#there was some error as well. 
 							assertion_result.assertion_result = assertion_result.assertion_result + "\n\nError Encountered : " \
@@ -254,7 +284,7 @@ class TestCaseExecution():
 						validation_doctype_doc = frappe.get_doc(assertion_doc.doctype_name, validation_doctype[0]['name'])
 						if (assertion_doc.workflow_state == validation_doctype_doc.workflow_state):
 							assertion_result.assertion_result = "Workflow matched - " + assertion_doc.workflow_state
-							print("       >>>> Assertion Passed")
+							print("\033[0;32;92m       >>>> Assertion Passed")
 						else:
 							assertion_result.assertion_status = "Failed"
 							assertion_result.assertion_result = "Workflow State found - " + str(validation_doctype_doc.workflow_state) \
@@ -264,25 +294,25 @@ class TestCaseExecution():
 								assertion_result.assertion_result = assertion_result.assertion_result + "\n\nError Encountered : " \
 															+ error_message
 							test_result_doc.test_case_status = "Failed"
-							print("       >>>> Assertion Failed")
+							print("\033[0;31;91m       >>>> Assertion Failed")
 
 
 				elif (assertion_doc.assertion_type == "ERROR"):
 					if (error_message):
 						if (error_message in assertion_doc.error_message):
 							assertion_result.assertion_result = "error received as expected - " + error_message
-							print("       >>>> Assertion Passed")
+							print("\033[0;32;92m       >>>> Assertion Passed")
 						else:
 							assertion_result.assertion_result = "error received - " + error_message + \
 																"\n\nExcepted error - " + assertion_doc.error_message
 							assertion_result.assertion_status = "Failed"
 							test_result_doc.test_case_status = "Failed"
-							print("       >>>> Assertion Failed")
+							print("\033[0;31;91m       >>>> Assertion Failed")
 					else:
 						assertion_result.assertion_result = "No Error received however following error was expected - " + assertion_doc.error_message
 						assertion_result.assertion_status = "Failed"
 						test_result_doc.test_case_status = "Failed"
-						print("       >>>> Assertion Failed")
+						print("\033[0;31;91m       >>>> Assertion Failed") 
 															
  					
 
@@ -304,6 +334,6 @@ class TestCaseExecution():
 			test_result_doc.save()
 			raise e
 		finally:
-			print (">> Test Case : " + str(testcase_doc.name) + " Execution Ended \n\n")	
+			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name) + " Execution Ended \n\n")	
 		
 		
