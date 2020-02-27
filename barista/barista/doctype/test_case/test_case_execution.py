@@ -10,6 +10,7 @@ from frappe.model.workflow import apply_workflow
 import frappe.model.rename_doc as rd
 import ast, json, requests, urllib3, re, math, difflib, base64, operator, copy, traceback, urllib, ssl, binascii, six, html.parser, os
 import bs4, sys, pymysql, html2text, warnings, markdown2, csv, calendar, unittest,random, datetime,dateutil
+from barista.barista.doctype.test_data.test_data_generator import set_record_name_in_child_table_test_record
 
 
 class TestCaseExecution():
@@ -50,13 +51,28 @@ class TestCaseExecution():
 			new_record_doc = TestDataGeneratorobj.create_testdata(testcase_doc.test_data)
 			error_message = None
 			if (testcase_doc.testcase_type == "CREATE"):
-
-				#check if it is old test data - 
+				
 				new_record_doc.save()
 				testdata_doc.test_record_name = new_record_doc.name
 				testdata_doc.status = "CREATED"				
 				try:
 					testdata_doc.save()
+
+					set_record_name_in_child_table_test_record(new_record_doc,testdata_doc)
+					# created function for the below code set_record_name_in_child_table_test_record
+					# new_record_fields = frappe.db.sql("select * from `tabDocField` where parent = '" + new_record_doc.doctype + "'and fieldtype = 'Table'")
+					# for new_record_field in new_record_fields:
+					# 	for child_doc in new_record_doc.get(new_record_field.fieldname):
+					# 		test_data_field_values = frappe.db.sql('select * from `tabTestdatafield` where docfield_fieldname = "  ' + new_record_field.fieldname + '" and parent = "' + testdata_doc.name + '" order by idx')
+
+					# 		for test_data_field_value in test_data_field_values:
+					# 			if(test_data_field_value.status != "CREATED"):
+					# 				#now we got the test data field row.. fetch linked test data 
+					# 				if (test_data_field_value.linkfield_name != None):
+					# 					child_test_data_doc = frappe.get_doc('Test Data', test_data_field_value.linkfield_name)
+					# 					child_test_data_doc.status = 'CREATED'
+					# 					child_test_data_doc.test_record_name = child_doc.name
+					# 					child_test_data_doc.save()
 				except Exception as e: 
 					error_message = str(e)
 					print('Error occurred ---',str(e))
@@ -153,8 +169,8 @@ class TestCaseExecution():
 							error_message = str(e)
 							print('Error occurred ---',str(e))
 						print("\033[0;33;93m    >>> Test data updated")
-			
 
+				set_record_name_in_child_table_test_record(new_record_doc,testcase_doc)
 			elif (testcase_doc.testcase_type == "READ"):
 				pass
 			elif (testcase_doc.testcase_type == "DELETE"):

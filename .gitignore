@@ -4,3 +4,4 @@
 *.swp
 tags
 barista/docs/current
+barista/public/test-coverage/

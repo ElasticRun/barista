@@ -174,3 +174,27 @@ class TestDataGenerator():
 				testdata_doc.test_record_name = created_doc.name
 				testdata_doc.status = 'CREATED'
 				testdata_doc.save()
+
+				set_record_name_in_child_table_test_record(created_doc,testdata_doc)
+		
+		frappe.db.commit()
+
+				
+# barista.barista.doctype.test_data.test_data_generator.set_record_name_in_child_table_test_record
+def set_record_name_in_child_table_test_record(created_doc,testdata_doc):
+	new_record_fields = frappe.db.sql("select * from `tabDocField` where parent = '" + created_doc.doctype + "'and fieldtype = 'Table'", as_dict= True)
+	for new_record_field in new_record_fields:
+		child_records=created_doc.get(new_record_field.fieldname)
+	
+		test_data_field_values = frappe.db.sql('select * from `tabTestdatafield` where docfield_fieldname = "' + new_record_field.fieldname + '" and parent = "' + testdata_doc.name + '" order by idx', as_dict=True)
+
+		child_record_index=0
+		for test_data_field_value in test_data_field_values:
+			if (test_data_field_value.linkfield_name is not None):
+				child_test_data_doc = frappe.get_doc('Test Data', test_data_field_value.linkfield_name)
+				if(child_test_data_doc.status != "CREATED"):
+					#now we got the test data field row.. fetch linked test data 
+					child_test_data_doc.status = 'CREATED'
+					child_test_data_doc.test_record_name = child_records[child_record_index].name
+					child_test_data_doc.save()
+			child_record_index+=1
