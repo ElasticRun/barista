@@ -102,18 +102,25 @@ class TestCaseExecution():
 					
 				#now take the fields to be updated 
 				update_fields = frappe.get_list("Testdatafield", filters={"parent":testcase_doc.name} )
+				fields=frappe.get_meta(testcase_doc.testcase_doctype).fields
+				
 				for update_field in update_fields:
 					
 					update_field_doc = frappe.get_doc("Testdatafield", update_field['name'])
-					
+
+					for field in fields:
+						if field.fieldname==update_field_doc.docfield_fieldname:
+							field_doc=field
+							break
+
 					if update_field_doc.docfield_fieldname == "name":
 						rd.rename_doc(update_field_doc.doctype_name,testdata_doc.test_record_name,update_field_doc.docfield_value,force=True)
 					elif update_field_doc.docfield_fieldname == "docstatus":
 						new_record_doc.set(update_field_doc.docfield_fieldname, int(update_field_doc.docfield_value))
 					else:
-						fields = frappe.get_all("DocField", filters={'parent':update_field_doc.doctype_name, 'fieldname': update_field_doc.docfield_fieldname } )
-						field_doc = frappe.get_doc("DocField", fields[0].name)
-
+						# fields = frappe.get_all("DocField", filters={'parent':update_field_doc.doctype_name, 'fieldname': update_field_doc.docfield_fieldname } )
+						# field_doc = frappe.get_doc("DocField", fields[0].name)
+						
 						if (field_doc.fieldtype == "Table"):
 							#if it is table then user will have to add multiple rows for multiple records.
 							#each test data field will link to one record.

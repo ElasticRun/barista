@@ -34,12 +34,14 @@ class TestDataGenerator():
 
 			#start creating the insert statement
 			new_doc  = frappe.get_doc({"doctype": testdata_doc.doctype_name})
-			fields = frappe.get_list('DocField', filters={'parent': testdata_doc.doctype_name })
+			# fields = frappe.get_list('DocField', filters={'parent': testdata_doc.doctype_name })
+			fields=frappe.get_meta(testdata_doc.doctype_name).fields
 			declared_fields = frappe.get_list('Testdatafield', filters={'parent': testdata_doc.name})
 			#for each field
 			for field in fields:
 				#check if the field values are in provided.. use it 
-				field_doc = frappe.get_doc("DocField", field.name)
+				# field_doc = frappe.get_doc("DocField", field.name)
+				field_doc=field
 				flag_field = False
 				
 				for declared_field in declared_fields:
