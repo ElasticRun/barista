@@ -15,9 +15,6 @@ class TestCase(Document):
 			docfields = [docfield.fieldname for docfield in frappe.get_meta(self.testcase_doctype).fields]
 			docfields.append('docstatus')
 			docfields.append('name')
-			
-			print(docfields)
-			print(self.update_fields)
 
 			for row in self.update_fields:
 				if row.docfield_fieldname not in docfields:
