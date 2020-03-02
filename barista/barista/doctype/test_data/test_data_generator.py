@@ -161,7 +161,7 @@ class TestDataGenerator():
 
 	def create_pretest_data(self,suite):
 		#select all the test data for a suite... 		
-		all_testdata = frappe.db.sql_list("""select distinct td.name from `tabTest Data` td join `tabTestdata Item` tdi on tdi.test_data=td.name where tdi.parent=%(parent)s order by td.seq""",{'parent':suite})
+		all_testdata = frappe.db.sql_list("""select distinct td.name from `tabTest Data` td join `tabTestdata Item` tdi on tdi.test_data=td.name where tdi.parent=%(parent)s order by tdi.idx""",{'parent':suite})
 
 		for testdata in all_testdata:
 			

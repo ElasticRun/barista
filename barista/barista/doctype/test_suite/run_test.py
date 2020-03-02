@@ -18,7 +18,7 @@ class RunTest():
 
         print("\033[0;33;93m************ Running all test cases for App - " + app_name + "*************\n\n")
 
-        suites = frappe.get_all("Test Suite", filters={'app_name' : app_name})
+        suites = frappe.get_all("Test Suite", filters={'app_name' : app_name},order_by='creation asc')
         generatorObj = TestDataGenerator()        
         objCoverage = coverage.Coverage(source=[frappe.get_app_path(app_name)] )
         objCoverage.start()
