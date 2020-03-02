@@ -322,7 +322,7 @@ class TestCaseExecution():
 
 				elif (assertion_doc.assertion_type == "ERROR"):
 					if (error_message):
-						if (error_message in assertion_doc.error_message):
+						if (assertion_doc.error_message in error_message):
 							assertion_result.assertion_result = "error received as expected - " + error_message
 							print("\033[0;32;92m       >>>> Assertion Passed")
 						else:
