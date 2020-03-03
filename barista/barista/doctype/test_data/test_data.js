@@ -4,6 +4,10 @@ let docFields = [];
 
 frappe.ui.form.on('Test Data', {
 	refresh: function (frm) {
+		$("[data-fieldname=read_only_7]").find("div.like-disabled-input").css("background", "white");
+		$("[data-fieldname=data_7]").find("div.like-disabled-input").css("background", "white");
+		$("[data-fieldname=data_7]").find("div.like-disabled-input").attr("style", "background: white !important;");
+		$("[data-fieldname=data_8]").find("div.like-disabled-input").css("background", "white");
 		$("div[data-fieldname=existing_record]").css("padding-top", "13px");
 		cur_frm.set_query("doctype_name", function (doc) {
 			if (cur_frm.doc.module_name) {
