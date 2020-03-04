@@ -154,12 +154,12 @@ class TestCaseExecution():
 							new_record_doc.set(update_field_doc.docfield_fieldname, update_field_doc.docfield_value) 
 
 
-						try:
-							new_record_doc.save()
-						except Exception as e: 
-							error_message = str(e)
-							print('Error occurred ---',str(e))
-						print("\033[0;33;93m    >>> Test data updated")
+				try:
+					new_record_doc.save()
+				except Exception as e: 
+					error_message = str(e)
+					print('Error occurred ---',str(e))
+				print("\033[0;33;93m    >>> Test data updated")
 
 				set_record_name_in_child_table_test_record(new_record_doc,testcase_doc)
 			elif (testcase_doc.testcase_type == "READ"):
@@ -223,6 +223,10 @@ class TestCaseExecution():
 
 			assertions = frappe.get_list("Assertion", filters={'parent': testcase})
 
+			if len(assertions)==0:
+				test_result_doc.execution_result = 'Assertions are not present in the TestCase. Please add atleast one assertion.'		
+				test_result_doc.test_case_status = "Failed"
+				test_result_doc.save()
 			
 			for assertion in assertions:
 
