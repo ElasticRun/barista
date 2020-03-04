@@ -18,7 +18,7 @@ class TestCaseExecution():
 		try:
 			
 			testcase_doc = frappe.get_doc("Test Case", testcase)
-
+			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name))
 			#Populate generic test result fields
 			test_result_doc = frappe.new_doc("Test Result")
 			test_result_doc.test_suite = test_suite
@@ -30,26 +30,24 @@ class TestCaseExecution():
 
 			TestDataGeneratorobj = TestDataGenerator()
 			#Test Data record doc
-			testdata_doc = frappe.get_doc("Test Data", testcase_doc.test_data)
-			
-			#print (testdata_doc.as_dict())
-			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name))
+			if testcase_doc.test_data:
+				testdata_doc = frappe.get_doc("Test Data", testcase_doc.test_data)
+				
+				#cannot use insert scripts in test case data generation as doctype.name will not be recorded
+				if (testdata_doc.use_script == 1):
+					test_result_doc.test_case_execution = "Execution Failed"
+					test_result_doc.execution_result = "The test data - " + testdata_doc.name + " selected is genereted using script for which record name cannot be recorded"
+					test_result_doc.test_case_status = "Failed"
 
-			#cannot use insert scritps in test case data generation as doctype.name will not be recorded
-			if (testdata_doc.use_script == 1):
-				test_result_doc.test_case_execution = "Execution Failed"
-				test_result_doc.execution_result = "The test data - " + testdata_doc.name + " selected is genereted using script for which record name cannot be recorded"
-				test_result_doc.test_case_status = "Failed"
-
-			#check if test case is create and test data already created then recreate the data
-			
-			if (testdata_doc.test_record_name and testcase_doc.testcase_type == "CREATE"):				
-				testdata_doc.test_record_name = None
-				testdata_doc.save()
-			
-			#get record document
-			new_record_doc = TestDataGeneratorobj.create_testdata(testcase_doc.test_data)
-			error_message = None
+				#check if test case is create and test data already created then recreate the data
+				
+				if (testdata_doc.test_record_name and testcase_doc.testcase_type == "CREATE"):				
+					testdata_doc.test_record_name = None
+					testdata_doc.save()
+				
+				#get record document
+				new_record_doc = TestDataGeneratorobj.create_testdata(testcase_doc.test_data)
+				error_message = None
 			if (testcase_doc.testcase_type == "CREATE"):
 				
 				new_record_doc.save()
@@ -59,20 +57,6 @@ class TestCaseExecution():
 					testdata_doc.save()
 
 					set_record_name_in_child_table_test_record(new_record_doc,testdata_doc)
-					# created function for the below code set_record_name_in_child_table_test_record
-					# new_record_fields = frappe.db.sql("select * from `tabDocField` where parent = '" + new_record_doc.doctype + "'and fieldtype = 'Table'")
-					# for new_record_field in new_record_fields:
-					# 	for child_doc in new_record_doc.get(new_record_field.fieldname):
-					# 		test_data_field_values = frappe.db.sql('select * from `tabTestdatafield` where docfield_fieldname = "  ' + new_record_field.fieldname + '" and parent = "' + testdata_doc.name + '" order by idx')
-
-					# 		for test_data_field_value in test_data_field_values:
-					# 			if(test_data_field_value.status != "CREATED"):
-					# 				#now we got the test data field row.. fetch linked test data 
-					# 				if (test_data_field_value.linkfield_name != None):
-					# 					child_test_data_doc = frappe.get_doc('Test Data', test_data_field_value.linkfield_name)
-					# 					child_test_data_doc.status = 'CREATED'
-					# 					child_test_data_doc.test_record_name = child_doc.name
-					# 					child_test_data_doc.save()
 				except Exception as e: 
 					error_message = str(e)
 					print('Error occurred ---',str(e))
@@ -197,23 +181,45 @@ class TestCaseExecution():
 
 			
 			elif (testcase_doc.testcase_type == "FUNCTION"):
-				if(new_record_doc.name == None):
-					new_record_doc = new_record_doc.save()
-					testdata_doc.test_record_name = new_record_doc.test_record_name
-					testdata_doc.status = "CREATED"
-					testdata_doc.save()
+				# if(new_record_doc.name == None):
+				# 	new_record_doc = new_record_doc.save()
+				# 	testdata_doc.test_record_name = new_record_doc.test_record_name
+				# 	testdata_doc.status = "CREATED"
+				# 	testdata_doc.save()
 				
-				if ((not testcase_doc.testcase_type) or testcase_doc.testcase_type == None):
-					#empty paramter call function diretly.
-					pass
-				# Executes the function  block in test case
-				# try:
-				# 	print("Function--",testcase_doc.function_name)
-				# 	print("Type of--",type(testcase_doc.function_name))
-				# 	exec(testcase_doc.function_name)
-				# except Exception as e:
-				# 	error_message = str(e)
-				# print("    >>> function executed")
+				# if ((not testcase_doc.testcase_type) or testcase_doc.testcase_type == None):
+				# 	#empty paramter call function directly.
+				# 	pass
+				kwargs={}
+				ret=None
+				try:
+					for param in testcase_doc.function_parameters:
+						parameter=param.parameter
+						test_record_name=frappe.db.get_value('Test Data',param.test_data,'test_record_name')
+						test_record_doctype=frappe.db.get_value('Test Data',param.test_data,'doctype_name')
+						test_record_doc=frappe.get_doc(test_record_doctype,test_record_name)
+						if param.is_object==1:
+							kwargs[parameter]=test_record_doc.as_dict()
+						else:
+							kwargs[parameter]=test_record_doc.get(param.field)
+
+					print("\033[0;33;93m   >>> Executing Function --",testcase_doc.function_name)
+					if testcase_doc.json_parameter and testcase_doc.json_parameter.strip()!='':
+						kwargs=eval(str(testcase_doc.json_parameter))
+					
+					method=testcase_doc.function_name
+					if method and '.' in method:
+						args=[]
+						ret = frappe.get_attr(method)(*args, **kwargs)
+					else:
+						test_data_record_name=frappe.db.get_value('Test Data',testcase_doc.test_data,'test_record_name')
+						test_record_doc=frappe.get_doc(testcase_doc.testcase_doctype,test_data_record_name)
+						ret=test_record_doc.run_method(method,**kwargs)
+					print('Result of the executed function -- ',ret)
+				except Exception as e:
+					error_message = str(e)
+					print("\033[0;31;91m       >>>> Execution of function failed\n    ",e)
+				print("\033[0;32;92m     >>> Function Executed")
 
 			assertions = frappe.get_list("Assertion", filters={'parent': testcase})
 
@@ -357,6 +363,12 @@ class TestCaseExecution():
 			test_result_doc.save()
 			raise e
 		finally:
-			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name) + " Execution Ended \n\n")	
-		
-		
+			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name) + " Execution Ended \n\n")
+
+
+# barista.barista.doctype.test_case.test_case_execution.test_func
+def test_func(arg1,arg2):
+	print('1',arg1)
+	print('2',arg2)
+	#print(arg1,arg2)
+	return {'output':1}

@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Test Case', {
 	refresh: function (frm) {
-		
+
 		if (cur_frm.doc.doctype_name) {
 			var row = locals[cdt][cdn];
 			row.doctype_name = cur_frm.doc.doctype_name;
@@ -76,14 +76,14 @@ frappe.ui.form.on('Test Case', {
 			});
 			cur_frm.refresh_fields();
 		}
-		$("[data-fieldname=dummy_chkbox]").find("i.disabled-check").css("display","none");
-		$("[data-fieldname=dummy_chkbox]").find("label").css("min-height","16px");
+		$("[data-fieldname=dummy_chkbox]").find("i.disabled-check").css("display", "none");
+		$("[data-fieldname=dummy_chkbox]").find("label").css("min-height", "16px");
 
-		if(cur_frm.doc.testcase_doctype){
+		if (cur_frm.doc.testcase_doctype) {
 			addTestCaseDocFields(cur_frm);
 		}
 
-		if(cur_frm.doc.test_data){
+		if (cur_frm.doc.test_data) {
 			addTestDataDocFields(cur_frm);
 		}
 	},
@@ -216,3 +216,37 @@ function addTestDataDocFields(cur_frm) {
 	// cur_frm.refresh_fields();
 }
 
+frappe.ui.form.on("Function Parameter", "test_data", function (frm, cdt, cdn) {
+	let row = locals[cdt][cdn];
+	let docFields = [];
+	frappe.db.get_value('Test Data', row.test_data, 'doctype_name').then((d) => {
+		let testDataDoctype = d.message.doctype_name;
+		frappe.model.with_doctype(testDataDoctype);
+		frappe.call({
+			method: 'frappe.desk.form.load.getdoctype',
+			args: {
+				'doctype': testDataDoctype,
+				'with_parent': 1
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					frappe.model.with_doctype(testDataDoctype, function () {
+						let fields = frappe.get_meta(testDataDoctype).fields;
+						let options = [];
+						fields.forEach((f) => {
+							if (!['Section Break', 'Column Break'].includes(f.fieldtype)) {
+								options.push(f.fieldname);
+							}
+						})
+						options.push("docstatus");
+						options.push('name');
+						docFields = options;
+						frappe.meta.get_docfield("Function Parameter", "field", cur_frm.doc.name).options = docFields;
+					});
+					cur_frm.refresh_fields();
+				}
+			}
+		});
+	});
+
+});
