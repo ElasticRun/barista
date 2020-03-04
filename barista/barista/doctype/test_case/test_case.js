@@ -192,6 +192,7 @@ function addTestDataDocFields(cur_frm) {
 			fieldname: "doctype_name",
 			filters: { name: cur_frm.doc.test_data }
 		},
+		freeze: true,
 		callback: function (r) {
 			var testDataDoc = r.message.doctype_name;
 			frappe.model.with_doctype(testDataDoc, function () {
@@ -228,6 +229,7 @@ frappe.ui.form.on("Function Parameter", "test_data", function (frm, cdt, cdn) {
 				'doctype': testDataDoctype,
 				'with_parent': 1
 			},
+			freeze: true,
 			callback: function (r) {
 				if (!r.exc) {
 					frappe.model.with_doctype(testDataDoctype, function () {

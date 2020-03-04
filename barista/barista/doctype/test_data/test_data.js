@@ -79,6 +79,7 @@ frappe.ui.form.on('Testdatafield', {
 });
 
 frappe.ui.form.on("Test Data", "doctype_name", function (frm, cdt, cdn) {
+	let tableFields = [];
 	docFields = [];
 	cur_frm.doc.docfield_value = [];
 	cur_frm.doc.existing_record = '';
@@ -91,6 +92,7 @@ frappe.ui.form.on("Test Data", "doctype_name", function (frm, cdt, cdn) {
 				'doctype': cur_frm.doc.doctype_name,
 				'with_parent': 1
 			},
+			freeze: true,
 			callback: function (r) {
 				if (!r.exc) {
 					frappe.model.with_doctype(cur_frm.doc.doctype_name, function () {
@@ -99,6 +101,7 @@ frappe.ui.form.on("Test Data", "doctype_name", function (frm, cdt, cdn) {
 								if (d.fieldname && frappe.model.no_value_type.indexOf(d.fieldtype) === -1) {
 									return d.fieldname;
 								} else if (d.fieldname && d.fieldtype == 'Table') {
+									tableFields.push(d.fieldname);
 									return d.fieldname;
 								}
 								return null;
@@ -112,7 +115,11 @@ frappe.ui.form.on("Test Data", "doctype_name", function (frm, cdt, cdn) {
 						var childTable = cur_frm.add_child("docfield_value");
 						childTable.doctype_name = cur_frm.doc.doctype_name;
 						childTable.docfield_fieldname = d;
-						childTable.docfield_code_value = 'Fixed Value'
+						if (tableFields.includes(d)) {
+							childTable.docfield_code_value = 'Code';
+						} else {
+							childTable.docfield_code_value = 'Fixed Value';
+						}
 
 						cur_frm.refresh_fields("docfield_value");
 					});
@@ -130,13 +137,19 @@ frappe.ui.form.on("Test Data", "existing_record", function (frm, cdt, cdn) {
 				'doctype': cur_frm.doc.doctype_name,
 				'name': cur_frm.doc.existing_record
 			},
+			freeze: true,
 			callback: function (r) {
 				if (!r.exc) {
 					if (r.docs) {
 						if (r.docs[0]) {
 							const doc = r.docs[0];
 							cur_frm.doc.docfield_value.forEach((d) => {
-								d.docfield_value = doc[d.docfield_fieldname];
+								if (typeof (doc[d.docfield_fieldname]) === 'object') {
+									// d.docfield_code = JSON.stringify(doc[d.docfield_fieldname])
+									// currently setting as empty
+								} else {
+									d.docfield_value = doc[d.docfield_fieldname];
+								}
 							})
 							cur_frm.refresh_fields()
 						}
