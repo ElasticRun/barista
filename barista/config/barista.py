@@ -50,7 +50,7 @@ def get_data():
                 },
                  {
                     "type": "doctype",
-                    "link": "query-report/Types of Test Case on Doctype",
+                    "link": "query-report/Assertion Type Wise Test Cases",
                     "name": "Test Result",
                     "description": _("Assertion Type Wise Test Cases"),
                     "label": "Assertion Type Wise Test Cases"

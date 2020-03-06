@@ -48,7 +48,7 @@ class RunTest():
                 print("\033[0;31;91m*************ERROR****************")
                 print("\033[0;31;91m The error encountered is - " + str(e)  + "\n")
                 print("\033[0;31;91m*************ERROR****************")
-                raise e
+                # raise e
 
 
             
