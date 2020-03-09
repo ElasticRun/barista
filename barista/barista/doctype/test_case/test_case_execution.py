@@ -60,7 +60,7 @@ class TestCaseExecution():
 				except Exception as e: 
 					error_message = str(e)
 					print('Error occurred ---',str(e))
-				print("\033[0;33;93m    >>> test data created")
+				print("\033[0;33;93m    >>> Test data created")
 
 			
 			elif (testcase_doc.testcase_type == "UPDATE"):
@@ -368,11 +368,3 @@ class TestCaseExecution():
 			raise e
 		finally:
 			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name) + " Execution Ended \n\n")
-
-
-# barista.barista.doctype.test_case.test_case_execution.test_func
-def test_func(arg1,arg2):
-	print('1',arg1)
-	print('2',arg2)
-	#print(arg1,arg2)
-	return {'output':1}
