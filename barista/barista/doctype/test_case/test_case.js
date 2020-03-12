@@ -155,6 +155,7 @@ frappe.ui.form.on("Assertion", {
 				);
 				options.push("docstatus");
 				options.push("name");
+				options.push("parent");
 				frappe.meta.get_docfield("Assertion", "reference_field", cur_frm.doc.name).options = options;
 				frappe.meta.get_docfield("Assertion", "docfield_name", cur_frm.doc.name).options = options;
 			});

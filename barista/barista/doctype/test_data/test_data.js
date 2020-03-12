@@ -55,6 +55,7 @@ frappe.ui.form.on('Testdatafield', {
 			row.doctype_name = cur_frm.doc.doctype_name;
 			cur_frm.refresh_fields();
 			frappe.model.with_doctype(cur_frm.doc.doctype_name, function () {
+				// var prompt_name = frappe.get_meta(cur_frm.doc.doctype_name).autoname
 				var options = $.map(frappe.get_meta(cur_frm.doc.doctype_name).fields,
 					function (d) {
 						if (d.fieldname && frappe.model.no_value_type.indexOf(d.fieldtype) === -1) {
@@ -65,6 +66,10 @@ frappe.ui.form.on('Testdatafield', {
 						return null;
 					}
 				);
+				// if(prompt_name === "Prompt"){
+				// 	options.push("__newname")	
+				// }
+				
 				options.push("docstatus");
 				frappe.meta.get_docfield("Testdatafield", "docfield_fieldname", cur_frm.doc.name).options = options;
 			});
@@ -108,6 +113,7 @@ frappe.ui.form.on("Test Data", "doctype_name", function (frm, cdt, cdn) {
 							}
 						);
 						options.push("docstatus");
+						options.push("name");
 						docFields = options;
 						frappe.meta.get_docfield("Testdatafield", "docfield_fieldname", cur_frm.doc.name).options = docFields;
 					});

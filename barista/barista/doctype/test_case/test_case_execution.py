@@ -31,8 +31,9 @@ class TestCaseExecution():
 			TestDataGeneratorobj = TestDataGenerator()
 			#Test Data record doc
 			if testcase_doc.test_data:
+				#print("testcase_doc.test_data",testcase_doc.test_data)
 				testdata_doc = frappe.get_doc("Test Data", testcase_doc.test_data)
-				
+				#print("tesdata_doc--",testdata_doc)
 				#cannot use insert scripts in test case data generation as doctype.name will not be recorded
 				if (testdata_doc.use_script == 1):
 					test_result_doc.test_case_execution = "Execution Failed"
@@ -41,7 +42,7 @@ class TestCaseExecution():
 
 				#check if test case is create and test data already created then recreate the data
 				
-				if (testdata_doc.test_record_name and testcase_doc.testcase_type == "CREATE"):				
+				if (testdata_doc.test_record_name and testcase_doc.testcase_type == "CREATE"):
 					testdata_doc.test_record_name = None
 					testdata_doc.save()
 				
@@ -49,22 +50,23 @@ class TestCaseExecution():
 				new_record_doc = TestDataGeneratorobj.create_testdata(testcase_doc.test_data)
 				error_message = None
 			if (testcase_doc.testcase_type == "CREATE"):
-				
-				new_record_doc.save()
-				testdata_doc.test_record_name = new_record_doc.name
-				testdata_doc.status = "CREATED"				
 				try:
-					testdata_doc.save()
+					new_record_doc.save()
 
-					set_record_name_in_child_table_test_record(new_record_doc,testdata_doc)
-				except Exception as e: 
+					testdata_doc.test_record_name = new_record_doc.name
+					testdata_doc.status = "CREATED"	
+					testdata_doc.save()
+					set_record_name_in_child_table_test_record(new_record_doc,testdata_doc,True)
+				except Exception as e:
+					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-CREATE-'+str(e))[:140])  
 					error_message = str(e)
-					print('Error occurred ---',str(e))
+					print('\033[0;31;91mError occurred ---',str(e))
 				print("\033[0;33;93m    >>> Test data created")
 
 			
 			elif (testcase_doc.testcase_type == "UPDATE"):
 				if testcase_doc.testcase_doctype != testdata_doc.doctype_name:
+					# testdata_doc = frappe.get_doc("Test Data", testcase_doc.test_data)
 					value_from_test_record_doc = frappe.db.get_value(testdata_doc.doctype_name,testdata_doc.test_record_name,testcase_doc.test_data_docfield)
 					all_existing_docs = frappe.get_all(testcase_doc.testcase_doctype,filters={testcase_doc.test_case_docfield : value_from_test_record_doc})
 					if len(all_existing_docs)==1:
@@ -87,18 +89,25 @@ class TestCaseExecution():
 				#now take the fields to be updated 
 				update_fields = frappe.get_list("Testdatafield", filters={"parent":testcase_doc.name} )
 				fields=frappe.get_meta(testcase_doc.testcase_doctype).fields
-				
+				create_new=False
 				for update_field in update_fields:
 					
 					update_field_doc = frappe.get_doc("Testdatafield", update_field['name'])
-
+					
 					for field in fields:
 						if field.fieldname==update_field_doc.docfield_fieldname:
 							field_doc=field
 							break
-
+						
 					if update_field_doc.docfield_fieldname == "name":
-						rd.rename_doc(update_field_doc.doctype_name,testdata_doc.test_record_name,update_field_doc.docfield_value,force=True)
+						new_name = update_field_doc.docfield_value
+						if update_field_doc.docfield_code_value=="Code":
+							new_name = eval(update_field_doc.docfield_code)
+							
+						rd.rename_doc(update_field_doc.doctype_name,testdata_doc.test_record_name,new_name,force=True)
+						# frappe.db.commit()
+						new_record_doc=frappe.get_doc(update_field_doc.doctype_name,new_name)
+					
 					elif update_field_doc.docfield_fieldname == "docstatus":
 						new_record_doc.set(update_field_doc.docfield_fieldname, int(update_field_doc.docfield_value))
 					else:
@@ -108,8 +117,9 @@ class TestCaseExecution():
 						if (field_doc.fieldtype == "Table"):
 							#if it is table then user will have to add multiple rows for multiple records.
 							#each test data field will link to one record.
-							
-							
+							child_testdata_doc=frappe.get_doc("Test Data",update_field_doc.linkfield_name)
+							if(child_testdata_doc.doctype_type=="Transaction"):
+								create_new=True
 							child_doc = TestDataGeneratorobj.create_testdata(update_field_doc.linkfield_name)
 							#TODO: Fetch child test data doc and update child doc
 							child_doc.parentfield = field_doc.fieldname
@@ -122,10 +132,10 @@ class TestCaseExecution():
 
 							#link parent to this record						
 								
-						elif (field_doc.fieldtype == "Link" and update_field_doc.docfield_code_value == "Fixed Value"):
+						elif (field_doc.fieldtype in ["Link","Dynamic Link"] and update_field_doc.docfield_code_value == "Fixed Value"):
 							new_record_doc.set(field_doc.fieldname, update_field_doc.docfield_value)
 
-						elif (field_doc.fieldtype == "Link"):						
+						elif (field_doc.fieldtype in ["Link","Dynamic Link"]):						
 							
 
 							child_testdata_doc = frappe.get_doc('Test Data',update_field_doc.linkfield_name)
@@ -137,7 +147,6 @@ class TestCaseExecution():
 							
 							child_doc = TestDataGeneratorobj.create_testdata(update_field_doc.linkfield_name)
 							child_doc.save()
-
 							child_testdata_doc = frappe.get_doc('Test Data', update_field_doc.linkfield_name)
 							child_testdata_doc.test_record_name = child_doc.name
 							child_testdata_doc.save()
@@ -156,12 +165,13 @@ class TestCaseExecution():
 
 				try:
 					new_record_doc.save()
-				except Exception as e: 
+				except Exception as e:
+					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-UPDATE-'+str(e))[:140]) 
 					error_message = str(e)
-					print('Error occurred ---',str(e))
+					print('\033[0;31;91mError occurred ---',str(e))
 				print("\033[0;33;93m    >>> Test data updated")
 
-				set_record_name_in_child_table_test_record(new_record_doc,testcase_doc)
+				set_record_name_in_child_table_test_record(new_record_doc,testcase_doc,create_new)
 			elif (testcase_doc.testcase_type == "READ"):
 				pass
 			elif (testcase_doc.testcase_type == "DELETE"):
@@ -175,9 +185,11 @@ class TestCaseExecution():
 				
 				try:
 					apply_workflow(new_record_doc, testcase_doc.workflow_state)
-				except Exception as e: 
+					print("\033[0;32;92m    >>> workflow applied")
+				except Exception as e:
+					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-WORKFLOW-'+str(e)+'-'+new_record_doc.doctype+'-'+new_record_doc.workflow_state+'-'+testcase_doc.workflow_state)[:140]) 
 					error_message = str(e)
-				print("\033[0;32;92m    >>> workflow applied")
+					print("\033[0;31;91m    >>> Error in applying Workflow - "+str(e))
 
 			
 			elif (testcase_doc.testcase_type == "FUNCTION"):
@@ -217,6 +229,7 @@ class TestCaseExecution():
 						ret=test_record_doc.run_method(method,**kwargs)
 					print('Result of the executed function -- ',ret)
 				except Exception as e:
+					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-FUNCTION-'+str(e))[:140])
 					error_message = str(e)
 					print("\033[0;31;91m       >>>> Execution of function failed\n    ",e)
 				print("\033[0;32;92m     >>> Function Executed")
@@ -290,7 +303,7 @@ class TestCaseExecution():
 						assertion_result.assertion_status = "Failed"
 						assertion_result.assertion_result = "Actual number of record(s) found - " + str(len(validation_doctype)) + \
 															". For Doctype - " + assertion_doc.doctype_name + " . Name - " + assertion_doc.reference_field +\
-																". Value - " + testdata_doc.test_record_name
+																". Value - " + (testdata_doc.test_record_name or '')
 						test_result_doc.test_case_status = "Failed"
 						print("\033[0;31;91m       >>>> Assertion Failed")
 
@@ -360,11 +373,11 @@ class TestCaseExecution():
 				
 		
 		except Exception as e:
-			
+			frappe.log_error(frappe.get_traceback(),('barista-Critical Error'+testcase_doc.name+'-'+str(e))[:140])
 			test_result_doc.test_case_execution = "Execution Failed"
 			test_result_doc.execution_result = str(e)		
 			test_result_doc.test_case_status = "Failed"
 			test_result_doc.save()
-			raise e
+			# raise e
 		finally:
 			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name) + " Execution Ended \n\n")

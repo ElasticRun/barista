@@ -15,6 +15,8 @@ class TestData(Document):
 		docfields = [docfield.fieldname for docfield in frappe.get_meta(self.doctype_name).fields]
 		docfields.append('docstatus')
 		docfields.append('name')
+		# if frappe.db.get_value("DocType",self.doctype_name,"autoname") =="Prompt":
+		# 	docfields.append('__newname')
 		for row in self.docfield_value:
 			if row.docfield_fieldname not in docfields:
 				frappe.throw(f"Invalid DocField {row.docfield_fieldname} in {self.doctype_name}")

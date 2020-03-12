@@ -9,13 +9,16 @@ from barista.barista.doctype.test_data.test_data_generator import TestDataGenera
 from frappe.model.workflow import apply_workflow
 import coverage
 from barista.barista.doctype.test_case.test_case_execution import  TestCaseExecution
+import time
+import shutil
 
 
 class RunTest():
 
     #Run all the suites for the given app
     def run_complete_suite(self, app_name,suites=[]):
-
+        start_time = time.time()
+    
         print("\033[0;33;93m************ Running all test cases for App - " + app_name + "*************\n\n")
         if len(suites)==0:
             suites = frappe.get_all("Test Suite", filters={'app_name' : app_name},order_by='creation asc')
@@ -25,12 +28,12 @@ class RunTest():
                 suite_name.append({'name':suite})
             suites=suite_name
             
-    
-        import shutil
-        path=frappe.get_app_path('barista') + '/public/test-coverage/'
-        shutil.rmtree(path,ignore_errors=True)
+        barista_app_path=frappe.get_app_path('barista') + '/public/test-coverage/'
+        shutil.rmtree(barista_app_path,ignore_errors=True)
+
         generatorObj = TestDataGenerator()        
-        objCoverage = coverage.Coverage(source=[frappe.get_app_path(app_name)] )
+        objCoverage = coverage.Coverage(source=[frappe.get_app_path(app_name)],data_file=str(barista_app_path+app_name+'.coverage'),omit=['*test_*'],config_file=False)
+        objCoverage.erase()
         objCoverage.start()
         
         for suite in suites:
@@ -44,6 +47,7 @@ class RunTest():
                     self.run_testcase(testcase,suite)
 
             except Exception as e:
+                frappe.log_error(frappe.get_traceback(),('barista-Suite Execution Failed'+suite.get('name'))[:140])
                 print("\033[0;31;91mAn Error occurred which will cause false test case result in the suite - " + str(suite.get('name')) )
                 print("\033[0;31;91m*************ERROR****************")
                 print("\033[0;31;91m The error encountered is - " + str(e)  + "\n")
@@ -53,12 +57,19 @@ class RunTest():
 
             
         objCoverage.stop()
+        objCoverage.save()
         #objCoverage.annotate(directory=frappe.get_app_path('barista') + '/public/test-coverage/')
 
-        objCoverage.html_report(directory=frappe.get_app_path('barista') + '/public/test-coverage/')
+        objCoverage.html_report(directory=barista_app_path,skip_empty=True,omit=['*test_*'])
 
-        objCoverage.erase()
         print("\033[0;33;93m************ Execution ends. Verify coverage at - " + "/assets/barista/test-coverage/index.html")
+
+        end_time=round(time.time() - start_time,2)
+        time_uom='seconds'
+        if(end_time>=60):
+            end_time=round(end_time/60,2)
+            time_uom='minutes'
+        print("--- Executed in %s %s ---" % (end_time,time_uom))
     
     def run_testcase(self, testcase, suite):
         executionObj = TestCaseExecution()        

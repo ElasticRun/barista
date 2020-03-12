@@ -60,12 +60,15 @@ class TestDataGenerator():
 						elif (field_doc.fieldtype == "Table"):
 							#if it is table then user will have to add multiple rows for multiple records.
 
-							
+							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)
+							if (child_testdata_doc.doctype_type == "Transaction"):
+								#since transaction remove existing record ref if any
+								child_testdata_doc.test_record_name = None
+								child_testdata_doc.save()
 							#each test data field will link to one record. create a new record
 							child_doc = self.create_testdata(declared_field_doc.linkfield_name)
 							#child_doc.save()
 							
-							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)
 							child_testdata_doc.test_record_name = child_doc.name
 							child_testdata_doc.save()
 
@@ -86,7 +89,6 @@ class TestDataGenerator():
 
 							child_doc = self.create_testdata(declared_field_doc.linkfield_name)
 							child_doc.save()
-
 							child_testdata_doc = frappe.get_doc('Test Data', declared_field_doc.linkfield_name)							
 							child_testdata_doc.test_record_name = child_doc.name
 							child_testdata_doc.save()
@@ -164,7 +166,6 @@ class TestDataGenerator():
 		all_testdata = frappe.db.sql_list("""select distinct td.name from `tabTest Data` td join `tabTestdata Item` tdi on tdi.test_data=td.name where tdi.parent=%(parent)s order by tdi.idx""",{'parent':suite})
 
 		for testdata in all_testdata:
-			
 			testdata_doc = frappe.get_doc("Test Data", testdata)
 			if (testdata_doc.use_script == 1):
 				self.create_testdata(testdata)
@@ -183,20 +184,22 @@ class TestDataGenerator():
 
 				
 # barista.barista.doctype.test_data.test_data_generator.set_record_name_in_child_table_test_record
-def set_record_name_in_child_table_test_record(created_doc,testdata_doc):
-	new_record_fields = frappe.db.sql("select * from `tabDocField` where parent = '" + created_doc.doctype + "'and fieldtype = 'Table'", as_dict= True)
+def set_record_name_in_child_table_test_record(created_doc,parent_doc,create_new_child=False):
+	new_record_fields = frappe.db.sql("select fieldname from `tabDocField` where parent = '" + created_doc.doctype + "'and fieldtype = 'Table'", as_dict= True)
 	for new_record_field in new_record_fields:
 		child_records=created_doc.get(new_record_field.fieldname)
-	
-		test_data_field_values = frappe.db.sql('select * from `tabTestdatafield` where docfield_fieldname = "' + new_record_field.fieldname + '" and parent = "' + testdata_doc.name + '" order by idx', as_dict=True)
-
+		test_data_field_values = frappe.db.sql('select linkfield_name from `tabTestdatafield` where docfield_fieldname = "' + new_record_field.fieldname + '" and parent = "' + parent_doc.name + '" order by idx', as_dict=True)
 		child_record_index=0
 		for test_data_field_value in test_data_field_values:
-			if (test_data_field_value.linkfield_name is not None):
-				child_test_data_doc = frappe.get_doc('Test Data', test_data_field_value.linkfield_name)
-				if(child_test_data_doc.status != "CREATED"):
-					#now we got the test data field row.. fetch linked test data 
-					child_test_data_doc.status = 'CREATED'
-					child_test_data_doc.test_record_name = child_records[child_record_index].name
-					child_test_data_doc.save()
+			if child_record_index<len(child_records):
+				if (test_data_field_value.linkfield_name is not None):
+					child_test_data_doc = frappe.get_doc('Test Data', test_data_field_value.linkfield_name)
+					if(child_test_data_doc.status != "CREATED") and parent_doc.doctype=="Test Data":
+						child_test_data_doc.status = 'CREATED'
+						child_test_data_doc.test_record_name = child_records[child_record_index].name
+						child_test_data_doc.save()
+					elif create_new_child:
+						child_test_data_doc.status = 'CREATED'
+						child_test_data_doc.test_record_name = child_records[child_record_index].name
+						child_test_data_doc.save()
 			child_record_index+=1
