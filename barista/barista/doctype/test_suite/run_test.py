@@ -11,10 +11,13 @@ import coverage
 from barista.barista.doctype.test_case.test_case_execution import  TestCaseExecution
 import time
 import shutil
+import sqlite3
+from coverage.numbits import register_sqlite_functions
 
+
+error_log_title_len=100
 
 class RunTest():
-
     #Run all the suites for the given app
     def run_complete_suite(self, app_name,suites=[]):
         start_time = time.time()
@@ -47,7 +50,7 @@ class RunTest():
                     self.run_testcase(testcase,suite)
 
             except Exception as e:
-                frappe.log_error(frappe.get_traceback(),('barista-Suite Execution Failed'+suite.get('name'))[:140])
+                frappe.log_error(frappe.get_traceback(),('barista-Suite Execution Failed'+suite.get('name')+str(e))[:error_log_title_len])
                 print("\033[0;31;91mAn Error occurred which will cause false test case result in the suite - " + str(suite.get('name')) )
                 print("\033[0;31;91m*************ERROR****************")
                 print("\033[0;31;91m The error encountered is - " + str(e)  + "\n")
@@ -75,3 +78,82 @@ class RunTest():
         executionObj = TestCaseExecution()        
         executionObj.run_testcase(testcase['testcase'], suite.get('name'))
         frappe.db.commit()
+
+
+    def get_executed_lines(self,app_name,file_name):
+        try:
+            barista_app_path=frappe.get_app_path('barista') + '/public/test-coverage/'
+            data_file_path=str(barista_app_path+app_name+'.coverage')
+
+            def dict_factory(cursor, row):
+                d = {}
+                for idx, col in enumerate(cursor.description):
+                    d[col[0]] = row[idx]
+                return d
+
+            conn = sqlite3.connect(data_file_path)
+            conn.row_factory = dict_factory
+            register_sqlite_functions(conn)
+            c = conn.cursor()
+            sql_query="""SELECT lb.file_id,
+                                    f.path,
+                                    lb.numbits
+                                FROM 'line_bits' lb
+                                INNER JOIN 'file' f ON f.id=lb.file_id
+                                WHERE f.path LIKE '%{0}'""".format(file_name)
+            c.execute(sql_query)
+            sql_query_result=c.fetchall()
+            for row in sql_query_result:
+                if row:
+                    numbits=row.get('numbits')
+                    if numbits:
+                        lines=coverage.numbits.numbits_to_nums(numbits)
+                        row['numbits']=lines
+                        # if len(lines)>1:
+                        #     print(row)
+            
+            return sql_query_result
+            # from tabulate import tabulate
+            # print(tabulate(sql_query_result,headers="keys",tablefmt="simple"))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            frappe.log_error(frappe.get_traceback(),('barista-get_executed_lines-'+str(e))[:error_log_title_len])
+
+
+@frappe.whitelist()
+# bench execute barista.barista.doctype.test_suite.run_test.generate_merge_commit_coverage --kwargs "{'app_name':'velocityduos','file_name':'trip.py','new_lines':[]}"
+def generate_merge_commit_coverage(app_name,file_name,new_lines):
+    output={
+        'file_name':file_name,
+        'file_path':'',
+        'executed_lines':[],
+        'missed_lines':[]
+    }
+    try:
+        new_executed_lines=[]
+        missed_lines=[]
+        run_test_obj=RunTest()
+
+        executed_lines=run_test_obj.get_executed_lines(app_name,file_name)
+        if len(executed_lines)!=0:
+            record=executed_lines[0]
+            file_path=record.get('path')
+            record_file_name=file_path.split('/').pop()
+            if record_file_name==file_name:
+                output['file_path']=file_path
+                executed_lines=record.get('numbits')
+                for line in new_lines:
+                    if line in executed_lines:
+                        new_executed_lines.append(line)
+                    else:
+                        missed_lines.append(line)
+            else:
+                frappe.throw('Multiple files of the same name found.')
+        
+        output['executed_lines']=new_executed_lines
+        output['missed_lines']=missed_lines
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(),('barista-generate_merge_commit_coverage-'+str(e))[:error_log_title_len])
+    
+    return output

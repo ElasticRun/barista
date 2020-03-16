@@ -13,6 +13,8 @@ import bs4, sys, pymysql, html2text, warnings, markdown2, csv, calendar, unittes
 from barista.barista.doctype.test_data.test_data_generator import set_record_name_in_child_table_test_record
 
 
+error_log_title_len=100
+
 class TestCaseExecution():
 	def run_testcase(self,testcase, test_suite):
 		try:
@@ -58,7 +60,7 @@ class TestCaseExecution():
 					testdata_doc.save()
 					set_record_name_in_child_table_test_record(new_record_doc,testdata_doc,True)
 				except Exception as e:
-					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-CREATE-'+str(e))[:140])  
+					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-CREATE-'+str(e))[:error_log_title_len])  
 					error_message = str(e)
 					print('\033[0;31;91mError occurred ---',str(e))
 				print("\033[0;33;93m    >>> Test data created")
@@ -166,7 +168,7 @@ class TestCaseExecution():
 				try:
 					new_record_doc.save()
 				except Exception as e:
-					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-UPDATE-'+str(e))[:140]) 
+					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-UPDATE-'+str(e))[:error_log_title_len]) 
 					error_message = str(e)
 					print('\033[0;31;91mError occurred ---',str(e))
 				print("\033[0;33;93m    >>> Test data updated")
@@ -187,7 +189,7 @@ class TestCaseExecution():
 					apply_workflow(new_record_doc, testcase_doc.workflow_state)
 					print("\033[0;32;92m    >>> workflow applied")
 				except Exception as e:
-					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-WORKFLOW-'+str(e)+'-'+new_record_doc.doctype+'-'+new_record_doc.workflow_state+'-'+testcase_doc.workflow_state)[:140]) 
+					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-WORKFLOW-'+str(e)+'-'+new_record_doc.doctype+'-'+new_record_doc.workflow_state+'-'+testcase_doc.workflow_state)[:error_log_title_len]) 
 					error_message = str(e)
 					print("\033[0;31;91m    >>> Error in applying Workflow - "+str(e))
 
@@ -229,7 +231,7 @@ class TestCaseExecution():
 						ret=test_record_doc.run_method(method,**kwargs)
 					print('Result of the executed function -- ',ret)
 				except Exception as e:
-					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-FUNCTION-'+str(e))[:140])
+					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-FUNCTION-'+str(e))[:error_log_title_len])
 					error_message = str(e)
 					print("\033[0;31;91m       >>>> Execution of function failed\n    ",e)
 				print("\033[0;32;92m     >>> Function Executed")
@@ -373,7 +375,7 @@ class TestCaseExecution():
 				
 		
 		except Exception as e:
-			frappe.log_error(frappe.get_traceback(),('barista-Critical Error'+testcase_doc.name+'-'+str(e))[:140])
+			frappe.log_error(frappe.get_traceback(),('barista-Critical Error'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
 			test_result_doc.test_case_execution = "Execution Failed"
 			test_result_doc.execution_result = str(e)		
 			test_result_doc.test_case_status = "Failed"
