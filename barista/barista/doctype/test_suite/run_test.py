@@ -81,6 +81,7 @@ class RunTest():
 
 
     def get_executed_lines(self,app_name,file_name):
+        sql_query_result=[]
         try:
             barista_app_path=frappe.get_app_path('barista') + '/public/test-coverage/'
             data_file_path=str(barista_app_path+app_name+'.coverage')
@@ -112,13 +113,13 @@ class RunTest():
                         # if len(lines)>1:
                         #     print(row)
             
-            return sql_query_result
             # from tabulate import tabulate
             # print(tabulate(sql_query_result,headers="keys",tablefmt="simple"))
             conn.commit()
             conn.close()
         except Exception as e:
             frappe.log_error(frappe.get_traceback(),('barista-get_executed_lines-'+str(e))[:error_log_title_len])
+        return sql_query_result
 
 
 @frappe.whitelist()
@@ -135,19 +136,26 @@ def generate_merge_commit_coverage(app_name,file_name,new_lines):
         missed_lines=[]
         run_test_obj=RunTest()
 
+        if type(new_lines)==str:
+            new_lines=[int(l) for l in new_lines.split(',')]
+
         executed_lines=run_test_obj.get_executed_lines(app_name,file_name)
         if len(executed_lines)!=0:
             record=executed_lines[0]
             file_path=record.get('path')
             record_file_name=file_path.split('/').pop()
+            if '/' in file_name:
+                file_name=file_name.split('/').pop()
             if record_file_name==file_name:
                 output['file_path']=file_path
                 executed_lines=record.get('numbits')
+                new_executed_lines=executed_lines
                 for line in new_lines:
-                    if line in executed_lines:
-                        new_executed_lines.append(line)
-                    else:
+                    if line not in executed_lines:
                         missed_lines.append(line)
+                for line in missed_lines:
+                    if line in executed_lines:
+                        new_executed_lines.remove(line)
             else:
                 frappe.throw('Multiple files of the same name found.')
         
@@ -155,5 +163,16 @@ def generate_merge_commit_coverage(app_name,file_name,new_lines):
         output['missed_lines']=missed_lines
     except Exception as e:
         frappe.log_error(frappe.get_traceback(),('barista-generate_merge_commit_coverage-'+str(e))[:error_log_title_len])
-    
     return output
+
+
+@frappe.whitelist()
+# barista.barista.doctype.test_suite.run_test.read_file
+def read_file(file_path):
+    lines=[]
+    try:
+        opened_file = open(file_path, 'r')  
+        lines = opened_file.readlines()
+    except Exception:
+        frappe.log_error(frappe.get_traceback(),'barista-read_file')
+    return lines
