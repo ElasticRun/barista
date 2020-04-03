@@ -243,6 +243,7 @@ frappe.ui.form.on("Function Parameter", "test_data", function (frm, cdt, cdn) {
 						})
 						options.push("docstatus");
 						options.push('name');
+						options.push('doctype');
 						docFields = options;
 						frappe.meta.get_docfield("Function Parameter", "field", cur_frm.doc.name).options = docFields;
 					});

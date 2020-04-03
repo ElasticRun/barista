@@ -18,7 +18,7 @@ error_log_title_len=100
 class TestCaseExecution():
 	def run_testcase(self,testcase, test_suite):
 		try:
-			
+			function_result=None
 			testcase_doc = frappe.get_doc("Test Case", testcase)
 			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name))
 			#Populate generic test result fields
@@ -26,6 +26,7 @@ class TestCaseExecution():
 			test_result_doc.test_suite = test_suite
 			test_result_doc.action = "Test Case"
 			test_result_doc.test_case =testcase_doc.name
+			test_result_doc.test_data_id=testcase_doc.test_data
 			test_result_doc.test_case_status = "Passed"
 			test_result_doc.test_case_execution = "Executed"
 			#test result fields ended 
@@ -195,17 +196,7 @@ class TestCaseExecution():
 
 			
 			elif (testcase_doc.testcase_type == "FUNCTION"):
-				# if(new_record_doc.name == None):
-				# 	new_record_doc = new_record_doc.save()
-				# 	testdata_doc.test_record_name = new_record_doc.test_record_name
-				# 	testdata_doc.status = "CREATED"
-				# 	testdata_doc.save()
-				
-				# if ((not testcase_doc.testcase_type) or testcase_doc.testcase_type == None):
-				# 	#empty paramter call function directly.
-				# 	pass
 				kwargs={}
-				ret=None
 				try:
 					for param in testcase_doc.function_parameters:
 						parameter=param.parameter
@@ -219,17 +210,17 @@ class TestCaseExecution():
 
 					print("\033[0;33;93m   >>> Executing Function --",testcase_doc.function_name)
 					if testcase_doc.json_parameter and testcase_doc.json_parameter.strip()!='':
-						kwargs=eval(str(testcase_doc.json_parameter))
+						kwargs.update(eval(str(testcase_doc.json_parameter)))
 					
 					method=testcase_doc.function_name
 					if method and '.' in method:
 						args=[]
-						ret = frappe.get_attr(method)(*args, **kwargs)
+						function_result = frappe.get_attr(method)(*args, **kwargs)
 					else:
 						test_data_record_name=frappe.db.get_value('Test Data',testcase_doc.test_data,'test_record_name')
 						test_record_doc=frappe.get_doc(testcase_doc.testcase_doctype,test_data_record_name)
-						ret=test_record_doc.run_method(method,**kwargs)
-					print('Result of the executed function -- ',ret)
+						function_result=test_record_doc.run_method(method,**kwargs)
+					# print('Result of the executed function -- ',function_result)
 				except Exception as e:
 					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-FUNCTION-'+str(e))[:error_log_title_len])
 					error_message = str(e)
@@ -365,7 +356,14 @@ class TestCaseExecution():
  					
 
 				elif (assertion_doc.assertion_type == "RESPONSE"):
-					pass
+					if testcase_doc.testcase_type == "FUNCTION":
+						if function_result:
+
+							def to_json_converter(value):
+								if isinstance(value, datetime.datetime):
+									return value.__str__()
+							
+							test_result_doc.execution_result=json.dumps(function_result,default=to_json_converter)
 
 				assertion_result.parentfield = "assertion_results"
 				test_result_doc.get("assertion_results").append(assertion_result)
