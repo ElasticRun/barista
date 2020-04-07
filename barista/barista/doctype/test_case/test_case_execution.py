@@ -9,7 +9,7 @@ from barista.barista.doctype.test_data.test_data_generator import TestDataGenera
 from frappe.model.workflow import apply_workflow
 import frappe.model.rename_doc as rd
 import ast, json, requests, urllib3, re, math, difflib, base64, operator, copy, traceback, urllib, ssl, binascii, six, html.parser, os
-import bs4, sys, pymysql, html2text, warnings, markdown2, csv, calendar, unittest,random, datetime,dateutil
+import bs4, sys, pymysql, html2text, warnings, markdown2, csv, calendar, unittest,random, datetime,dateutil,time
 from barista.barista.doctype.test_data.test_data_generator import set_record_name_in_child_table_test_record
 
 
@@ -18,6 +18,7 @@ error_log_title_len=100
 class TestCaseExecution():
 	def run_testcase(self,testcase, test_suite):
 		try:
+			start_time=None
 			function_result=None
 			testcase_doc = frappe.get_doc("Test Case", testcase)
 			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name))
@@ -53,6 +54,7 @@ class TestCaseExecution():
 				new_record_doc = TestDataGeneratorobj.create_testdata(testcase_doc.test_data)
 				error_message = None
 			if (testcase_doc.testcase_type == "CREATE"):
+				start_time = time.time()
 				try:
 					new_record_doc.save()
 
@@ -68,6 +70,7 @@ class TestCaseExecution():
 
 			
 			elif (testcase_doc.testcase_type == "UPDATE"):
+				start_time = time.time()
 				if testcase_doc.testcase_doctype != testdata_doc.doctype_name:
 					# testdata_doc = frappe.get_doc("Test Data", testcase_doc.test_data)
 					value_from_test_record_doc = frappe.db.get_value(testdata_doc.doctype_name,testdata_doc.test_record_name,testcase_doc.test_data_docfield)
@@ -176,10 +179,13 @@ class TestCaseExecution():
 
 				set_record_name_in_child_table_test_record(new_record_doc,testcase_doc,create_new)
 			elif (testcase_doc.testcase_type == "READ"):
+				start_time = time.time()
 				pass
 			elif (testcase_doc.testcase_type == "DELETE"):
+				start_time = time.time()
 				pass
 			elif (testcase_doc.testcase_type == "WORKFLOW"):
+				start_time = time.time()
 				if(new_record_doc.name == None):
 					new_record_doc = new_record_doc.save()
 					testdata_doc.test_record_name = new_record_doc.test_record_name
@@ -196,6 +202,7 @@ class TestCaseExecution():
 
 			
 			elif (testcase_doc.testcase_type == "FUNCTION"):
+				start_time = time.time()
 				kwargs={}
 				try:
 					for param in testcase_doc.function_parameters:
@@ -226,6 +233,8 @@ class TestCaseExecution():
 					error_message = str(e)
 					print("\033[0;31;91m       >>>> Execution of function failed\n    ",e)
 				print("\033[0;32;92m     >>> Function Executed")
+
+			test_result_doc.execution_time=get_execution_time(start_time)
 
 			assertions = frappe.get_list("Assertion", filters={'parent': testcase})
 
@@ -356,14 +365,35 @@ class TestCaseExecution():
  					
 
 				elif (assertion_doc.assertion_type == "RESPONSE"):
+					if assertion_doc.response_regex and  assertion_doc.response_regex.strip()!='':
+						response_regex=assertion_doc.response_regex.replace('": "','":"').replace('": ','":')
+					else:
+						response_regex=''
 					if testcase_doc.testcase_type == "FUNCTION":
+						test_result_doc.execution_result=''
 						if function_result:
 
 							def to_json_converter(value):
 								if isinstance(value, datetime.datetime):
 									return value.__str__()
 							
-							test_result_doc.execution_result=json.dumps(function_result,default=to_json_converter)
+							test_result_doc.execution_result=json.dumps(function_result,default=to_json_converter).replace('": "','":"').replace('": ','":')
+						
+						if response_regex and response_regex!='' and (response_regex in test_result_doc.execution_result):
+							assertion_result.assertion_status = "Passed"
+							assertion_result.assertion_result = response_regex + " -> is present in the response received from the function"
+							print("\033[0;32;92m       >>>> Assertion Passed")
+						elif test_result_doc.execution_result!='':
+							assertion_result.assertion_status = "Failed"
+							test_result_doc.test_case_status = "Failed"
+							if response_regex=='':
+								assertion_result.assertion_result = 'Please check value of any key in response'
+							else:
+								assertion_result.assertion_result = response_regex + "-> is not found in the response received from the function"
+							print("\033[0;31;91m       >>>> Assertion Failed")
+						elif test_result_doc.execution_result=='' and response_regex=='':
+							assertion_result.assertion_status = "Passed"
+							print("\033[0;32;92m       >>>> Assertion Passed")
 
 				assertion_result.parentfield = "assertion_results"
 				test_result_doc.get("assertion_results").append(assertion_result)
@@ -381,3 +411,13 @@ class TestCaseExecution():
 			# raise e
 		finally:
 			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name) + " Execution Ended \n\n")
+
+
+def get_execution_time(start_time):
+	end_time=round(time.time() - start_time,4)
+	time_uom='seconds'
+	if(end_time>=60):
+		end_time=round(end_time/60,4)
+		time_uom='minutes'
+	
+	return str(end_time)+' '+time_uom
