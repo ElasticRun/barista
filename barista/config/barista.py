@@ -54,6 +54,13 @@ def get_data():
                     "name": "Test Result",
                     "description": _("Assertion Type Wise Test Cases"),
                     "label": "Assertion Type Wise Test Cases"
+                },
+                {
+                    "type": "doctype",
+                    "link": "query-report/Test Execution Statistics",
+                    "name": "Test Result",
+                    "description": _("Test Execution Statistics"),
+                    "label": "Test Execution Statistics"
                 }
             ]
         }

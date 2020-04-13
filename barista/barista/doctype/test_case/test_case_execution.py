@@ -12,16 +12,17 @@ import ast, json, requests, urllib3, re, math, difflib, base64, operator, copy, 
 import bs4, sys, pymysql, html2text, warnings, markdown2, csv, calendar, unittest,random, datetime,dateutil,time
 from barista.barista.doctype.test_data.test_data_generator import set_record_name_in_child_table_test_record
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-error_log_title_len=100
+error_log_title_len=1000
 
 class TestCaseExecution():
-	def run_testcase(self,testcase, test_suite):
+	def run_testcase(self,testcase, test_suite,testcase_srno,total_testcases):
 		try:
 			start_time=None
 			function_result=None
 			testcase_doc = frappe.get_doc("Test Case", testcase)
-			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name))
+			print ("\033[0;36;96m>> " + str(testcase_doc.name)+' ['+str(testcase_srno)+'/'+str(total_testcases)+']'+':')
 			#Populate generic test result fields
 			test_result_doc = frappe.new_doc("Test Result")
 			test_result_doc.test_suite = test_suite
@@ -65,8 +66,8 @@ class TestCaseExecution():
 				except Exception as e:
 					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-CREATE-'+str(e))[:error_log_title_len])  
 					error_message = str(e)
-					print('\033[0;31;91mError occurred ---',str(e))
-				print("\033[0;33;93m    >>> Test data created")
+					print('\033[0;31;91m   Error occurred ---',str(e))
+				print("\033[0;33;93m    >>> Test Data created")
 
 			
 			elif (testcase_doc.testcase_type == "UPDATE"):
@@ -174,8 +175,8 @@ class TestCaseExecution():
 				except Exception as e:
 					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-UPDATE-'+str(e))[:error_log_title_len]) 
 					error_message = str(e)
-					print('\033[0;31;91mError occurred ---',str(e))
-				print("\033[0;33;93m    >>> Test data updated")
+					print('\033[0;31;91m   Error occurred ---',str(e))
+				print("\033[0;33;93m    >>> Test Data updated")
 
 				set_record_name_in_child_table_test_record(new_record_doc,testcase_doc,create_new)
 			elif (testcase_doc.testcase_type == "READ"):
@@ -194,7 +195,7 @@ class TestCaseExecution():
 				
 				try:
 					apply_workflow(new_record_doc, testcase_doc.workflow_state)
-					print("\033[0;32;92m    >>> workflow applied")
+					print("\033[0;32;92m    >>> Workflow Applied")
 				except Exception as e:
 					frappe.log_error(frappe.get_traceback(),('barista-'+testcase_doc.name+'-WORKFLOW-'+str(e)+'-'+new_record_doc.doctype+'-'+new_record_doc.workflow_state+'-'+testcase_doc.workflow_state)[:error_log_title_len]) 
 					error_message = str(e)
@@ -299,7 +300,7 @@ class TestCaseExecution():
 						assertion_result = frappe.new_doc("Assertion Result")
 						assertion_result.assertion = assertion_doc.name
 						assertion_result.assertion_status = "Passed"
-						assertion_result.assertion_result = "record found - " + validation_doctype[0]['name']
+						assertion_result.assertion_result = "Record found - " + validation_doctype[0]['name']
 						print("\033[0;32;92m       >>>> Assertion Passed")
 					else:
 						assertion_result.assertion_status = "Failed"
@@ -348,10 +349,10 @@ class TestCaseExecution():
 				elif (assertion_doc.assertion_type == "ERROR"):
 					if (error_message):
 						if (assertion_doc.error_message in error_message):
-							assertion_result.assertion_result = "error received as expected - " + error_message
+							assertion_result.assertion_result = "Error received as expected - " + error_message
 							print("\033[0;32;92m       >>>> Assertion Passed")
 						else:
-							assertion_result.assertion_result = "error received - " + error_message + \
+							assertion_result.assertion_result = "Error received - " + error_message + \
 																"\n\nExcepted error - " + assertion_doc.error_message
 							assertion_result.assertion_status = "Failed"
 							test_result_doc.test_case_status = "Failed"
@@ -410,7 +411,7 @@ class TestCaseExecution():
 			test_result_doc.save()
 			# raise e
 		finally:
-			print ("\033[0;36;96m>> Test Case : " + str(testcase_doc.name) + " Execution Ended \n\n")
+			print ("\033[0;36;96m>> " + "Execution Ended \n\n")
 
 
 def get_execution_time(start_time):
