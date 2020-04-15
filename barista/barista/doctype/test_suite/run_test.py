@@ -38,9 +38,10 @@ class RunTest():
 		objCoverage = coverage.Coverage(source=[frappe.get_app_path(app_name)],data_file=str(barista_app_path+app_name+'.coverage'),omit=['*test_*'],config_file=False)
 		objCoverage.erase()
 		objCoverage.start()
-		
+		total_suites=len(suites)
+		suite_srno=0
 		for suite in suites:
-
+			suite_srno+=1
 			print("\033[0;32;92m************ Suite - " + suite.get('name') + " *************\n\n")
 			try:
 				generatorObj.create_pretest_data(suite.get('name'))            
@@ -49,7 +50,7 @@ class RunTest():
 				testcase_srno=0
 				for testcase in testcases:
 					testcase_srno+=1
-					self.run_testcase(testcase,suite,testcase_srno,total_testcases)
+					self.run_testcase(testcase,suite,testcase_srno,total_testcases,suite_srno,total_suites)
 
 			except Exception as e:
 				frappe.log_error(frappe.get_traceback(),('barista-Suite Execution Failed-'+suite.get('name')+'-'+str(e))[:error_log_title_len])
@@ -76,9 +77,9 @@ class RunTest():
 			time_uom='minutes'
 		print("--- Executed in %s %s ---" % (end_time,time_uom))
 	
-	def run_testcase(self, testcase, suite,testcase_srno,total_testcases):
+	def run_testcase(self, testcase, suite,testcase_srno,total_testcases,suite_srno,total_suites):
 		executionObj = TestCaseExecution()        
-		executionObj.run_testcase(testcase['testcase'], suite.get('name'),testcase_srno,total_testcases)
+		executionObj.run_testcase(testcase['testcase'], suite.get('name'),testcase_srno,total_testcases,suite_srno,total_suites)
 		frappe.db.commit()
 
 
@@ -213,3 +214,9 @@ def fix_series():
 		frappe.db.sql(f"""update `tabSeries` set current={max_test_case_series} where name="TestCase-";""",auto_commit=1)
 	
 	print('Current Series-',frappe.db.sql("""select * from `tabSeries` where name in ('TestData-','TestCase-')""",as_dict=1))
+
+
+
+# bench execute barista.barista.doctype.test_suite.run_test.run_test --kwargs "{'app_name':'velocityduos','suites':[]}"
+def run_test(app_name,suites=[]):
+	RunTest().run_complete_suite(app_name,suites)

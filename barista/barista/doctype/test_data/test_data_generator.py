@@ -161,7 +161,8 @@ class TestDataGenerator():
 					# if (value != None):
 					# 	new_doc.set(declared_field_doc.docfield_fieldname, value) # commented by us
 						
-				#insert		
+				#insert
+				# new_doc.save(True)		
 				return new_doc
 		except Exception as e:
 			frappe.log_error(frappe.get_traceback(),(f'barista-{testdata}-{current_fieldname}-'+str(e))[:error_log_title_len])	
@@ -172,19 +173,22 @@ class TestDataGenerator():
 		if len(all_testdata)!=0:
 			print('\033[0;33;93m Creating Pre-Test Data')
 		for testdata in all_testdata:
-			testdata_doc = frappe.get_doc("Test Data", testdata)
-			if (testdata_doc.use_script == 1):
-				self.create_testdata(testdata)
-			else:
-				new_doc = self.create_testdata(testdata)
-				new_doc.save()
-				created_doc = new_doc
-				testdata_doc = frappe.get_doc('Test Data', testdata)
-				testdata_doc.test_record_name = created_doc.name
-				testdata_doc.status = 'CREATED'
-				testdata_doc.save()
+			try:
+				testdata_doc = frappe.get_doc("Test Data", testdata)
+				if (testdata_doc.use_script == 1):
+					self.create_testdata(testdata)
+				else:
+					new_doc = self.create_testdata(testdata)
+					new_doc.save(True)
+					created_doc = new_doc
+					# testdata_doc = frappe.get_doc('Test Data', testdata)
+					testdata_doc.test_record_name = created_doc.name
+					testdata_doc.status = 'CREATED'
+					testdata_doc.save()
 
-				set_record_name_in_child_table_test_record(created_doc,testdata_doc)
+					set_record_name_in_child_table_test_record(created_doc,testdata_doc)
+			except Exception as e:
+				frappe.log_error(frappe.get_traceback(),(f'barista-{testdata}'+'-'+str(e))[:error_log_title_len])
 		if len(all_testdata)!=0:
 			print('\033[0;33;93m Pre-Test Data created successfully')
 		print('')
