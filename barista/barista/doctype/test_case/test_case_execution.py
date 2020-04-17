@@ -474,12 +474,12 @@ class TestCaseExecution():
                             test_result_doc.execution_result = json.dumps(
                                 function_result, default=to_json_converter).replace('": "', '":"').replace('": ', '":')
 
-                        if response_regex and response_regex != '' and (response_regex in test_result_doc.execution_result):
+                        if response_regex and response_regex != '' and (response_regex in test_result_doc.execution_result) and value_type=='Fixed Value':
                             assertion_result.assertion_status = "Passed"
                             assertion_result.assertion_result = response_regex + \
                                 " -> is present in the response received from the function"
                             print("\033[0;32;92m       >>>> Assertion Passed")
-                        elif test_result_doc.execution_result != '':
+                        elif test_result_doc.execution_result != '' and value_type=='Fixed Value':
                             assertion_result.assertion_status = "Failed"
                             test_result_doc.test_case_status = "Failed"
                             if response_regex == '':
@@ -488,7 +488,7 @@ class TestCaseExecution():
                                 assertion_result.assertion_result = response_regex + \
                                     "-> is not found in the response received from the function"
                             print("\033[0;31;91m       >>>> Assertion Failed")
-                        elif test_result_doc.execution_result == '' and response_regex == '':
+                        elif test_result_doc.execution_result == '' and response_regex == '' and value_type=='Fixed Value':
                             assertion_result.assertion_status = "Passed"
                             print("\033[0;32;92m       >>>> Assertion Passed")
 

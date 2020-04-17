@@ -120,11 +120,15 @@ app_license = "MIT"
 # 	"frappe.desk.doctype.event.event.get_events": "barista.event.get_events"
 # }
 fixtures = [
-    "Test Data", 
-    "Test Case", 
-    "Test Suite", 
-        # "Testcase Item", 
-        # "Testdata Item", 
-        # "Assertion", 
-        # "Testdatafield"
-        ]
+    "Test Data",
+    "Test Case",
+    "Test Suite",
+    # "Testcase Item",
+    # "Testdata Item",
+    # "Assertion",
+    # "Testdatafield"
+]
+
+after_migrate = [
+    'barista.barista.doctype.test_suite.run_test.fix_series',
+]

@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Test Case', {
 	refresh: function (frm) {
-
+		$('textarea[data-fieldname=function_name').css('height', '30px');
 		if (cur_frm.doc.doctype_name) {
 			var row = locals[cdt][cdn];
 			row.doctype_name = cur_frm.doc.doctype_name;
