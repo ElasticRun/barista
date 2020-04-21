@@ -5,19 +5,46 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-import ast, json, requests, urllib3, re, math, difflib, base64, operator, copy, traceback, urllib, ssl, binascii, six, html.parser, os
-import bs4, sys, pymysql, html2text, warnings, markdown2, csv, calendar, unittest,random, datetime,dateutil
-
+import ast
+import json
+import requests
+import urllib3
+import re
+import math
+import difflib
+import base64
+import operator
+import copy
+import traceback
+import urllib
+import ssl
+import binascii
+import six
+import html.parser
+import os
+import bs4
+import sys
+import pymysql
+import html2text
+import warnings
+import markdown2
+import csv
+import calendar
+import unittest
+import random
+import datetime
+import dateutil
 
 
 class TestData(Document):
-	def validate(self):
-		docfields = [docfield.fieldname for docfield in frappe.get_meta(self.doctype_name).fields]
-		docfields.append('docstatus')
-		docfields.append('name')
-		docfields.append('parent')
-		
-		for row in self.docfield_value:
-			if row.docfield_fieldname not in docfields:
-				frappe.throw(f"Invalid DocField {row.docfield_fieldname} in {self.doctype_name}")
-		
+    def validate(self):
+        docfields = [docfield.fieldname for docfield in frappe.get_meta(
+            self.doctype_name).fields]
+        docfields.append('docstatus')
+        docfields.append('name')
+        docfields.append('parent')
+
+        for row in self.docfield_value:
+            if row.docfield_fieldname not in docfields:
+                frappe.throw(
+                    f"Invalid DocField {row.docfield_fieldname} in {self.doctype_name}")
