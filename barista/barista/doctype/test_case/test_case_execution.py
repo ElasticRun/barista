@@ -39,7 +39,7 @@ import datetime
 import dateutil
 import time
 from barista.barista.doctype.test_data.test_data_generator import set_record_name_in_child_table_test_record
-
+from frappe.utils.jinja import validate_template,render_template
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 error_log_title_len = 1000
@@ -263,7 +263,19 @@ class TestCaseExecution():
                     print("\033[0;33;93m   >>> Executing Function --",
                           testcase_doc.function_name)
                     if testcase_doc.json_parameter and testcase_doc.json_parameter.strip() != '':
-                        kwargs.update(eval(str(testcase_doc.json_parameter)))
+                        context_dict={}
+                        resolved_jinja=' '
+                        if testcase_doc.testcase_doctype and testcase_doc.test_data:
+                            test_record_name = frappe.db.get_value('Test Data', testcase_doc.test_data, 'test_record_name')
+                            context=frappe.get_doc(testcase_doc.testcase_doctype,test_record_name).as_dict()
+                            context_dict={"doc":context}
+                        try:
+                            validate_template(testcase_doc.json_parameter)
+                            resolved_jinja=render_template(testcase_doc.json_parameter,context_dict)
+                        except Exception as e:
+                            print("\033[0;31;91m       >>>> Error in Json Parameter\n      ", str(e))
+
+                        kwargs.update(eval(str(resolved_jinja)))
 
                     method = testcase_doc.function_name
                     if method and '.' in method:
