@@ -43,18 +43,7 @@ frappe.ui.form.on('Test Case', {
 				frappe.throw("Please Choose TestCase Doctype first")
 			}
 		});
-		cur_frm.set_query("doctype_name", "assertion", function (doc, cdt, cdn) {
-			var row = locals[cdt][cdn];
-			if (row.module) {
-				return {
-					filters: {
-						'module': row.module
-					}
-				}
-			} else {
-				frappe.throw("Please Select Module")
-			}
-		});
+
 		if (cur_frm.doc.assertion && cur_frm.doc.assertion.length > 0 && cur_frm.doc.assertion[0].doctype_name) {
 			var doctype_name = cur_frm.doc.assertion[0].doctype_name;
 			frappe.model.with_doctype(doctype_name, function () {

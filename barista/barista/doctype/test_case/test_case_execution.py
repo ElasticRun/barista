@@ -223,7 +223,15 @@ class TestCaseExecution():
                 pass
             elif (testcase_doc.testcase_type == "DELETE"):
                 start_time = time.time()
-                pass
+                record_doc=frappe.get_doc(testdata_doc.doctype_name,testdata_doc.test_record_name)
+                try:
+                    record_doc.delete()
+                except Exception as e:
+                    frappe.log_error(frappe.get_traceback(
+                    ), ('barista-'+testcase_doc.name+'-DELETE-'+str(e))[:error_log_title_len])
+                    error_message = str(e)
+                    print(
+                        "\033[0;31;91m    >>> Error in deleting - "+str(e))
             elif (testcase_doc.testcase_type == "WORKFLOW"):
 
                 try:
@@ -316,7 +324,7 @@ class TestCaseExecution():
                 if assertion_doc.value_type:
                     value_type = assertion_doc.value_type
 
-                if assertion_doc.record_count:
+                if assertion_doc.record_count is not None:
                     record_count = assertion_doc.record_count
 
                 print("\033[0;37;97m       >>>> Applying assertion : " +

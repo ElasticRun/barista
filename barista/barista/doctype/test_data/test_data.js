@@ -2,20 +2,10 @@
 // For license information, please see license.txt
 let docFields = [];
 const ignoredFields = ['name', 'docstatus', 'workflow_state', 'parent', 'amended_from'];
+let fieldType = {};
 
 frappe.ui.form.on('Test Data', {
 	refresh: function (frm) {
-		cur_frm.set_query("doctype_name", function (doc) {
-			if (cur_frm.doc.module_name) {
-				return {
-					filters: {
-						'module': cur_frm.doc.module_name
-					}
-				}
-			} else {
-				frappe.throw("Please select Module Name first!");
-			}
-		});
 		if (cur_frm.doc.doctype_name) {
 			if (cur_frm.doc.doctype_name) {
 				frappe.model.with_doctype(cur_frm.doc.doctype_name, function () {
@@ -60,6 +50,7 @@ frappe.ui.form.on('Testdatafield', {
 				);
 
 				options.push("docstatus");
+				options.push("name");
 				frappe.meta.get_docfield("Testdatafield", "docfield_fieldname", cur_frm.doc.name).options = options;
 			});
 		} else {
@@ -72,6 +63,8 @@ frappe.ui.form.on('Testdatafield', {
 frappe.ui.form.on("Test Data", "doctype_name", function (frm, cdt, cdn) {
 	let tableFields = [];
 	docFields = [];
+	fieldType = {};
+
 	cur_frm.doc.docfield_value = [];
 	cur_frm.doc.existing_record = '';
 	cur_frm.refresh_fields();
@@ -89,6 +82,8 @@ frappe.ui.form.on("Test Data", "doctype_name", function (frm, cdt, cdn) {
 					frappe.model.with_doctype(cur_frm.doc.doctype_name, function () {
 						var options = $.map(frappe.get_meta(cur_frm.doc.doctype_name).fields,
 							function (d) {
+								fieldType[d.fieldname] = d.fieldtype;
+
 								if (d.fieldname && frappe.model.no_value_type.indexOf(d.fieldtype) === -1) {
 									return d.fieldname;
 								} else if (d.fieldname && d.fieldtype == 'Table') {
@@ -142,7 +137,7 @@ frappe.ui.form.on("Test Data", "existing_record", function (frm, cdt, cdn) {
 									if (!ignoredFields.includes(d.docfield_fieldname)) {
 										if (typeof (doc[d.docfield_fieldname]) === 'object') {
 											// Not setting right now, will do in future
-										} else if (doc[d.docfield_fieldname]) {
+										} else if (doc[d.docfield_fieldname] && !['Link', 'Dynamic Link'].includes(fieldType[d.docfield_fieldname])) {
 											d.docfield_value = doc[d.docfield_fieldname].toString();
 											d.docfield_code_value = 'Fixed Value';
 										}

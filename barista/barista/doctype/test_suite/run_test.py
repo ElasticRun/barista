@@ -209,8 +209,8 @@ def fix_series():
     test_data_series = frappe.db.sql_list(
         """select * from `tabSeries` where name='TestData-';""")
     max_test_data_series = frappe.db.sql_list(
-        """select max(name) from `tabTest Data`;""")
-    if len(max_test_data_series) != 0:
+        """select ifnull(max(name),'TestData-0') from `tabTest Data`;""")
+    if len(max_test_data_series):
         max_test_data_series = int(max_test_data_series[0].split('-')[1])
     if len(test_data_series) == 0:
         frappe.db.sql(
@@ -222,8 +222,8 @@ def fix_series():
     test_case_series = frappe.db.sql_list(
         """select * from `tabSeries` where name='TestCase-';""")
     max_test_case_series = frappe.db.sql_list(
-        """select max(name) from `tabTest Case`;""")
-    if len(max_test_case_series) != 0:
+        """select ifnull(max(name),'TestCase-0') from `tabTest Case`;""")
+    if len(max_test_case_series):
         max_test_case_series = int(max_test_case_series[0].split('-')[1])
     if len(test_case_series) == 0:
         frappe.db.sql(
