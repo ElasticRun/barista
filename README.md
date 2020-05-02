@@ -1,6 +1,8 @@
 ## Barista
 
-Frapp app test framework
+Frappe App Testing Framework
+
+
 
 #### License
 
