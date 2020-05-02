@@ -1,0 +1,38 @@
+[
+ {
+  "app_name": "frappe",
+  "docstatus": 0,
+  "doctype": "Test Suite",
+  "modified": "2020-04-28 13:55:15.731499",
+  "name": "Create User",
+  "parent": null,
+  "parentfield": null,
+  "parenttype": null,
+  "suite_name": "Create User",
+  "test_data": [
+   {
+    "parent": "Create User",
+    "parentfield": "test_data",
+    "parenttype": "Test Suite",
+    "test_data": "TestData-0002",
+    "test_data_description": "Create new Role System User"
+   }
+  ],
+  "testcase": [
+   {
+    "parent": "Create User",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0001",
+    "testcase_name": "Test user creation John Doe"
+   },
+   {
+    "parent": "Create User",
+    "parentfield": "testcase",
+    "parenttype": "Test Suite",
+    "testcase": "TestCase-0002",
+    "testcase_name": "Delete created User John Doe"
+   }
+  ]
+ }
+]
