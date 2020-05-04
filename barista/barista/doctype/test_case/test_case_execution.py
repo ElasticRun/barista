@@ -87,14 +87,17 @@ class TestCaseExecution():
             if (testcase_doc.testcase_type == "CREATE"):
                 start_time = time.time()
                 try:
-                    new_record_doc.save()
+                    if new_record_doc:
+                        new_record_doc.save()
 
-                    testdata_doc.test_record_name = new_record_doc.name
-                    testdata_doc.status = "CREATED"
-                    testdata_doc.save()
-                    set_record_name_in_child_table_test_record(
-                        new_record_doc, testdata_doc, True)
-                    print("\033[0;33;93m    >>> Test Data created")
+                        testdata_doc.test_record_name = new_record_doc.name
+                        testdata_doc.status = "CREATED"
+                        testdata_doc.save()
+                        set_record_name_in_child_table_test_record(
+                            new_record_doc, testdata_doc, True)
+                        print("\033[0;33;93m    >>> Test Data created")
+                    else:
+                        frappe.throw(f'Test Data {testcase_doc.test_data} generated None doc. Please check Test Data {testcase_doc.test_data}')
                 except Exception as e:
                     frappe.log_error(frappe.get_traceback(
                     ), ('barista-'+testcase_doc.name+'-CREATE-'+str(e))[:error_log_title_len])
@@ -102,112 +105,116 @@ class TestCaseExecution():
                     print('\033[0;31;91m   Error occurred ---', str(e))
 
             elif (testcase_doc.testcase_type == "UPDATE"):
-                start_time = time.time()
-                if testcase_doc.testcase_doctype != testdata_doc.doctype_name:
-                    value_from_test_record_doc = frappe.db.get_value(
-                        testdata_doc.doctype_name, testdata_doc.test_record_name, testcase_doc.test_data_docfield)
-                    all_existing_docs = frappe.get_all(testcase_doc.testcase_doctype, filters={
-                                                       testcase_doc.test_case_docfield: value_from_test_record_doc})
-                    if len(all_existing_docs) == 1:
-                        existing_doc_name = all_existing_docs[0]['name']
-                        new_record_doc = frappe.get_doc(
-                            testcase_doc.testcase_doctype, existing_doc_name)
-                    else:
-                        test_result_doc.test_case_execution = "Execution Failed"
-                        test_result_doc.execution_result = "The test case doctype - " + testcase_doc.testcase_doctype + " with reference field " + \
-                            testcase_doc.test_case_docfield + " value " + testdata_doc.test_record_name + \
-                            " records found "+str(len(all_existing_docs))
-                        test_result_doc.test_case_status = "Failed"
-                        return
+                try:
+                    start_time = time.time()
+                    create_new = False
+                    if testcase_doc.testcase_doctype != testdata_doc.doctype_name:
+                        value_from_test_record_doc = frappe.db.get_value(
+                            testdata_doc.doctype_name, testdata_doc.test_record_name, testcase_doc.test_data_docfield)
+                        all_existing_docs = frappe.get_all(testcase_doc.testcase_doctype, filters={
+                                                        testcase_doc.test_case_docfield: value_from_test_record_doc})
+                        if len(all_existing_docs) == 1:
+                            existing_doc_name = all_existing_docs[0]['name']
+                            new_record_doc = frappe.get_doc(
+                                testcase_doc.testcase_doctype, existing_doc_name)
+                        else:
+                            test_result_doc.test_case_execution = "Execution Failed"
+                            test_result_doc.execution_result = "The Test Case DocType - " + testcase_doc.testcase_doctype + " with reference field " + \
+                                testcase_doc.test_case_docfield + " value " + testdata_doc.test_record_name + \
+                                " records found "+str(len(all_existing_docs))
+                            # print('\033[0;31;91m   Error occurred ---', test_result_doc.execution_result)
+                            test_result_doc.test_case_status = "Failed"
+                            frappe.throw(test_result_doc.execution_result)
 
-                # create the record if already not created
-                if(new_record_doc.name == None):
-                    new_record_doc.save()
-                    testdata_doc.test_record_name = new_record_doc.name
-                    testdata_doc.status = "CREATED"
+                    # create the record if already not created
+                    if(new_record_doc and new_record_doc.name == None):
+                        new_record_doc.save()
+                        testdata_doc.test_record_name = new_record_doc.name
+                        testdata_doc.status = "CREATED"
 
-                    testdata_doc.save()
+                        testdata_doc.save()
 
-                # now take the fields to be updated
-                update_fields = frappe.get_list("Testdatafield", filters={
-                                                "parent": testcase_doc.name})
-                fields = frappe.get_meta(testcase_doc.testcase_doctype).fields
-                create_new = False
-                for update_field in update_fields:
+                    # now take the fields to be updated
+                    update_fields = frappe.get_list("Testdatafield", filters={
+                                                    "parent": testcase_doc.name})
+                    fields = frappe.get_meta(testcase_doc.testcase_doctype).fields
+                    
+                    for update_field in update_fields:
 
-                    update_field_doc = frappe.get_doc(
-                        "Testdatafield", update_field['name'])
+                        update_field_doc = frappe.get_doc(
+                            "Testdatafield", update_field['name'])
 
-                    for field in fields:
-                        if field.fieldname == update_field_doc.docfield_fieldname:
-                            field_doc = field
-                            break
+                        for field in fields:
+                            if field.fieldname == update_field_doc.docfield_fieldname:
+                                field_doc = field
+                                break
 
-                    if update_field_doc.docfield_fieldname == "name":
-                        new_name = update_field_doc.docfield_value
-                        if update_field_doc.docfield_code_value == "Code":
-                            new_name = eval(update_field_doc.docfield_code)
+                        if update_field_doc.docfield_fieldname == "name":
+                            new_name = update_field_doc.docfield_value
+                            if update_field_doc.docfield_code_value == "Code":
+                                new_name = eval(update_field_doc.docfield_code)
 
-                        rd.rename_doc(update_field_doc.doctype_name,
-                                      testdata_doc.test_record_name, new_name, force=True)
-                        # setting the new updated name in the Test Data record name
-                        testdata_doc.test_record_name = new_name
-                
-                        new_record_doc = frappe.get_doc(
-                            update_field_doc.doctype_name, new_name)
+                            rd.rename_doc(update_field_doc.doctype_name,
+                                        testdata_doc.test_record_name, new_name, force=True)
+                            # setting the new updated name in the Test Data record name
+                            testdata_doc.test_record_name = new_name
+                    
+                            new_record_doc = frappe.get_doc(
+                                update_field_doc.doctype_name, new_name)
 
-                    elif update_field_doc.docfield_fieldname == "docstatus":
-                        new_record_doc.set(update_field_doc.docfield_fieldname, int(
-                            update_field_doc.docfield_value))
-                    else:
-                        if (field_doc.fieldtype == "Table"):
-                            # if it is table then user will have to add multiple rows for multiple records.
-                            # each test data field will link to one record.
-                            child_testdata_doc = frappe.get_doc(
-                                "Test Data", update_field_doc.linkfield_name)
-                            if(child_testdata_doc.doctype_type == "Transaction"):
-                                create_new = True
-                            child_doc = TestDataGeneratorobj.create_testdata(
-                                update_field_doc.linkfield_name)
-                            
-                            child_doc.parentfield = field_doc.fieldname
-                            child_doc.parenttype = testcase_doc.testcase_doctype
-                            new_record_doc.append(
-                                field_doc.fieldname, child_doc)
-                            
-                        elif (field_doc.fieldtype in ["Link", "Dynamic Link"] and update_field_doc.docfield_code_value == "Fixed Value"):
-                            new_record_doc.set(
-                                field_doc.fieldname, update_field_doc.docfield_value)
+                        elif new_record_doc and update_field_doc.docfield_fieldname == "docstatus":
+                            new_record_doc.set(update_field_doc.docfield_fieldname, int(
+                                update_field_doc.docfield_value))
+                        else:
+                            if (field_doc.fieldtype == "Table"):
+                                # if it is table then user will have to add multiple rows for multiple records.
+                                # each test data field will link to one record.
+                                child_testdata_doc = frappe.get_doc(
+                                    "Test Data", update_field_doc.linkfield_name)
+                                if(child_testdata_doc.doctype_type == "Transaction"):
+                                    create_new = True
+                                child_doc = TestDataGeneratorobj.create_testdata(
+                                    update_field_doc.linkfield_name)
+                                
+                                child_doc.parentfield = field_doc.fieldname
+                                child_doc.parenttype = testcase_doc.testcase_doctype
+                                new_record_doc.append(
+                                    field_doc.fieldname, child_doc)
+                                
+                            elif (field_doc.fieldtype in ["Link", "Dynamic Link"] and update_field_doc.docfield_code_value == "Fixed Value"):
+                                new_record_doc.set(
+                                    field_doc.fieldname, update_field_doc.docfield_value)
 
-                        elif (field_doc.fieldtype in ["Link", "Dynamic Link"]):
-                            child_testdata_doc = frappe.get_doc(
-                                'Test Data', update_field_doc.linkfield_name)
-                            if (child_testdata_doc.doctype_type == "Transaction"):
-                                # since transaction remove existing record ref if any
-                                child_testdata_doc.test_record_name = None
+                            elif (field_doc.fieldtype in ["Link", "Dynamic Link"]):
+                                child_testdata_doc = frappe.get_doc(
+                                    'Test Data', update_field_doc.linkfield_name)
+                                if (child_testdata_doc.doctype_type == "Transaction"):
+                                    # since transaction remove existing record ref if any
+                                    child_testdata_doc.test_record_name = None
+                                    child_testdata_doc.save()
+
+                                child_doc = TestDataGeneratorobj.create_testdata(
+                                    update_field_doc.linkfield_name)
+                                child_doc.save()
+                                child_testdata_doc = frappe.get_doc(
+                                    'Test Data', update_field_doc.linkfield_name)
+                                child_testdata_doc.test_record_name = child_doc.name
                                 child_testdata_doc.save()
 
-                            child_doc = TestDataGeneratorobj.create_testdata(
-                                update_field_doc.linkfield_name)
-                            child_doc.save()
-                            child_testdata_doc = frappe.get_doc(
-                                'Test Data', update_field_doc.linkfield_name)
-                            child_testdata_doc.test_record_name = child_doc.name
-                            child_testdata_doc.save()
+                                new_record_doc.set(
+                                    field_doc.fieldname, child_doc.name)
 
-                            new_record_doc.set(
-                                field_doc.fieldname, child_doc.name)
+                            # for rest of data type.. either it should be code or fixed value
+                            elif (update_field_doc.docfield_code_value == "Code"):
+                                if update_field_doc.docfield_code and not update_field_doc.linkfield_name:
+                                    new_record_doc.set(field_doc.fieldname, eval(update_field_doc.docfield_code))
+                                if not update_field_doc.docfield_code and update_field_doc.linkfield_name:
+                                    new_record_doc.set(field_doc.fieldname, frappe.db.get_value('Test Data',update_field_doc.linkfield_name,'test_record_name'))
 
-                        # for rest of data type.. either it should be code or fixed value
-                        elif (update_field_doc.docfield_code_value == "Code"):
-                            new_record_doc.set(field_doc.fieldname, eval(
-                                update_field_doc.docfield_code))
+                            else:
+                                new_record_doc.set(
+                                    update_field_doc.docfield_fieldname, update_field_doc.docfield_value)
 
-                        else:
-                            new_record_doc.set(
-                                update_field_doc.docfield_fieldname, update_field_doc.docfield_value)
-
-                try:
                     new_record_doc.save()
                     print("\033[0;33;93m    >>> Test Data updated")
                 except Exception as e:
@@ -244,8 +251,8 @@ class TestCaseExecution():
                     apply_workflow(new_record_doc, testcase_doc.workflow_state)
                     print("\033[0;32;92m    >>> Workflow Applied")
                 except Exception as e:
-                    frappe.log_error(frappe.get_traceback(), ('barista-'+testcase_doc.name+'-WORKFLOW-'+str(
-                        e)+'-'+new_record_doc.doctype+'-'+new_record_doc.workflow_state+'-'+testcase_doc.workflow_state)[:error_log_title_len])
+                    frappe.log_error(frappe.get_traceback(), (f"""barista-{testcase_doc.name}-WORKFLOW-{str(
+                        e)}-DocType-[{new_record_doc.doctype}]-WorkflowState-[{new_record_doc.workflow_state}]-Action-[{testcase_doc.workflow_state}]""")[:error_log_title_len])
                     error_message = str(e)
                     print(
                         "\033[0;31;91m    >>> Error in applying Workflow - "+str(e))
@@ -412,9 +419,7 @@ class TestCaseExecution():
                 elif (assertion_doc.assertion_type == "WORKFLOW"):
                     if (len(validation_doctype) != 1):
                         assertion_result.assertion_status = "Failed"
-                        assertion_result.assertion_result = "Actual number of record(s) found - " + str(len(validation_doctype)) + \
-                            ". For Doctype - " + assertion_doc.doctype_name + " . Name - " + assertion_doc.reference_field +\
-                            ". Value - " + testdata_doc.test_record_name
+                        assertion_result.assertion_result = f"""Actual number of record(s) found - {str(len(validation_doctype))}. For Doctype - {assertion_doc.doctype_name}. Name - {assertion_doc.reference_field}. Value - {testdata_doc.test_record_name}"""
                         test_result_doc.test_case_status = "Failed"
                         print("\033[0;31;91m       >>>> Assertion Failed")
                         if(error_message):

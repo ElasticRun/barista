@@ -95,13 +95,15 @@ class TestDataGenerator():
                                 # each test data field will link to one record. create a new record
                                 child_doc = self.create_testdata(
                                     declared_field_doc.linkfield_name)
+                                if child_doc:
+                                    child_testdata_doc.test_record_name = child_doc.name
+                                    child_testdata_doc.save()
 
-                                child_testdata_doc.test_record_name = child_doc.name
-                                child_testdata_doc.save()
-
-                                child_doc.parentfield = field_doc.fieldname
-                                new_doc.get(field_doc.fieldname).append(
-                                    child_doc)
+                                    child_doc.parentfield = field_doc.fieldname
+                                    new_doc.get(field_doc.fieldname).append(
+                                        child_doc)
+                                else:
+                                    frappe.throw(f'Child Doc is None. Test Data of Child {declared_field_doc.linkfield_name}. Test Data of Parent {testdata}')
 
                             # link parent to this record
                             elif ("Link" in field_doc.fieldtype and declared_field_doc.docfield_code_value == "Fixed Value"):
@@ -127,8 +129,11 @@ class TestDataGenerator():
                                             child_doc.name)
 
                             elif (declared_field_doc.docfield_code_value == "Code"):
-                                new_doc.set(declared_field_doc.docfield_fieldname, eval(
-                                    str(declared_field_doc.docfield_code)))
+                                if declared_field_doc.docfield_code and not declared_field_doc.linkfield_name:
+                                    new_doc.set(declared_field_doc.docfield_fieldname, eval(
+                                        str(declared_field_doc.docfield_code)))
+                                if not declared_field_doc.docfield_code and declared_field_doc.linkfield_name:
+                                    new_doc.set(declared_field_doc.docfield_fieldname, frappe.db.get_value('Test Data', declared_field_doc.linkfield_name, 'test_record_name'))
                             else:
                                 if field_doc.fieldtype in ['Currency', 'Float', 'Percent']:
                                     new_doc.set(declared_field_doc.docfield_fieldname, float(
@@ -176,7 +181,7 @@ class TestDataGenerator():
                 return new_doc
         except Exception as e:
             frappe.log_error(frappe.get_traceback(
-            ), (f'barista-{testdata}-{current_fieldname}-'+str(e))[:error_log_title_len])
+            ), (f'barista-TestDataGenerator-{testdata}-DocTypeField-{current_fieldname}-'+str(e))[:error_log_title_len])
 
     def create_pretest_data(self, suite):
         # select all the test data for a suite...
@@ -201,7 +206,7 @@ class TestDataGenerator():
                         created_doc, testdata_doc)
             except Exception as e:
                 frappe.log_error(frappe.get_traceback(
-                ), (f'barista-{testdata}'+'-'+str(e))[:error_log_title_len])
+                ), (f'barista-TestDataGenerator-{testdata}-{str(e)}')[:error_log_title_len])
         if len(all_testdata) != 0:
             print('\033[0;33;93m Pre-Test Data created successfully')
         print('')
@@ -210,8 +215,10 @@ class TestDataGenerator():
 
 # barista.barista.doctype.test_data.test_data_generator.set_record_name_in_child_table_test_record
 def set_record_name_in_child_table_test_record(created_doc, parent_doc, create_new_child=False):
-    new_record_fields = frappe.db.sql("select fieldname from `tabDocField` where parent = '" +
-                                      created_doc.doctype + "'and fieldtype = 'Table'", as_dict=True)
+    parenttype = None
+    if created_doc:
+        parenttype = created_doc.doctype
+    new_record_fields = frappe.db.sql(f"select fieldname from `tabDocField` where parent = '{parenttype}'and fieldtype = 'Table'", as_dict=True)
     for new_record_field in new_record_fields:
         child_records = created_doc.get(new_record_field.fieldname)
         test_data_field_values = frappe.db.sql('select linkfield_name from `tabTestdatafield` where docfield_fieldname = "' +
