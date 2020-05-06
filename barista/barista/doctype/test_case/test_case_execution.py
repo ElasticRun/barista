@@ -393,6 +393,16 @@ class TestCaseExecution():
                             print("\033[0;31;91m       >>>> Assertion Failed")
 
                 elif (assertion_doc.assertion_type == "RECORD VALIDATION"):
+                    filter_field_to_refer = 'name'
+                    if assertion_doc.docfield_name and assertion_doc.docfield_name.strip()!='':
+                        filter_field_to_refer = assertion_doc.docfield_name
+                    test_record_doc = frappe.get_doc(testdata_doc.doctype_name, testdata_doc.test_record_name)
+                    if test_record_doc:
+                        filter_field_value = test_record_doc.get(filter_field_to_refer)
+                    else:
+                        filter_field_value = ''
+                    validation_doctype = frappe.get_all(assertion_doc.doctype_name, filters={
+                                                        assertion_doc.reference_field: filter_field_value})
                     if (len(validation_doctype) == record_count):
                         records = [doc['name'] for doc in validation_doctype]
                         # Assertion is successful
