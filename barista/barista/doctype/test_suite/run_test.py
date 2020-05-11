@@ -20,7 +20,7 @@ error_log_title_len = 1000
 
 class RunTest():
     # Run all the suites for the given app
-    def run_complete_suite(self, app_name, suites=[]):
+    def run_complete_suite(self, app_name, suites=[], run_name=None):
         start_time = time.time()
         alter_error_log()
         print("\033[0;33;93m************ Running all test cases for App - " +
@@ -50,7 +50,7 @@ class RunTest():
             print("\033[0;32;92m************ Suite - " +
                   suite.get('name') + " *************\n\n")
             try:
-                generatorObj.create_pretest_data(suite.get('name'))
+                generatorObj.create_pretest_data(suite.get('name'), run_name)
                 testcases = frappe.get_list('Testcase Item', filters={
                                             'parent': suite.get('name')}, fields=["testcase"], order_by="idx")
                 total_testcases = len(testcases)
@@ -58,7 +58,7 @@ class RunTest():
                 for testcase in testcases:
                     testcase_srno += 1
                     self.run_testcase(
-                        testcase, suite, testcase_srno, total_testcases, suite_srno, total_suites)
+                        testcase, suite, testcase_srno, total_testcases, suite_srno, total_suites, run_name)
 
             except Exception as e:
                 frappe.log_error(frappe.get_traceback(
@@ -87,10 +87,10 @@ class RunTest():
             time_uom = 'minutes'
         print("--- Executed in %s %s ---" % (end_time, time_uom))
 
-    def run_testcase(self, testcase, suite, testcase_srno, total_testcases, suite_srno, total_suites):
+    def run_testcase(self, testcase, suite, testcase_srno, total_testcases, suite_srno, total_suites, run_name):
         executionObj = TestCaseExecution()
         executionObj.run_testcase(testcase['testcase'], suite.get(
-            'name'), testcase_srno, total_testcases, suite_srno, total_suites)
+            'name'), testcase_srno, total_testcases, suite_srno, total_suites, run_name)
         frappe.db.commit()
 
     def get_executed_lines(self, app_name, file_name):
