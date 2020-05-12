@@ -50,14 +50,14 @@ class TestCaseExecution():
         try:
             start_time = None
             function_result = None
-            testcase_doc = frappe.get_doc("Test Case", testcase)
             print(
-                f"\033[0;36;96m>> ({str(suite_srno)}/{str(total_suites)}) {str(testcase_doc.name)} [{str(testcase_srno)}/{str(total_testcases)}] :")
+                f"\033[0;36;96m>> ({str(suite_srno)}/{str(total_suites)}) {str(testcase)} [{str(testcase_srno)}/{str(total_testcases)}] :")
             # Populate generic test result fields
             test_result_doc = frappe.new_doc("Test Result")
             test_result_doc.test_run_name = run_name
             test_result_doc.test_suite = test_suite
             test_result_doc.action = "Test Case"
+            testcase_doc = frappe.get_doc("Test Case", testcase)
             test_result_doc.test_case = testcase_doc.name
             test_result_doc.test_data_id = testcase_doc.test_data
             test_result_doc.test_case_status = "Passed"
@@ -630,13 +630,14 @@ class TestCaseExecution():
                 test_result_doc.save()
         except Exception as e:
             frappe.log_error(frappe.get_traceback(
-            ), ('barista-Critical Error-'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
+            ), ('barista-Critical Error-'+testcase+'-'+str(e))[:error_log_title_len])
             test_result_doc.test_case_execution = "Execution Failed"
             test_result_doc.execution_result = str(e)
             test_result_doc.test_case_status = "Failed"
             test_result_doc.save()
         finally:
             print("\033[0;36;96m>> " + "Execution Ended \n\n")
+            test_result_doc.save()
 
 
 def get_execution_time(start_time):
