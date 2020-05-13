@@ -238,4 +238,17 @@ def fix_series():
 
 # bench execute barista.barista.doctype.test_suite.run_test.run_test --kwargs "{'app_name':'velocityduos','suites':[]}"
 def run_test(app_name, suites=[]):
-    RunTest().run_complete_suite(app_name, suites)
+    print('''
+            This commmand is deprecated.
+        ''', end='')
+    print('''
+            Please use bench execute barista.run --kwargs "{'app_name':'velocityduos','suites':[],'reset_testdata':0,'clear_testresult':0,'run_name':'Release 1'}"
+        ''', end='')
+    print('''
+            app_name is mandatory while all other parameters are optional
+        ''', end='')
+    print('''
+            You can use bench execute barista.run --kwargs "{'app_name':'velocityduos'}"
+        ''')
+    return
+    # RunTest().run_complete_suite(app_name, suites)
