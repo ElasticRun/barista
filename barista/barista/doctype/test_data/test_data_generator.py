@@ -56,8 +56,8 @@ class TestDataGenerator():
                         new_doc.save(True)
                         created_doc = new_doc
                         testdata_doc = frappe.get_doc("Test Data", testdata)
-                        testdata_doc.test_record_name = created_doc.name
-                        testdata_doc.status = 'CREATED'
+                        # testdata_doc.test_record_name = created_doc.name
+                        # testdata_doc.status = 'CREATED'
                         # testdata_doc.save()
                         create_test_run_log(
                             run_name, testdata, created_doc.name)
@@ -68,8 +68,8 @@ class TestDataGenerator():
                                 created_doc = new_doc
                                 testdata_doc = frappe.get_doc(
                                     "Test Data", testdata)
-                                testdata_doc.test_record_name = created_doc.name
-                                testdata_doc.status = 'CREATED'
+                                # testdata_doc.test_record_name = created_doc.name
+                                # testdata_doc.status = 'CREATED'
                                 # testdata_doc.save()
                                 create_test_run_log(
                                     run_name, testdata, created_doc.name)
@@ -81,8 +81,8 @@ class TestDataGenerator():
                             created_doc = new_doc
                             testdata_doc = frappe.get_doc(
                                 "Test Data", testdata)
-                            testdata_doc.test_record_name = created_doc.name
-                            testdata_doc.status = 'CREATED'
+                            # testdata_doc.test_record_name = created_doc.name
+                            # testdata_doc.status = 'CREATED'
                             # testdata_doc.save()
                             create_test_run_log(
                                 run_name, testdata, created_doc.name)
@@ -114,15 +114,15 @@ class TestDataGenerator():
                 frappe.db.sql(testdata_doc.insert_script)
                 frappe.db.commit()
             else:
-                testdata_doc.test_record_name = frappe.db.get_value(
+                testdata_doc_test_record_name = frappe.db.get_value(
                     'Test Run Log', {'test_run_name': run_name, 'test_data': testdata}, 'test_record')
-                if (testdata_doc.test_record_name):
+                if (testdata_doc_test_record_name):
                     # this means test data already created....
                     # send the created doc
                     # frappe.db.set_value(
                     #     'Test Data', testdata, 'status', 'CREATED')
                     created_doc_earlier = frappe.get_doc(
-                        testdata_doc.doctype_name, testdata_doc.test_record_name)
+                        testdata_doc.doctype_name, testdata_doc_test_record_name)
                     return created_doc_earlier
 
                 # start creating the insert statement
@@ -157,7 +157,7 @@ class TestDataGenerator():
                                     'Test Data', declared_field_doc.linkfield_name)
                                 if (child_testdata_doc.doctype_type == "Transaction"):
                                     # since transaction remove existing record ref if any
-                                    child_testdata_doc.test_record_name = None
+                                    # child_testdata_doc.test_record_name = None
                                     # child_testdata_doc.save()
                                     create_test_run_log(
                                         run_name, child_testdata_doc.name, None)
@@ -165,8 +165,8 @@ class TestDataGenerator():
                                 child_doc = self.create_testdata(
                                     declared_field_doc.linkfield_name, run_name)
                                 if child_doc:
-                                    child_testdata_doc.test_record_name = child_doc.name
-                                    child_testdata_doc.status = 'CREATED'  # Recently added this line
+                                    # child_testdata_doc.test_record_name = child_doc.name
+                                    # child_testdata_doc.status = 'CREATED'  # Recently added this line
                                     # child_testdata_doc.save()
                                     create_test_run_log(
                                         run_name, child_testdata_doc.name, child_doc.name)
@@ -187,7 +187,7 @@ class TestDataGenerator():
                                     'Test Data', declared_field_doc.linkfield_name)
                                 if (child_testdata_doc.doctype_type == "Transaction"):
                                     # since transaction remove existing record ref if any
-                                    child_testdata_doc.test_record_name = None
+                                    # child_testdata_doc.test_record_name = None
                                     # child_testdata_doc.save()
                                     create_test_run_log(
                                         run_name, child_testdata_doc.name, None)
@@ -199,8 +199,8 @@ class TestDataGenerator():
                                         child_doc.save()
                                         child_testdata_doc = frappe.get_doc(
                                             'Test Data', declared_field_doc.linkfield_name)
-                                        child_testdata_doc.test_record_name = child_doc.name
-                                        child_testdata_doc.status = 'CREATED'  # Recently added this line
+                                        # child_testdata_doc.test_record_name = child_doc.name
+                                        # child_testdata_doc.status = 'CREATED'  # Recently added this line
                                         # child_testdata_doc.save()
                                         create_test_run_log(
                                             run_name, child_testdata_doc.name, child_doc.name)
@@ -212,8 +212,8 @@ class TestDataGenerator():
                                             'Test Data', declared_field_doc.linkfield_name)
                                         child_doc = resolve_unique_validation_error(
                                             e, child_testdata_doc, run_name)
-                                        child_testdata_doc.test_record_name = child_doc.name
-                                        child_testdata_doc.status = 'CREATED'  # Recently added this line
+                                        # child_testdata_doc.test_record_name = child_doc.name
+                                        # child_testdata_doc.status = 'CREATED'  # Recently added this line
                                         # child_testdata_doc.save()
                                         create_test_run_log(
                                             run_name, child_testdata_doc.name, child_doc.name)
@@ -229,8 +229,8 @@ class TestDataGenerator():
                                         doctype, docname)
                                     child_testdata_doc = frappe.get_doc(
                                         'Test Data', declared_field_doc.linkfield_name)
-                                    child_testdata_doc.test_record_name = child_doc.name
-                                    child_testdata_doc.status = 'CREATED'  # Recently added this line
+                                    # child_testdata_doc.test_record_name = child_doc.name
+                                    # child_testdata_doc.status = 'CREATED'  # Recently added this line
                                     # child_testdata_doc.save()
                                     create_test_run_log(
                                         run_name, child_testdata_doc.name, child_doc.name)
@@ -316,15 +316,17 @@ def set_record_name_in_child_table_test_record(created_doc, parent_doc, create_n
                 if (test_data_field_value.linkfield_name is not None):
                     child_test_data_doc = frappe.get_doc(
                         'Test Data', test_data_field_value.linkfield_name)
-                    if(child_test_data_doc.status != "CREATED") and parent_doc.doctype == "Test Data":
-                        child_test_data_doc.status = 'CREATED'
-                        child_test_data_doc.test_record_name = child_records[child_record_index].name
+                    child_test_data_doc_status = frappe.db.get_value('Test Run Log', {
+                                                                     'test_run_name': run_name, 'test_data': child_test_data_doc.name}, 'test_data_status')
+                    if(child_test_data_doc_status != "Created") and parent_doc.doctype == "Test Data":
+                        # child_test_data_doc.status = 'CREATED'
+                        # child_test_data_doc.test_record_name = child_records[child_record_index].name
                         # child_test_data_doc.save()
                         create_test_run_log(
                             run_name, child_test_data_doc.name, child_records[child_record_index].name)
                     elif create_new_child:
-                        child_test_data_doc.status = 'CREATED'
-                        child_test_data_doc.test_record_name = child_records[child_record_index].name
+                        # child_test_data_doc.status = 'CREATED'
+                        # child_test_data_doc.test_record_name = child_records[child_record_index].name
                         # child_test_data_doc.save()
                         create_test_run_log(
                             run_name, child_test_data_doc.name, child_records[child_record_index].name)
@@ -343,9 +345,9 @@ def create_test_run_log(run_name, test_data, test_record):
         trl_doc.test_run_name = run_name
         trl_doc.test_data = test_data
         if test_record:
-            trl_doc.test_data_status = 'CREATED'
+            trl_doc.test_data_status = 'Created'
         else:
-            trl_doc.test_data_status = 'FAILED'
+            trl_doc.test_data_status = 'Failed'
         trl_doc.test_record = test_record
         if frappe.db.exists('Test Run Log', {'test_run_name': run_name, 'test_data': test_data}):
             trl_doc.save(True)
@@ -366,7 +368,7 @@ def resolve_unique_validation_error(e, testdata_doc, run_name):
     k = k[1]
     v = v.replace("'", "")
     k = k.replace("'", "").replace('")', "")
-    print(k, v)
+
     new_record_doc = frappe.get_doc(doctype, {k: v})
     if new_record_doc:
         create_test_run_log(
