@@ -252,3 +252,31 @@ def run_test(app_name, suites=[]):
         ''')
     return
     # RunTest().run_complete_suite(app_name, suites)
+
+
+def fix_assertion_type_status():
+    frappe.db.sql(
+        "update `tabAssertion` set assertion_type='Field Value' where assertion_type='FIELD VALUE'", auto_commit=1)
+    frappe.db.sql(
+        "update `tabAssertion` set assertion_type='Record Validation' where assertion_type='RECORD VALIDATION'", auto_commit=1)
+    frappe.db.sql(
+        "update `tabAssertion` set assertion_type='Workflow' where assertion_type='WORKFLOW'", auto_commit=1)
+    frappe.db.sql(
+        "update `tabAssertion` set assertion_type='Response' where assertion_type='RESPONSE'", auto_commit=1)
+    frappe.db.sql(
+        "update `tabAssertion` set assertion_type='Error' where assertion_type='ERROR'", auto_commit=1)
+
+
+def fix_testcase_type_status():
+    frappe.db.sql(
+        "update `tabTest Case` set testcase_type='Create' where testcase_type='CREATE'", auto_commit=1)
+    frappe.db.sql(
+        "update `tabTest Case` set testcase_type='Update' where testcase_type='UPDATE'", auto_commit=1)
+    frappe.db.sql(
+        "update `tabTest Case` set testcase_type='Read' where testcase_type='READ'", auto_commit=1)
+    frappe.db.sql(
+        "update `tabTest Case` set testcase_type='Delete' where testcase_type='DELETE'", auto_commit=1)
+    frappe.db.sql(
+        "update `tabTest Case` set testcase_type='Workflow' where testcase_type='WORKFLOW'", auto_commit=1)
+    frappe.db.sql(
+        "update `tabTest Case` set testcase_type='Function' where testcase_type='FUNCTION'", auto_commit=1)
