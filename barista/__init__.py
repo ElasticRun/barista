@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import time
 import sys
 import frappe
-from barista.barista.doctype.test_suite.run_test import RunTest
+from barista.barista.doctype.test_suite.run_test import RunTest, resolve_run_name
 
 
 __version__ = '0.0.1'
@@ -24,16 +24,7 @@ def run(app_name, suites=[], reset_testdata=False, clear_testresult=False, run_n
     # sys.stdout.close()
 
 
-def resolve_run_name(run_name='Run-1'):
-    # bench execute barista.resolve_run_name --kwargs "{'run_name':''}"
-
-    if frappe.db.exists('Test Run Log', {'test_run_name': run_name}):
-        return resolve_run_name(
-            f"Run-{safe_cast(run_name.split('-')[1],int,1)+1}")
-    else:
-        return run_name
-
-
+'''
 def resolve_run_name1(run_name):
     if run_name and run_name.strip() != '':
 
@@ -100,13 +91,7 @@ def resolve_run_name1(run_name):
                 run_name = 'Run 1'
 
     return run_name
-
-
-def safe_cast(value, value_type, default):
-    try:
-        return value_type(value)
-    except Exception:
-        return default
+'''
 
 
 def reset_test_data(suites=[], clear_testresult=False):
@@ -225,3 +210,12 @@ def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=
     # Print New Line on Complete
     if iteration == total:
         print()
+
+
+def get_commands():
+    from .commands import commands as barista_commands
+
+    return list(barista_commands)
+
+
+commands = get_commands()

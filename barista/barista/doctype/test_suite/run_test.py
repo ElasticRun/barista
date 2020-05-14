@@ -280,3 +280,20 @@ def fix_testcase_type_status():
         "update `tabTest Case` set testcase_type='Workflow' where testcase_type='WORKFLOW'", auto_commit=1)
     frappe.db.sql(
         "update `tabTest Case` set testcase_type='Function' where testcase_type='FUNCTION'", auto_commit=1)
+
+
+def resolve_run_name(run_name='Run-1'):
+    # bench execute barista.resolve_run_name --kwargs "{'run_name':''}"
+
+    if frappe.db.exists('Test Run Log', {'test_run_name': run_name}):
+        return resolve_run_name(
+            f"Run-{safe_cast(run_name.split('-')[1],int,1)+1}")
+    else:
+        return run_name
+
+
+def safe_cast(value, value_type, default):
+    try:
+        return value_type(value)
+    except Exception:
+        return default
