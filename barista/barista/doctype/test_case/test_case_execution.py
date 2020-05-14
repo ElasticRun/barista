@@ -464,7 +464,6 @@ class TestCaseExecution():
                 if(assertion_doc.assertion_type != "RESPONSE" and assertion_doc.assertion_type != "ERROR"):
                     validation_doctype = frappe.get_all(assertion_doc.doctype_name, filters={
                                                         assertion_doc.reference_field: testdata_doc_test_record_name})
-
                 if (assertion_doc.assertion_type == "FIELD VALUE"):
                     if (len(validation_doctype) != 1):
                         assertion_result.assertion_status = "Failed"
@@ -483,6 +482,9 @@ class TestCaseExecution():
                     else:
                         validation_doctype_doc = frappe.get_doc(
                             assertion_doc.doctype_name, validation_doctype[0]['name'])
+                        if not assertion_doc.docfield_name:
+                            assertion_doc.docfield_name = 'name'
+
                         result = validation_doctype_doc.get(
                             assertion_doc.docfield_name)
                         try:
