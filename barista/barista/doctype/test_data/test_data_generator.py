@@ -50,6 +50,8 @@ class TestDataGenerator():
                 testdata_doc = frappe.get_doc("Test Data", testdata)
                 if (testdata_doc.use_script == 1):
                     self.create_testdata(testdata, run_name)
+                elif (testdata_doc.use_function == 1):
+                    self.create_testdata_using_function(testdata, run_name)
                 else:
                     new_doc = self.create_testdata(testdata, run_name)
                     if testdata_doc.doctype_type == 'Transaction':
@@ -87,12 +89,14 @@ class TestDataGenerator():
                             create_test_run_log(
                                 run_name, testdata, created_doc.name)
                         except frappe.DuplicateEntryError as e:
-                            args = e.args
-                            doctype = args[0]
-                            docname = args[1]
-                            created_doc = frappe.get_doc(doctype, docname)
-                            create_test_run_log(
-                                run_name, testdata, created_doc.name)
+                            created_doc = resolve_duplicate_entry_error(
+                                e, testdata_doc, run_name)
+                            # args = e.args
+                            # doctype = args[0]
+                            # docname = args[1]
+                            # created_doc = frappe.get_doc(doctype, docname)
+                            # create_test_run_log(
+                            #     run_name, testdata, created_doc.name)
 
                     set_record_name_in_child_table_test_record(
                         created_doc, testdata_doc, run_name=run_name)
@@ -111,8 +115,9 @@ class TestDataGenerator():
             # first check if use script is true
             if (testdata_doc.use_script == 1):
                 # if Yes run the script
-                frappe.db.sql(testdata_doc.insert_script)
-                frappe.db.commit()
+                frappe.db.sql(testdata_doc.insert_script, auto_commit=1)
+            elif (testdata_doc.use_function == 1):
+                return self.create_testdata_using_function(testdata, run_name)
             else:
                 testdata_doc_test_record_name = frappe.db.get_value(
                     'Test Run Log', {'test_run_name': run_name, 'test_data': testdata}, 'test_record')
@@ -221,19 +226,23 @@ class TestDataGenerator():
                                         new_doc.set(field_doc.fieldname,
                                                     child_doc.name)
                                 except frappe.DuplicateEntryError as e:
-                                    args = e.args
-                                    doctype = args[0]
-                                    docname = args[1]
-
-                                    child_doc = frappe.get_doc(
-                                        doctype, docname)
                                     child_testdata_doc = frappe.get_doc(
                                         'Test Data', declared_field_doc.linkfield_name)
+                                    child_doc = resolve_duplicate_entry_error(
+                                        e, child_testdata_doc, run_name)
+
+                                    # args = e.args
+                                    # doctype = args[0]
+                                    # docname = args[1]
+
+                                    # child_doc = frappe.get_doc(
+                                    #     doctype, docname)
+
                                     # child_testdata_doc.test_record_name = child_doc.name
                                     # child_testdata_doc.status = 'CREATED'  # Recently added this line
                                     # child_testdata_doc.save()
-                                    create_test_run_log(
-                                        run_name, child_testdata_doc.name, child_doc.name)
+                                    # create_test_run_log(
+                                    #     run_name, child_testdata_doc.name, child_doc.name)
 
                                     new_doc.set(field_doc.fieldname,
                                                 child_doc.name)
@@ -297,6 +306,64 @@ class TestDataGenerator():
         except Exception as e:
             frappe.log_error(frappe.get_traceback(
             ), (f'barista-TestDataGenerator-{testdata}-DocTypeField-[{current_fieldname}]-'+str(e))[:error_log_title_len])
+
+    def create_testdata_using_function(self, testdata, run_name):
+        generated_doc = None
+        try:
+            args = []
+            kwargs = {}
+            result = None
+            test_record_to_save = None
+
+            testdata_doc = frappe.get_doc('Test Data', testdata)
+            method = testdata_doc.function_name
+
+            for param in testdata_doc.function_parameters:
+                key = param.parameter
+                if param.value and param.value[0] in ['{', '[']:
+                    value = eval(param.value)
+                else:
+                    value = param.value
+                kwargs[key] = value
+                if param.test_data:
+                    test_record_name = frappe.db.get_value(
+                        'Test Run Log', {'test_run_name': run_name, 'test_data': param.test_data}, 'test_record')
+                    test_record_doctype = frappe.db.get_value(
+                        'Test Data', param.test_data, 'doctype_name')
+                    if test_record_name:
+                        test_record_doc = frappe.get_doc(
+                            test_record_doctype, test_record_name)
+                        if param.is_object:
+                            kwargs[key] = test_record_doc.as_dict()
+                        else:
+                            kwargs[key] = test_record_doc.get(
+                                param.field)
+
+            if method and '.' in method:
+                try:
+                    result = frappe.get_attr(
+                        method)(*args, **kwargs)
+                except frappe.DuplicateEntryError as e:
+                    result = resolve_duplicate_entry_error(
+                        e, testdata_doc, run_name)
+                except frappe.UniqueValidationError as e:
+                    result = resolve_unique_validation_error(
+                        e, testdata_doc, run_name)
+
+            if testdata_doc.eval_function_result:
+                test_record_to_save = eval(testdata_doc.eval_function_result)
+            else:
+                if result:
+                    test_record_to_save = result.get('name')
+
+            create_test_run_log(run_name, testdata, test_record_to_save)
+
+            generated_doc = frappe.get_doc(
+                testdata_doc.doctype_name, test_record_to_save)
+        except Exception as e:
+            frappe.log_error(frappe.get_traceback(
+            ), (f'barista-TestDataGenerator-{testdata}-Function-[{method}]-'+str(e))[:error_log_title_len])
+        return generated_doc
 
 
 # barista.barista.doctype.test_data.test_data_generator.set_record_name_in_child_table_test_record
@@ -374,3 +441,17 @@ def resolve_unique_validation_error(e, testdata_doc, run_name):
         create_test_run_log(
             run_name, testdata_doc.name, new_record_doc.name)
         return new_record_doc
+
+
+def resolve_duplicate_entry_error(e, testdata_doc, run_name):
+    args = e.args
+    doctype = args[0]
+    docname = args[1]
+
+    new_doc = frappe.get_doc(
+        doctype, docname)
+
+    if new_doc:
+        create_test_run_log(
+            run_name, testdata_doc.name, new_doc.name)
+        return new_doc
