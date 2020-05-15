@@ -7,14 +7,14 @@ from barista.barista.doctype.test_suite.run_test import RunTest, resolve_run_nam
 
 @click.command('run-barista')
 @click.argument('app_name')
-@click.option('--run-name', default='Run-1', help='Test Run Name for this execution run')
-@click.option('--suite', multiple=True, help='Test Suite name')
+@click.option('-r', '--run-name', default='Run-1', help='Test Run Name for this execution run')
+@click.option('-s', '--suite', multiple=True, help='Test Suite name')
 @pass_context
 def run_barista(context, app_name, suite=[], run_name='Run-1'):
     site = get_site(context)
     frappe.init(site=site)
     frappe.connect(site)
-    
+
     run_name = resolve_run_name(run_name)
     print('Test Run Name - ', run_name)
     RunTest().run_complete_suite(app_name, list(suite), run_name)
