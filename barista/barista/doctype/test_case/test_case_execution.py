@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from barista.barista.doctype.test_data.test_data_generator import TestDataGenerator, create_test_run_log, set_record_name_in_child_table_test_record, resolve_unique_validation_error
+from barista.barista.doctype.test_data.test_data_generator import TestDataGenerator, create_test_run_log, set_record_name_child_table, resolve_unique_validation_error
 from frappe.model.workflow import apply_workflow
 import frappe.model.rename_doc as rd
 from frappe.utils.jinja import validate_template, render_template
@@ -65,7 +65,7 @@ class TestCaseExecution():
             # test result fields ended
             print(
                 f"\033[0;36;96m>> ({str(suite_srno)}/{str(total_suites)}) {str(testcase)}:{testcase_doc.testcase_type} [{str(testcase_srno)}/{str(total_testcases)}] :")
-            TestDataGeneratorobj = TestDataGenerator()
+            testdata_generator = TestDataGenerator()
             # Test Data record doc
             if testcase_doc.test_data:
                 testdata_doc = frappe.get_doc(
@@ -87,7 +87,7 @@ class TestCaseExecution():
                     # testdata_doc.save()
                     create_test_run_log(run_name, testcase_doc.test_data, None)
                 # get record document
-                new_record_doc = TestDataGeneratorobj.create_testdata(
+                new_record_doc = testdata_generator.create_testdata(
                     testcase_doc.test_data, run_name)
                 error_message = None
             if (testcase_doc.testcase_type == "CREATE"):
@@ -103,7 +103,7 @@ class TestCaseExecution():
                             # testdata_doc.save()
                             create_test_run_log(
                                 run_name, testcase_doc.test_data, new_record_doc.name)
-                            set_record_name_in_child_table_test_record(
+                            testdata_generator.set_record_name_child_table(
                                 new_record_doc, testdata_doc, True, run_name)
                             print("\033[0;33;93m    >>> Test Data created")
                         except frappe.DuplicateEntryError as e:
@@ -118,7 +118,7 @@ class TestCaseExecution():
                             # testdata_doc.save()
                             create_test_run_log(
                                 run_name, testcase_doc.test_data, new_record_doc.name)
-                            set_record_name_in_child_table_test_record(
+                            testdata_generator.set_record_name_child_table(
                                 new_record_doc, testdata_doc, True, run_name)
                             print("\033[0;33;93m    >>> Test Data created")
                     else:
@@ -209,7 +209,7 @@ class TestCaseExecution():
                                     "Test Data", update_field_doc.linkfield_name)
                                 if(child_testdata_doc.doctype_type == "Transaction"):
                                     create_new = True
-                                child_doc = TestDataGeneratorobj.create_testdata(
+                                child_doc = testdata_generator.create_testdata(
                                     update_field_doc.linkfield_name, run_name)
 
                                 child_doc.parentfield = field_doc.fieldname
@@ -231,7 +231,7 @@ class TestCaseExecution():
                                     create_test_run_log(
                                         run_name, child_testdata_doc.name, None)
 
-                                child_doc = TestDataGeneratorobj.create_testdata(
+                                child_doc = testdata_generator.create_testdata(
                                     update_field_doc.linkfield_name, run_name)
                                 try:
                                     try:
@@ -315,7 +315,7 @@ class TestCaseExecution():
                     error_message = str(e)
                     print('\033[0;31;91m   Error occurred ---', str(e))
 
-                set_record_name_in_child_table_test_record(
+                testdata_generator.set_record_name_child_table(
                     new_record_doc, testcase_doc, create_new, run_name)
             elif (testcase_doc.testcase_type == "READ"):
                 start_time = time.time()

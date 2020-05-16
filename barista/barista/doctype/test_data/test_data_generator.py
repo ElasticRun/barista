@@ -51,7 +51,7 @@ class TestDataGenerator():
                 if (testdata_doc.use_script == 1):
                     self.create_testdata(testdata, run_name)
                 elif (testdata_doc.use_function == 1):
-                    self.create_testdata_using_function(testdata, run_name)
+                    self.create_testdata_function(testdata, run_name)
                 else:
                     new_doc = self.create_testdata(testdata, run_name)
                     if testdata_doc.doctype_type == 'Transaction':
@@ -98,7 +98,7 @@ class TestDataGenerator():
                             # create_test_run_log(
                             #     run_name, testdata, created_doc.name)
 
-                    set_record_name_in_child_table_test_record(
+                    self.set_record_name_child_table(
                         created_doc, testdata_doc, run_name=run_name)
             except Exception as e:
                 frappe.log_error(frappe.get_traceback(
@@ -117,7 +117,7 @@ class TestDataGenerator():
                 # if Yes run the script
                 frappe.db.sql(testdata_doc.insert_script, auto_commit=1)
             elif (testdata_doc.use_function == 1):
-                return self.create_testdata_using_function(testdata, run_name)
+                return self.create_testdata_function(testdata, run_name)
             else:
                 testdata_doc_test_record_name = frappe.db.get_value(
                     'Test Run Log', {'test_run_name': run_name, 'test_data': testdata}, 'test_record')
@@ -307,7 +307,7 @@ class TestDataGenerator():
             frappe.log_error(frappe.get_traceback(
             ), (f'barista-TestDataGenerator-{testdata}-DocTypeField-[{current_fieldname}]-'+str(e))[:error_log_title_len])
 
-    def create_testdata_using_function(self, testdata, run_name):
+    def create_testdata_function(self, testdata, run_name):
         generated_doc = None
         try:
             args = []
@@ -365,39 +365,37 @@ class TestDataGenerator():
             ), (f'barista-TestDataGenerator-{testdata}-Function-[{method}]-'+str(e))[:error_log_title_len])
         return generated_doc
 
-
-# barista.barista.doctype.test_data.test_data_generator.set_record_name_in_child_table_test_record
-def set_record_name_in_child_table_test_record(created_doc, parent_doc, create_new_child=False, run_name=None):
-    parenttype = None
-    if created_doc:
-        parenttype = created_doc.doctype
-    new_record_fields = frappe.db.sql(
-        f"select fieldname from `tabDocField` where parent = '{parenttype}'and fieldtype = 'Table'", as_dict=True)
-    for new_record_field in new_record_fields:
-        child_records = created_doc.get(new_record_field.fieldname)
-        test_data_field_values = frappe.db.sql('select linkfield_name from `tabTestdatafield` where docfield_fieldname = "' +
-                                               new_record_field.fieldname + '" and parent = "' + parent_doc.name + '" order by idx', as_dict=True)
-        child_record_index = 0
-        for test_data_field_value in test_data_field_values:
-            if child_record_index < len(child_records):
-                if (test_data_field_value.linkfield_name is not None):
-                    child_test_data_doc = frappe.get_doc(
-                        'Test Data', test_data_field_value.linkfield_name)
-                    child_test_data_doc_status = frappe.db.get_value('Test Run Log', {
-                                                                     'test_run_name': run_name, 'test_data': child_test_data_doc.name}, 'test_data_status')
-                    if(child_test_data_doc_status != "Created") and parent_doc.doctype == "Test Data":
-                        # child_test_data_doc.status = 'CREATED'
-                        # child_test_data_doc.test_record_name = child_records[child_record_index].name
-                        # child_test_data_doc.save()
-                        create_test_run_log(
-                            run_name, child_test_data_doc.name, child_records[child_record_index].name)
-                    elif create_new_child:
-                        # child_test_data_doc.status = 'CREATED'
-                        # child_test_data_doc.test_record_name = child_records[child_record_index].name
-                        # child_test_data_doc.save()
-                        create_test_run_log(
-                            run_name, child_test_data_doc.name, child_records[child_record_index].name)
-            child_record_index += 1
+    def set_record_name_child_table(self, created_doc, parent_doc, create_new_child=False, run_name=None):
+        parenttype = None
+        if created_doc:
+            parenttype = created_doc.doctype
+        new_record_fields = frappe.db.sql(
+            f"select fieldname from `tabDocField` where parent = '{parenttype}'and fieldtype = 'Table'", as_dict=True)
+        for new_record_field in new_record_fields:
+            child_records = created_doc.get(new_record_field.fieldname)
+            test_data_field_values = frappe.db.sql('select linkfield_name from `tabTestdatafield` where docfield_fieldname = "' +
+                                                   new_record_field.fieldname + '" and parent = "' + parent_doc.name + '" order by idx', as_dict=True)
+            child_record_index = 0
+            for test_data_field_value in test_data_field_values:
+                if child_record_index < len(child_records):
+                    if (test_data_field_value.linkfield_name is not None):
+                        child_test_data_doc = frappe.get_doc(
+                            'Test Data', test_data_field_value.linkfield_name)
+                        child_test_data_doc_status = frappe.db.get_value('Test Run Log', {
+                            'test_run_name': run_name, 'test_data': child_test_data_doc.name}, 'test_data_status')
+                        if(child_test_data_doc_status != "Created") and parent_doc.doctype == "Test Data":
+                            # child_test_data_doc.status = 'CREATED'
+                            # child_test_data_doc.test_record_name = child_records[child_record_index].name
+                            # child_test_data_doc.save()
+                            create_test_run_log(
+                                run_name, child_test_data_doc.name, child_records[child_record_index].name)
+                        elif create_new_child:
+                            # child_test_data_doc.status = 'CREATED'
+                            # child_test_data_doc.test_record_name = child_records[child_record_index].name
+                            # child_test_data_doc.save()
+                            create_test_run_log(
+                                run_name, child_test_data_doc.name, child_records[child_record_index].name)
+                child_record_index += 1
 
 
 def create_test_run_log(run_name, test_data, test_record):
