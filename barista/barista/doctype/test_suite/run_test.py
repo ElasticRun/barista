@@ -12,6 +12,8 @@ from barista.barista.doctype.test_case.test_case_execution import TestCaseExecut
 import time
 import shutil
 import sqlite3
+import click
+import sys
 from coverage.numbits import register_sqlite_functions
 
 
@@ -34,13 +36,15 @@ class RunTest():
                 suite_name.append({'name': suite})
             suites = suite_name
 
-        barista_app_path = frappe.get_app_path(
-            'barista') + '/public/test-coverage/'
+        run_name_path = run_name.replace(' ', '_').replace('-', '_')
+        barista_app_path = f"{frappe.get_app_path('barista')}/public/test-coverage/{run_name_path}/"
+        data_file_path = str(f"{barista_app_path}{app_name}.coverage")
+
         shutil.rmtree(barista_app_path, ignore_errors=True)
 
         generatorObj = TestDataGenerator()
-        objCoverage = coverage.Coverage(source=[frappe.get_app_path(app_name)], data_file=str(
-            barista_app_path+app_name+'.coverage'), omit=['*test_*'], config_file=False)
+        objCoverage = coverage.Coverage(source=[frappe.get_app_path(
+            app_name)], data_file=data_file_path, omit=['*test_*'], config_file=False)
         objCoverage.erase()
         objCoverage.start()
         total_suites = len(suites)
@@ -77,8 +81,8 @@ class RunTest():
         objCoverage.html_report(
             directory=barista_app_path, skip_empty=True, omit=['*test_*'])
 
-        print("\033[0;33;93m************ Execution ends. Verify coverage at - " +
-              "/assets/barista/test-coverage/index.html")
+        print(
+            f"\033[0;33;93m************ Execution ends. Verify coverage at - /assets/barista/test-coverage/{run_name_path}/index.html")
 
         end_time = round(time.time() - start_time, 2)
         time_uom = 'seconds'
@@ -290,7 +294,9 @@ def resolve_run_name(run_name='Pass-1'):
             return resolve_run_name(
                 f"Pass-{safe_cast(run_name.split('-')[1],int,1)+1}")
         else:
-            frappe.throw('Provided Run Name already exists. Please use provide other Run Name.')
+            click.echo(
+                f'Provided Run Name [{run_name}] already exists. Please provide other Run Name.')
+            sys.exit(1)
     else:
         return run_name
 
