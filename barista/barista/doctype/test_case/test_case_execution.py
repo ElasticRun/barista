@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from barista.barista.doctype.test_data.test_data_generator import TestDataGenerator, create_test_run_log, set_record_name_child_table, resolve_unique_validation_error
+from barista.barista.doctype.test_data.test_data_generator import TestDataGenerator, create_test_run_log, set_record_name_child_table, resolve_unique_validation_error, resolve_duplicate_entry_error
 from frappe.model.workflow import apply_workflow
 import frappe.model.rename_doc as rd
 from frappe.utils.jinja import validate_template, render_template
@@ -106,11 +106,12 @@ class TestCaseExecution():
                                 new_record_doc, testdata_doc, True, run_name)
                             print("\033[0;33;93m    >>> Test Data created")
                         except frappe.DuplicateEntryError as e:
-                            args = e.args
-                            doctype = args[0]
-                            docname = args[1]
-
-                            new_record_doc = frappe.get_doc(doctype, docname)
+                            # args = e.args
+                            # doctype = args[0]
+                            # docname = args[1]
+                            new_record_doc = resolve_duplicate_entry_error(
+                                e, testdata_doc, run_name)
+                            # new_record_doc = frappe.get_doc(doctype, docname)
                             testdata_doc_test_record_name = new_record_doc.name
                             # testdata_doc.test_record_name = new_record_doc.name
                             # testdata_doc.status = "CREATED"
@@ -232,55 +233,51 @@ class TestCaseExecution():
                                 child_doc = testdata_generator.create_testdata(
                                     update_field_doc.linkfield_name, run_name)
                                 try:
-                                    try:
-                                        if child_doc:
-                                            child_doc.save()
-                                            child_testdata_doc = frappe.get_doc(
-                                                'Test Data', update_field_doc.linkfield_name)
-                                            child_testdata_doc_test_record_name = child_doc.name
-                                            # child_testdata_doc.test_record_name = child_doc.name
-                                            # child_testdata_doc.save()
-                                            create_test_run_log(
-                                                run_name, child_testdata_doc.name, child_doc.name)
+                                    if child_doc:
+                                        child_doc.save()
+                                        # child_testdata_doc = frappe.get_doc(
+                                        #     'Test Data', update_field_doc.linkfield_name)
+                                        # child_testdata_doc_test_record_name = child_doc.name
+                                        # child_testdata_doc.test_record_name = child_doc.name
+                                        # child_testdata_doc.save()
+                                        # create_test_run_log(
+                                        #     run_name, child_testdata_doc.name, child_doc.name)
 
-                                            new_record_doc.set(
-                                                field_doc.fieldname, child_doc.name)
-                                        else:
-                                            frappe.throw(
-                                                f"Child Doc is None. Test Data of Child {update_field_doc.linkfield_name}. Test Data of Parent {testdata_doc.name}")
-                                    except frappe.UniqueValidationError as e:
-                                        child_testdata_doc = frappe.get_doc(
-                                            'Test Data', update_field_doc.linkfield_name)
-                                        child_doc = resolve_unique_validation_error(
-                                            e, child_testdata_doc, run_name)
-                                    child_testdata_doc = frappe.get_doc(
-                                        'Test Data', update_field_doc.linkfield_name)
-                                    child_testdata_doc_test_record_name = child_doc.name
-                                    # child_testdata_doc.test_record_name = child_doc.name
-                                    # child_testdata_doc.save()
-                                    create_test_run_log(
-                                        run_name, child_testdata_doc.name, child_doc.name)
-
-                                    new_record_doc.set(
-                                        field_doc.fieldname, child_doc.name)
+                                        # new_record_doc.set(
+                                        #     field_doc.fieldname, child_doc.name)
+                                    else:
+                                        frappe.throw(
+                                            f"Child Doc is None. Test Data of Child {update_field_doc.linkfield_name}. Test Data of Parent {testdata_doc.name}")
                                 except frappe.DuplicateEntryError as e:
-                                    args = e.args
-                                    doctype = args[0]
-                                    docname = args[1]
+                                    # args = e.args
+                                    # doctype = args[0]
+                                    # docname = args[1]
+                                    # child_testdata_doc = frappe.get_doc(
+                                    #     'Test Data', update_field_doc.linkfield_name)
+                                    child_doc = resolve_duplicate_entry_error(
+                                        e, child_testdata_doc, run_name)
+                                    # child_doc = frappe.get_doc(
+                                    #     doctype, docname)
 
-                                    child_doc = frappe.get_doc(
-                                        doctype, docname)
-                                    child_testdata_doc = frappe.get_doc(
-                                        'Test Data', update_field_doc.linkfield_name)
-                                    child_testdata_doc_test_record_name = child_doc.name
+                                    # child_testdata_doc_test_record_name = child_doc.name
                                     # child_testdata_doc.test_record_name = child_doc.name
                                     # child_testdata_doc.save()
-                                    create_test_run_log(
-                                        run_name, child_testdata_doc.name, child_doc.name)
+                                    # create_test_run_log(
+                                    #     run_name, child_testdata_doc.name, child_doc.name)
 
-                                    new_record_doc.set(
-                                        field_doc.fieldname, child_doc.name)
+                                    # new_record_doc.set(
+                                    #     field_doc.fieldname, child_doc.name)
+                                except frappe.UniqueValidationError as e:
+                                    # child_testdata_doc = frappe.get_doc(
+                                    #     'Test Data', update_field_doc.linkfield_name)
+                                    child_doc = resolve_unique_validation_error(
+                                        e, child_testdata_doc, run_name)
 
+                                child_testdata_doc_test_record_name = child_doc.name
+                                create_test_run_log(
+                                    run_name, child_testdata_doc.name, child_doc.name)
+                                new_record_doc.set(
+                                    field_doc.fieldname, child_doc.name)
                             # for rest of data type.. either it should be code or fixed value
                             elif (update_field_doc.docfield_code_value == "Code"):
                                 if update_field_doc.docfield_code and not update_field_doc.linkfield_name:
