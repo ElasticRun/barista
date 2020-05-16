@@ -282,12 +282,15 @@ def fix_testcase_type_status():
         "update `tabTest Case` set testcase_type='Function' where testcase_type='FUNCTION'", auto_commit=1)
 
 
-def resolve_run_name(run_name='Run-1'):
+def resolve_run_name(run_name='Pass-1'):
     # bench execute barista.resolve_run_name --kwargs "{'run_name':''}"
 
     if frappe.db.exists('Test Run Log', {'test_run_name': run_name}):
-        return resolve_run_name(
-            f"Run-{safe_cast(run_name.split('-')[1],int,1)+1}")
+        if 'Pass-' in run_name:
+            return resolve_run_name(
+                f"Pass-{safe_cast(run_name.split('-')[1],int,1)+1}")
+        else:
+            frappe.throw('Provided Run Name already exists. Please use provide other Run Name.')
     else:
         return run_name
 

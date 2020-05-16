@@ -15,8 +15,8 @@ with open('barista/__init__.py', 'rb') as f:
 setup(
 	name='barista',
 	version=version,
-	description='Frapp app test framework',
-	author='elasticrun',
+	description='Frappe App Test Framework',
+	author='ElasticRun',
 	author_email='shreem.bansal@elastic.run',
 	packages=find_packages(),
 	zip_safe=False,

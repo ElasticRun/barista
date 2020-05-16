@@ -9,7 +9,7 @@ from barista.barista.doctype.test_suite.run_test import RunTest, resolve_run_nam
 __version__ = '0.0.1'
 
 
-def run(app_name, suites=[], reset_testdata=False, clear_testresult=False, run_name='Run-1'):
+def run(app_name, suites=[], reset_testdata=False, clear_testresult=False, run_name='Pass-1'):
     # sys.stdout = open('barista_log.txt', 'w')
     # bench execute barista.run --kwargs "{'app_name':'velocityduos','suites':[],'reset_testdata':0,'clear_testresult':0,'run_name':'Release 1'}"
     # bench execute barista.run --kwargs "{'app_name':'velocityduos'}"
