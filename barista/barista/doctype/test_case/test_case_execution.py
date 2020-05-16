@@ -431,230 +431,9 @@ class TestCaseExecution():
                 test_result_doc.save()
 
             for assertion in assertions:
+                self.process_assertion(
+                    assertion, testcase_doc, run_name, error_message, function_result, test_result_doc)
 
-                assertion_doc = frappe.get_doc("Assertion", assertion['name'])
-                assertion_doc.assertion_type = assertion_doc.assertion_type.upper()
-
-                value_type = 'Fixed Value'
-                record_count = 1
-
-                if assertion_doc.value_type:
-                    value_type = assertion_doc.value_type
-
-                if assertion_doc.record_count is not None:
-                    record_count = assertion_doc.record_count
-
-                if not assertion_doc.reference_field:
-                    assertion_doc.reference_field = 'name'
-
-                print(
-                    f"\033[0;37;97m       >>>> Applying {assertion_doc.assertion_type} assertion :{str(assertion['name'])}")
-                assertion_result = frappe.new_doc("Assertion Result")
-                assertion_result.assertion = assertion_doc.name
-                assertion_result.assertion_status = "Passed"
-                testdata_doc = frappe.get_doc(
-                    'Test Data', testcase_doc.test_data)
-                testdata_doc_test_record_name = frappe.db.get_value(
-                    'Test Run Log', {'test_run_name': run_name, 'test_data': testcase_doc.test_data}, 'test_record')
-                if(assertion_doc.assertion_type != "RESPONSE" and assertion_doc.assertion_type != "ERROR"):
-                    validation_doctype = frappe.get_all(assertion_doc.doctype_name, filters={
-                                                        assertion_doc.reference_field: testdata_doc_test_record_name})
-                if (assertion_doc.assertion_type == "FIELD VALUE"):
-                    if (len(validation_doctype) != 1):
-                        assertion_result.assertion_status = "Failed"
-                        assertion_result.assertion_result = "Actual number of record(s) found - " + str(len(validation_doctype)) + \
-                            ". For Doctype - " + assertion_doc.doctype_name + " . Name - " + assertion_doc.reference_field +\
-                            ". Value - " + str(testdata_doc_test_record_name)
-
-                        if(error_message):
-                            # there was some error as well.
-                            assertion_result.assertion_result = assertion_result.assertion_result + "\n\nError Encountered : " \
-                                + error_message
-
-                        test_result_doc.test_case_status = "Failed"
-                        print("\033[0;31;91m       >>>> Assertion failed")
-
-                    else:
-                        validation_doctype_doc = frappe.get_doc(
-                            assertion_doc.doctype_name, validation_doctype[0]['name'])
-                        if not assertion_doc.docfield_name:
-                            assertion_doc.docfield_name = 'name'
-
-                        result = validation_doctype_doc.get(
-                            assertion_doc.docfield_name)
-                        try:
-                            if((str(validation_doctype_doc.get(assertion_doc.docfield_name)) == str(assertion_doc.docfield_value)) and value_type == 'Fixed Value'):
-                                # Assertion is successful
-                                assertion_result.assertion_result = "Value matched - " + \
-                                    str(validation_doctype_doc.get(
-                                        assertion_doc.docfield_name))
-                                print(
-                                    "\033[0;32;92m       >>>> Assertion Passed")
-                            elif value_type == 'Code' and eval(assertion_doc.code):
-                                assertion_result.assertion_result = "Value matched - " + \
-                                    str(validation_doctype_doc.get(
-                                        assertion_doc.docfield_name))
-                                print(
-                                    "\033[0;32;92m       >>>> Assertion Passed")
-                            else:
-                                # Assertion failed
-                                # test case also fails
-                                assertion_result.assertion_status = "Failed"
-                                assertion_result.assertion_result = "Value Found - " + str(validation_doctype_doc.get(assertion_doc.docfield_name))  \
-                                    + ". Where as expected value is - " + \
-                                    str(assertion_doc.docfield_value)
-
-                                if(error_message):
-                                    # there was some error as well.
-                                    assertion_result.assertion_result = f"{assertion_result.assertion_result} \n\nError Encountered :{error_message}"
-
-                                test_result_doc.test_case_status = "Failed"
-                                print(
-                                    "\033[0;31;91m       >>>> Assertion Failed")
-                        except AttributeError as e:
-                            assertion_result.assertion_status = "Failed"
-                            test_result_doc.test_case_status = "Failed"
-                            test_result_doc.test_case_status = "Failed"
-                            assertion_result.assertion_result = f"Error Encountered :{str(e)}"
-
-                elif (assertion_doc.assertion_type == "RECORD VALIDATION"):
-                    filter_field_to_refer = 'name'
-                    if assertion_doc.docfield_name and assertion_doc.docfield_name.strip() != '':
-                        filter_field_to_refer = assertion_doc.docfield_name
-                    test_record_doc = frappe.get_doc(
-                        testdata_doc.doctype_name, testdata_doc_test_record_name)
-
-                    if test_record_doc:
-                        filter_field_value = test_record_doc.get(
-                            filter_field_to_refer)
-                    else:
-                        filter_field_value = ''
-                    validation_doctype = frappe.get_all(assertion_doc.doctype_name, filters={
-                                                        assertion_doc.reference_field: filter_field_value})
-                    if (len(validation_doctype) == record_count):
-                        records = [doc['name'] for doc in validation_doctype]
-                        # Assertion is successful
-                        assertion_result = frappe.new_doc("Assertion Result")
-                        assertion_result.assertion = assertion_doc.name
-                        assertion_result.assertion_status = "Passed"
-                        assertion_result.assertion_result = "Record found - " + \
-                            ','.join(records)
-                        print("\033[0;32;92m       >>>> Assertion Passed")
-                    else:
-                        assertion_result.assertion_status = "Failed"
-                        assertion_result.assertion_result = "Actual number of record(s) found - " + str(len(validation_doctype)) + \
-                            ". For Doctype - " + assertion_doc.doctype_name + " . Name - " + assertion_doc.reference_field +\
-                            ". Value - " + \
-                            (testdata_doc_test_record_name or '')
-                        test_result_doc.test_case_status = "Failed"
-                        print("\033[0;31;91m       >>>> Assertion Failed")
-
-                        if(error_message):
-                            # there was some error as well.
-                            assertion_result.assertion_result = assertion_result.assertion_result + "\n\nError Encountered : " \
-                                + error_message
-
-                elif (assertion_doc.assertion_type == "WORKFLOW"):
-                    if (len(validation_doctype) != 1):
-                        assertion_result.assertion_status = "Failed"
-                        assertion_result.assertion_result = f"""Actual number of record(s) found - {str(len(validation_doctype))}. For Doctype - {assertion_doc.doctype_name}. Name - {assertion_doc.reference_field}. Value - {testdata_doc_test_record_name}"""
-                        test_result_doc.test_case_status = "Failed"
-                        print("\033[0;31;91m       >>>> Assertion Failed")
-                        if(error_message):
-                            # there was some error as well.
-                            assertion_result.assertion_result = assertion_result.assertion_result + "\n\nError Encountered : " \
-                                + error_message
-                    else:
-                        validation_doctype_doc = frappe.get_doc(
-                            assertion_doc.doctype_name, validation_doctype[0]['name'])
-                        if (assertion_doc.workflow_state == validation_doctype_doc.workflow_state):
-                            assertion_result.assertion_result = "Workflow matched - " + \
-                                assertion_doc.workflow_state
-                            print("\033[0;32;92m       >>>> Assertion Passed")
-                        else:
-                            assertion_result.assertion_status = "Failed"
-                            assertion_result.assertion_result = "Workflow State found - " + str(validation_doctype_doc.workflow_state) \
-                                + ". Expected Workflow state is - " + \
-                                str(assertion_doc.workflow_state)
-                            if(error_message):
-                                # there was some error as well.
-                                assertion_result.assertion_result = assertion_result.assertion_result + "\n\nError Encountered : " \
-                                    + error_message
-                            test_result_doc.test_case_status = "Failed"
-                            print("\033[0;31;91m       >>>> Assertion Failed")
-
-                elif (assertion_doc.assertion_type == "ERROR"):
-                    if (error_message):
-                        if (assertion_doc.error_message in error_message):
-                            assertion_result.assertion_result = "Error received as expected - " + error_message
-                            print("\033[0;32;92m       >>>> Assertion Passed")
-                        else:
-                            assertion_result.assertion_result = "Error received - " + error_message + \
-                                "\n\nExpected error - " + assertion_doc.error_message
-                            assertion_result.assertion_status = "Failed"
-                            test_result_doc.test_case_status = "Failed"
-                            print("\033[0;31;91m       >>>> Assertion Failed")
-                    else:
-                        assertion_result.assertion_result = "No Error received however following error was expected - " + \
-                            assertion_doc.error_message
-                        assertion_result.assertion_status = "Failed"
-                        test_result_doc.test_case_status = "Failed"
-                        print("\033[0;31;91m       >>>> Assertion Failed")
-
-                elif (assertion_doc.assertion_type == "RESPONSE"):
-                    if assertion_doc.response_regex and assertion_doc.response_regex.strip() != '':
-                        response_regex = assertion_doc.response_regex.replace(
-                            '": "', '":"').replace('": ', '":')
-                    else:
-                        response_regex = ''
-                    if testcase_doc.testcase_type == "FUNCTION":
-                        test_result_doc.execution_result = ''
-                        result = function_result
-                        if function_result:
-
-                            def to_json_converter(value):
-                                if isinstance(value, datetime.datetime):
-                                    return value.__str__()
-
-                            test_result_doc.execution_result = json.dumps(
-                                function_result, default=to_json_converter).replace('": "', '":"').replace('": ', '":')
-                        if value_type == 'Fixed Value':
-                            if response_regex and response_regex != '' and (response_regex in test_result_doc.execution_result):
-                                assertion_result.assertion_status = "Passed"
-                                assertion_result.assertion_result = response_regex + \
-                                    " -> is present in the response received from the function"
-                                print(
-                                    "\033[0;32;92m       >>>> Assertion Passed")
-                            elif test_result_doc.execution_result != '':
-                                assertion_result.assertion_status = "Failed"
-                                test_result_doc.test_case_status = "Failed"
-                                if response_regex == '':
-                                    assertion_result.assertion_result = 'Please check value of any key in response'
-                                else:
-                                    assertion_result.assertion_result = response_regex + \
-                                        "-> is not found in the response received from the function"
-                                print(
-                                    "\033[0;31;91m       >>>> Assertion Failed")
-                            elif test_result_doc.execution_result == '' and response_regex == '':
-                                assertion_result.assertion_status = "Passed"
-                                print(
-                                    "\033[0;32;92m       >>>> Assertion Passed")
-                        elif value_type == 'Code':
-                            if eval(assertion_doc.code):
-                                assertion_result.assertion_status = "Passed"
-                                print(
-                                    "\033[0;32;92m       >>>> Assertion Passed")
-                            else:
-                                assertion_result.assertion_status = "Failed"
-                                test_result_doc.test_case_status = "Failed"
-                                assertion_result.assertion_result = 'Written Code condition was False'
-                                print(
-                                    "\033[0;31;91m       >>>> Assertion Failed")
-
-                assertion_result.parentfield = "assertion_results"
-                test_result_doc.get("assertion_results").append(
-                    assertion_result)
-                test_result_doc.save()
         except Exception as e:
             frappe.log_error(frappe.get_traceback(
             ), ('barista-Critical Error-'+testcase+'-'+str(e))[:error_log_title_len])
@@ -665,6 +444,231 @@ class TestCaseExecution():
         finally:
             print("\033[0;36;96m>> " + "Execution Ended \n\n")
             test_result_doc.save()
+
+    def process_assertion(self, assertion, testcase_doc, run_name, error_message, function_result, test_result_doc):
+        assertion_doc = frappe.get_doc("Assertion", assertion['name'])
+        assertion_doc.assertion_type = assertion_doc.assertion_type.upper()
+
+        value_type = 'Fixed Value'
+        record_count = 1
+
+        if assertion_doc.value_type:
+            value_type = assertion_doc.value_type
+
+        if assertion_doc.record_count is not None:
+            record_count = assertion_doc.record_count
+
+        if not assertion_doc.reference_field:
+            assertion_doc.reference_field = 'name'
+
+        print(
+            f"\033[0;37;97m       >>>> Applying {assertion_doc.assertion_type} assertion :{str(assertion['name'])}")
+        assertion_result = frappe.new_doc("Assertion Result")
+        assertion_result.assertion = assertion_doc.name
+        assertion_result.assertion_status = "Passed"
+        testdata_doc = frappe.get_doc(
+            'Test Data', testcase_doc.test_data)
+        testdata_doc_test_record_name = frappe.db.get_value(
+            'Test Run Log', {'test_run_name': run_name, 'test_data': testcase_doc.test_data}, 'test_record')
+        if(assertion_doc.assertion_type != "RESPONSE" and assertion_doc.assertion_type != "ERROR"):
+            validation_doctype = frappe.get_all(assertion_doc.doctype_name, filters={
+                                                assertion_doc.reference_field: testdata_doc_test_record_name})
+        if (assertion_doc.assertion_type == "FIELD VALUE"):
+            if (len(validation_doctype) != 1):
+                assertion_result.assertion_status = "Failed"
+                assertion_result.assertion_result = "Actual number of record(s) found - " + str(len(validation_doctype)) + \
+                    ". For Doctype - " + assertion_doc.doctype_name + " . Name - " + assertion_doc.reference_field +\
+                    ". Value - " + str(testdata_doc_test_record_name)
+
+                if(error_message):
+                    # there was some error as well.
+                    assertion_result.assertion_result = assertion_result.assertion_result + "\n\nError Encountered : " \
+                        + error_message
+
+                test_result_doc.test_case_status = "Failed"
+                print("\033[0;31;91m       >>>> Assertion failed")
+
+            else:
+                validation_doctype_doc = frappe.get_doc(
+                    assertion_doc.doctype_name, validation_doctype[0]['name'])
+                if not assertion_doc.docfield_name:
+                    assertion_doc.docfield_name = 'name'
+
+                result = validation_doctype_doc.get(
+                    assertion_doc.docfield_name)
+                try:
+                    if((str(validation_doctype_doc.get(assertion_doc.docfield_name)) == str(assertion_doc.docfield_value)) and value_type == 'Fixed Value'):
+                        # Assertion is successful
+                        assertion_result.assertion_result = "Value matched - " + \
+                            str(validation_doctype_doc.get(
+                                assertion_doc.docfield_name))
+                        print(
+                            "\033[0;32;92m       >>>> Assertion Passed")
+                    elif value_type == 'Code' and eval(assertion_doc.code):
+                        assertion_result.assertion_result = "Value matched - " + \
+                            str(validation_doctype_doc.get(
+                                assertion_doc.docfield_name))
+                        print(
+                            "\033[0;32;92m       >>>> Assertion Passed")
+                    else:
+                        # Assertion failed
+                        # test case also fails
+                        assertion_result.assertion_status = "Failed"
+                        assertion_result.assertion_result = "Value Found - " + str(validation_doctype_doc.get(assertion_doc.docfield_name))  \
+                            + ". Where as expected value is - " + \
+                            str(assertion_doc.docfield_value)
+
+                        if(error_message):
+                            # there was some error as well.
+                            assertion_result.assertion_result = f"{assertion_result.assertion_result} \n\nError Encountered :{error_message}"
+
+                        test_result_doc.test_case_status = "Failed"
+                        print(
+                            "\033[0;31;91m       >>>> Assertion Failed")
+                except AttributeError as e:
+                    assertion_result.assertion_status = "Failed"
+                    test_result_doc.test_case_status = "Failed"
+                    test_result_doc.test_case_status = "Failed"
+                    assertion_result.assertion_result = f"Error Encountered :{str(e)}"
+
+        elif (assertion_doc.assertion_type == "RECORD VALIDATION"):
+            filter_field_to_refer = 'name'
+            if assertion_doc.docfield_name and assertion_doc.docfield_name.strip() != '':
+                filter_field_to_refer = assertion_doc.docfield_name
+            test_record_doc = frappe.get_doc(
+                testdata_doc.doctype_name, testdata_doc_test_record_name)
+
+            if test_record_doc:
+                filter_field_value = test_record_doc.get(
+                    filter_field_to_refer)
+            else:
+                filter_field_value = ''
+            validation_doctype = frappe.get_all(assertion_doc.doctype_name, filters={
+                                                assertion_doc.reference_field: filter_field_value})
+            if (len(validation_doctype) == record_count):
+                records = [doc['name'] for doc in validation_doctype]
+                # Assertion is successful
+                assertion_result = frappe.new_doc("Assertion Result")
+                assertion_result.assertion = assertion_doc.name
+                assertion_result.assertion_status = "Passed"
+                assertion_result.assertion_result = "Record found - " + \
+                    ','.join(records)
+                print("\033[0;32;92m       >>>> Assertion Passed")
+            else:
+                assertion_result.assertion_status = "Failed"
+                assertion_result.assertion_result = "Actual number of record(s) found - " + str(len(validation_doctype)) + \
+                    ". For Doctype - " + assertion_doc.doctype_name + " . Name - " + assertion_doc.reference_field +\
+                    ". Value - " + \
+                    (testdata_doc_test_record_name or '')
+                test_result_doc.test_case_status = "Failed"
+                print("\033[0;31;91m       >>>> Assertion Failed")
+
+                if(error_message):
+                    # there was some error as well.
+                    assertion_result.assertion_result = assertion_result.assertion_result + "\n\nError Encountered : " \
+                        + error_message
+
+        elif (assertion_doc.assertion_type == "WORKFLOW"):
+            if (len(validation_doctype) != 1):
+                assertion_result.assertion_status = "Failed"
+                assertion_result.assertion_result = f"""Actual number of record(s) found - {str(len(validation_doctype))}. For Doctype - {assertion_doc.doctype_name}. Name - {assertion_doc.reference_field}. Value - {testdata_doc_test_record_name}"""
+                test_result_doc.test_case_status = "Failed"
+                print("\033[0;31;91m       >>>> Assertion Failed")
+                if(error_message):
+                    # there was some error as well.
+                    assertion_result.assertion_result = assertion_result.assertion_result + "\n\nError Encountered : " \
+                        + error_message
+            else:
+                validation_doctype_doc = frappe.get_doc(
+                    assertion_doc.doctype_name, validation_doctype[0]['name'])
+                if (assertion_doc.workflow_state == validation_doctype_doc.workflow_state):
+                    assertion_result.assertion_result = "Workflow matched - " + \
+                        assertion_doc.workflow_state
+                    print("\033[0;32;92m       >>>> Assertion Passed")
+                else:
+                    assertion_result.assertion_status = "Failed"
+                    assertion_result.assertion_result = "Workflow State found - " + str(validation_doctype_doc.workflow_state) \
+                        + ". Expected Workflow state is - " + \
+                        str(assertion_doc.workflow_state)
+                    if(error_message):
+                        # there was some error as well.
+                        assertion_result.assertion_result = assertion_result.assertion_result + "\n\nError Encountered : " \
+                            + error_message
+                    test_result_doc.test_case_status = "Failed"
+                    print("\033[0;31;91m       >>>> Assertion Failed")
+
+        elif (assertion_doc.assertion_type == "ERROR"):
+            if (error_message):
+                if (assertion_doc.error_message in error_message):
+                    assertion_result.assertion_result = "Error received as expected - " + error_message
+                    print("\033[0;32;92m       >>>> Assertion Passed")
+                else:
+                    assertion_result.assertion_result = "Error received - " + error_message + \
+                        "\n\nExpected error - " + assertion_doc.error_message
+                    assertion_result.assertion_status = "Failed"
+                    test_result_doc.test_case_status = "Failed"
+                    print("\033[0;31;91m       >>>> Assertion Failed")
+            else:
+                assertion_result.assertion_result = "No Error received however following error was expected - " + \
+                    assertion_doc.error_message
+                assertion_result.assertion_status = "Failed"
+                test_result_doc.test_case_status = "Failed"
+                print("\033[0;31;91m       >>>> Assertion Failed")
+
+        elif (assertion_doc.assertion_type == "RESPONSE"):
+            if assertion_doc.response_regex and assertion_doc.response_regex.strip() != '':
+                response_regex = assertion_doc.response_regex.replace(
+                    '": "', '":"').replace('": ', '":')
+            else:
+                response_regex = ''
+            if testcase_doc.testcase_type == "FUNCTION":
+                test_result_doc.execution_result = ''
+                result = function_result
+                if function_result:
+
+                    def to_json_converter(value):
+                        if isinstance(value, datetime.datetime):
+                            return value.__str__()
+
+                    test_result_doc.execution_result = json.dumps(
+                        function_result, default=to_json_converter).replace('": "', '":"').replace('": ', '":')
+                if value_type == 'Fixed Value':
+                    if response_regex and response_regex != '' and (response_regex in test_result_doc.execution_result):
+                        assertion_result.assertion_status = "Passed"
+                        assertion_result.assertion_result = response_regex + \
+                            " -> is present in the response received from the function"
+                        print(
+                            "\033[0;32;92m       >>>> Assertion Passed")
+                    elif test_result_doc.execution_result != '':
+                        assertion_result.assertion_status = "Failed"
+                        test_result_doc.test_case_status = "Failed"
+                        if response_regex == '':
+                            assertion_result.assertion_result = 'Please check value of any key in response'
+                        else:
+                            assertion_result.assertion_result = response_regex + \
+                                "-> is not found in the response received from the function"
+                        print(
+                            "\033[0;31;91m       >>>> Assertion Failed")
+                    elif test_result_doc.execution_result == '' and response_regex == '':
+                        assertion_result.assertion_status = "Passed"
+                        print(
+                            "\033[0;32;92m       >>>> Assertion Passed")
+                elif value_type == 'Code':
+                    if eval(assertion_doc.code):
+                        assertion_result.assertion_status = "Passed"
+                        print(
+                            "\033[0;32;92m       >>>> Assertion Passed")
+                    else:
+                        assertion_result.assertion_status = "Failed"
+                        test_result_doc.test_case_status = "Failed"
+                        assertion_result.assertion_result = 'Written Code condition was False'
+                        print(
+                            "\033[0;31;91m       >>>> Assertion Failed")
+
+        assertion_result.parentfield = "assertion_results"
+        test_result_doc.get("assertion_results").append(
+            assertion_result)
+        test_result_doc.save()
 
 
 def get_execution_time(start_time):
