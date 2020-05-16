@@ -269,43 +269,51 @@ class TestDataGenerator():
                                     new_doc.set(declared_field_doc.docfield_fieldname, str(
                                         declared_field_doc.docfield_value))
 
-                if(flag_field == False and not field_doc.fetch_from):
-                    # no declared field necessary for the test case. Create random field.
-                    value = None
-                    if (field_doc.fieldtype == "Data"):
-                        # its a string of 140
-                        value = (field_doc.label.split()[
-                                 0] + str(random.randrange(0, 20000, 1)))[0:139]
-                    elif (field_doc.fieldtype == "Check"):
-                        # its a check
-                        value = random.choice([0, 1])
-                    elif(field_doc.fieldtype == "Currency"):
-                        value = round(random.uniform(500.12, 22000.34), 2)
-                    elif(field_doc.fieldtype == "Date"):
-                        value = datetime.date.today() + datetime.timedelta(days=(random.randrange(0, 15, 1)))
-                    elif(field_doc.fieldtype == "Datetime"):
-                        value = datetime.datetime.now() + datetime.timedelta(minutes=(random.randrange(0, 200, 2)))
-                    elif(field_doc.fieldtype == "Float"):
-                        value = round(random.uniform(0, 22000.34), 2)
-                    elif(field_doc.fieldtype == "Int"):
-                        value = random.randrange(0, 200, 1)
-                    elif(field_doc.fieldtype == "Long Text" or field_doc.fieldtype == "Small Text" or field_doc.fieldtype == "Text"):
-                        value = (field_doc.label +
-                                 str(random.randrange(0, 20000, 1)))
-                    elif(field_doc.fieldtype == "Password"):
-                        value = "Frappe@12345"
-                    elif (field_doc.fieldtype == "Percent"):
-                        value = round(random.uniform(0, 100), 2)
-                    elif ("Link" in field_doc.fieldtype or field_doc.fieldtype == "Table"):
-                        # it looks like table or link field is not declared by user... test data generation failed..
-                        pass
-                    elif("Attach" in field_doc.fieldtype):
-                        value = "assets/barista/sample-file.html"
+                    self.assign_random_value(
+                        flag_field, field_doc, new_doc, declared_field_doc)
 
                 return new_doc
         except Exception as e:
             frappe.log_error(frappe.get_traceback(
             ), (f'barista-TestDataGenerator-{testdata}-DocTypeField-[{current_fieldname}]-'+str(e))[:error_log_title_len])
+
+    def assign_random_value(self, flag_field, field_doc, new_doc, declared_field_doc):
+        if(flag_field == False and not field_doc.fetch_from):
+            # no declared field necessary for the test case. Create random field.
+            value = None
+            if (field_doc.fieldtype == "Data"):
+                # its a string of 140
+                value = (field_doc.label.split()[
+                    0] + str(random.randrange(0, 20000, 1)))[0:139]
+            elif (field_doc.fieldtype == "Check"):
+                # its a check
+                value = random.choice([0, 1])
+            elif(field_doc.fieldtype == "Currency"):
+                value = round(random.uniform(500.12, 22000.34), 2)
+            elif(field_doc.fieldtype == "Date"):
+                value = datetime.date.today() + datetime.timedelta(days=(random.randrange(0, 15, 1)))
+            elif(field_doc.fieldtype == "Datetime"):
+                value = datetime.datetime.now() + datetime.timedelta(minutes=(random.randrange(0, 200, 2)))
+            elif(field_doc.fieldtype == "Float"):
+                value = round(random.uniform(0, 22000.34), 2)
+            elif(field_doc.fieldtype == "Int"):
+                value = random.randrange(0, 200, 1)
+            elif(field_doc.fieldtype == "Long Text" or field_doc.fieldtype == "Small Text" or field_doc.fieldtype == "Text"):
+                value = (field_doc.label +
+                         str(random.randrange(0, 20000, 1)))
+            elif(field_doc.fieldtype == "Password"):
+                value = "Frappe@12345"
+            elif (field_doc.fieldtype == "Percent"):
+                value = round(random.uniform(0, 100), 2)
+            elif ("Link" in field_doc.fieldtype or field_doc.fieldtype == "Table"):
+                # it looks like table or link field is not declared by user... test data generation failed..
+                pass
+            elif("Attach" in field_doc.fieldtype):
+                value = "assets/barista/sample-file.html"
+
+            if value != None:
+                new_doc.set(
+                    declared_field_doc.docfield_fieldname, value)
 
     def create_testdata_function(self, testdata, run_name):
         generated_doc = None
