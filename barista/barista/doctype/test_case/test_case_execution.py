@@ -82,9 +82,7 @@ class TestCaseExecution():
                     'Test Run Log', {'test_run_name': run_name, 'test_data': testcase_doc.test_data}, 'test_record')
 
                 if (testdata_doc_test_record_name and testcase_doc.testcase_type == "CREATE"):
-                    # testdata_doc.test_record_name = None
                     testdata_doc_test_record_name = None
-                    # testdata_doc.save()
                     create_test_run_log(run_name, testcase_doc.test_data, None)
                 # get record document
                 new_record_doc = testdata_generator.create_testdata(
@@ -95,27 +93,19 @@ class TestCaseExecution():
                     if new_record_doc:
                         try:
                             new_record_doc.save()
-
-                            # testdata_doc.test_record_name = new_record_doc.name
                             testdata_doc_test_record_name = new_record_doc.name
-                            # testdata_doc.status = "CREATED"
-                            # testdata_doc.save()
+
                             create_test_run_log(
                                 run_name, testcase_doc.test_data, new_record_doc.name)
                             testdata_generator.set_record_name_child_table(
                                 new_record_doc, testdata_doc, True, run_name)
                             print("\033[0;33;93m    >>> Test Data created")
                         except frappe.DuplicateEntryError as e:
-                            # args = e.args
-                            # doctype = args[0]
-                            # docname = args[1]
                             new_record_doc = resolve_duplicate_entry_error(
                                 e, testdata_doc, run_name)
-                            # new_record_doc = frappe.get_doc(doctype, docname)
+
                             testdata_doc_test_record_name = new_record_doc.name
-                            # testdata_doc.test_record_name = new_record_doc.name
-                            # testdata_doc.status = "CREATED"
-                            # testdata_doc.save()
+
                             create_test_run_log(
                                 run_name, testcase_doc.test_data, new_record_doc.name)
                             testdata_generator.set_record_name_child_table(
@@ -136,8 +126,7 @@ class TestCaseExecution():
                     if testcase_doc.testcase_doctype != testdata_doc.doctype_name:
                         value_from_test_record_doc = frappe.db.get_value(
                             testdata_doc.doctype_name, testdata_doc_test_record_name, testcase_doc.test_data_docfield)
-                        # value_from_test_record_doc = frappe.db.get_value(
-                        #     testdata_doc.doctype_name, testdata_doc.test_record_name, testcase_doc.test_data_docfield)
+
                         all_existing_docs = frappe.get_all(testcase_doc.testcase_doctype, filters={
                             testcase_doc.test_case_docfield: value_from_test_record_doc})
                         if len(all_existing_docs) == 1:
@@ -158,9 +147,7 @@ class TestCaseExecution():
                             new_record_doc = resolve_unique_validation_error(
                                 e, testdata_doc, run_name)
                         testdata_doc_test_record_name = new_record_doc.name
-                        # testdata_doc.test_record_name = new_record_doc.name
-                        # testdata_doc.status = "CREATED"
-                        # testdata_doc.save()
+
                         create_test_run_log(
                             run_name, testdata_doc.name, new_record_doc.name)
 
@@ -187,10 +174,7 @@ class TestCaseExecution():
 
                             rd.rename_doc(update_field_doc.doctype_name,
                                           testdata_doc_test_record_name, new_name, force=True)
-                            # rd.rename_doc(update_field_doc.doctype_name,
-                            #               testdata_doc.test_record_name, new_name, force=True)
-                            # setting the new updated name in the Test Data record name
-                            # testdata_doc.test_record_name = new_name
+
                             testdata_doc_test_record_name = new_name
 
                             new_record_doc = frappe.get_doc(
@@ -224,9 +208,6 @@ class TestCaseExecution():
                                 child_testdata_doc = frappe.get_doc(
                                     'Test Data', update_field_doc.linkfield_name)
                                 if (child_testdata_doc.doctype_type == "Transaction"):
-                                    # since transaction remove existing record ref if any
-                                    # child_testdata_doc.test_record_name = None
-                                    # child_testdata_doc.save()
                                     create_test_run_log(
                                         run_name, child_testdata_doc.name, None)
 
@@ -235,41 +216,13 @@ class TestCaseExecution():
                                 try:
                                     if child_doc:
                                         child_doc.save()
-                                        # child_testdata_doc = frappe.get_doc(
-                                        #     'Test Data', update_field_doc.linkfield_name)
-                                        # child_testdata_doc_test_record_name = child_doc.name
-                                        # child_testdata_doc.test_record_name = child_doc.name
-                                        # child_testdata_doc.save()
-                                        # create_test_run_log(
-                                        #     run_name, child_testdata_doc.name, child_doc.name)
-
-                                        # new_record_doc.set(
-                                        #     field_doc.fieldname, child_doc.name)
                                     else:
                                         frappe.throw(
                                             f"Child Doc is None. Test Data of Child {update_field_doc.linkfield_name}. Test Data of Parent {testdata_doc.name}")
                                 except frappe.DuplicateEntryError as e:
-                                    # args = e.args
-                                    # doctype = args[0]
-                                    # docname = args[1]
-                                    # child_testdata_doc = frappe.get_doc(
-                                    #     'Test Data', update_field_doc.linkfield_name)
                                     child_doc = resolve_duplicate_entry_error(
                                         e, child_testdata_doc, run_name)
-                                    # child_doc = frappe.get_doc(
-                                    #     doctype, docname)
-
-                                    # child_testdata_doc_test_record_name = child_doc.name
-                                    # child_testdata_doc.test_record_name = child_doc.name
-                                    # child_testdata_doc.save()
-                                    # create_test_run_log(
-                                    #     run_name, child_testdata_doc.name, child_doc.name)
-
-                                    # new_record_doc.set(
-                                    #     field_doc.fieldname, child_doc.name)
                                 except frappe.UniqueValidationError as e:
-                                    # child_testdata_doc = frappe.get_doc(
-                                    #     'Test Data', update_field_doc.linkfield_name)
                                     child_doc = resolve_unique_validation_error(
                                         e, child_testdata_doc, run_name)
 
@@ -286,8 +239,6 @@ class TestCaseExecution():
                                 if not update_field_doc.docfield_code and update_field_doc.linkfield_name:
                                     value = frappe.db.get_value(
                                         'Test Run Log', {'test_run_name': run_name, 'test_data': update_field_doc.linkfield_name}, 'test_record')
-                                    # value = frappe.db.get_value(
-                                    #     'Test Data', update_field_doc.linkfield_name, 'test_record_name')
                                     new_record_doc.set(
                                         field_doc.fieldname, value)
                             elif new_record_doc:
@@ -318,8 +269,6 @@ class TestCaseExecution():
                 try:
                     record_doc = frappe.get_doc(
                         testdata_doc.doctype_name, testdata_doc_test_record_name)
-                    # record_doc = frappe.get_doc(
-                    #     testdata_doc.doctype_name, testdata_doc.test_record_name)
                     record_doc.delete()
                 except Exception as e:
                     frappe.log_error(frappe.get_traceback(
@@ -339,9 +288,7 @@ class TestCaseExecution():
                             new_record_doc = resolve_unique_validation_error(
                                 e, testdata_doc, run_name)
                         testdata_doc_test_record_name = new_record_doc.name
-                        # testdata_doc.test_record_name = new_record_doc.name
-                        # testdata_doc.status = "CREATED"
-                        # testdata_doc.save()
+
                         create_test_run_log(
                             run_name, testdata_doc.name, new_record_doc.name)
                     apply_workflow(new_record_doc, testcase_doc.workflow_state)
@@ -358,19 +305,26 @@ class TestCaseExecution():
                 try:
                     for param in testcase_doc.function_parameters:
                         parameter = param.parameter
-                        test_record_name = frappe.db.get_value(
-                            'Test Run Log', {'test_run_name': run_name, 'test_data': param.test_data}, 'test_record')
-                        # test_record_name = frappe.db.get_value(
-                        #     'Test Data', param.test_data, 'test_record_name')
-                        test_record_doctype = frappe.db.get_value(
-                            'Test Data', param.test_data, 'doctype_name')
-                        test_record_doc = frappe.get_doc(
-                            test_record_doctype, test_record_name)
-                        if param.is_object == 1:
-                            kwargs[parameter] = test_record_doc.as_dict()
+
+                        if param.value and param.value.strip()[0] in ['{', '[']:
+                            value = eval(param.value)
                         else:
-                            kwargs[parameter] = test_record_doc.get(
-                                param.field)
+                            value = param.value
+                        kwargs[parameter] = value
+
+                        if param.test_data:
+                            test_record_name = frappe.db.get_value(
+                                'Test Run Log', {'test_run_name': run_name, 'test_data': param.test_data}, 'test_record')
+
+                            test_record_doctype = frappe.db.get_value(
+                                'Test Data', param.test_data, 'doctype_name')
+                            test_record_doc = frappe.get_doc(
+                                test_record_doctype, test_record_name)
+                            if param.is_object == 1:
+                                kwargs[parameter] = test_record_doc.as_dict()
+                            else:
+                                kwargs[parameter] = test_record_doc.get(
+                                    param.field)
 
                     print("\033[0;33;93m   >>> Executing Function --",
                           testcase_doc.function_name)
@@ -380,8 +334,7 @@ class TestCaseExecution():
                         if testcase_doc.testcase_doctype and testcase_doc.test_data:
                             test_record_name = frappe.db.get_value(
                                 'Test Run Log', {'test_run_name': run_name, 'test_data': testcase_doc.test_data}, 'test_record')
-                            # test_record_name = frappe.db.get_value(
-                            #     'Test Data', testcase_doc.test_data, 'test_record_name')
+
                             context = frappe.get_doc(
                                 testcase_doc.testcase_doctype, test_record_name).as_dict()
                             context_dict = {"doc": context}
@@ -403,8 +356,7 @@ class TestCaseExecution():
                     else:
                         test_data_record_name = frappe.db.get_value(
                             'Test Run Log', {'test_run_name': run_name, 'test_data': testcase_doc.test_data}, 'test_record')
-                        # test_data_record_name = frappe.db.get_value(
-                        #     'Test Data', testcase_doc.test_data, 'test_record_name')
+
                         test_record_doc = frappe.get_doc(
                             testcase_doc.testcase_doctype, test_data_record_name)
                         function_result = test_record_doc.run_method(

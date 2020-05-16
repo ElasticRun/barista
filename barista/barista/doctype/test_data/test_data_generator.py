@@ -253,7 +253,7 @@ class TestDataGenerator():
 
             for param in testdata_doc.function_parameters:
                 key = param.parameter
-                if param.value and param.value[0] in ['{', '[']:
+                if param.value and param.value.strip()[0] in ['{', '[']:
                     value = eval(param.value)
                 else:
                     value = param.value
