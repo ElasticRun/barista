@@ -313,7 +313,7 @@ class TestDataGenerator():
 
             if value != None:
                 new_doc.set(
-                    declared_field_doc.docfield_fieldname, value)
+                    field_doc.fieldname, value)
 
     def create_testdata_function(self, testdata, run_name):
         generated_doc = None
