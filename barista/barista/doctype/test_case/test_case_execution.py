@@ -361,14 +361,14 @@ class TestCaseExecution():
                             testcase_doc.testcase_doctype, test_data_record_name)
                         function_result = test_record_doc.run_method(
                             method, **kwargs)
+                    print("\033[0;32;92m     >>> Function Executed")
                 except Exception as e:
                     frappe.log_error(frappe.get_traceback(
                     ), ('barista-FUNCTION-'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
                     error_message = str(e)
                     print(
-                        "\033[0;31;91m       >>>> Execution of function failed\n      ", str(e))
-                print("\033[0;32;92m     >>> Function Executed")
-
+                        "\033[0;31;91m       >>>> Execution of function failed\n       Error occurred :", str(e))
+                
             test_result_doc.execution_time = get_execution_time(start_time)
 
             assertions = frappe.get_list(
