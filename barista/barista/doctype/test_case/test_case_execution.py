@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from barista.barista.doctype.test_data.test_data_generator import TestDataGenerator, create_test_run_log, set_record_name_child_table, resolve_unique_validation_error, resolve_duplicate_entry_error
+from barista.barista.doctype.test_data.test_data_generator import TestDataGenerator, create_test_run_log, resolve_unique_validation_error, resolve_duplicate_entry_error
 from frappe.model.workflow import apply_workflow
 import frappe.model.rename_doc as rd
 from frappe.utils.jinja import validate_template, render_template
