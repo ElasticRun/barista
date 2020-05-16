@@ -65,29 +65,15 @@ class TestDataGenerator():
                             run_name, testdata, created_doc.name)
                     elif testdata_doc.doctype_type == 'Master':
                         try:
-                            try:
-                                new_doc.save(True)
-                                created_doc = new_doc
-                                testdata_doc = frappe.get_doc(
-                                    "Test Data", testdata)
-                                # testdata_doc.test_record_name = created_doc.name
-                                # testdata_doc.status = 'CREATED'
-                                # testdata_doc.save()
-                                create_test_run_log(
-                                    run_name, testdata, created_doc.name)
-                            except frappe.UniqueValidationError as e:
-                                testdata_doc = frappe.get_doc(
-                                    "Test Data", testdata)
-                                new_doc = resolve_unique_validation_error(
-                                    e, testdata_doc, run_name)
+                            new_doc.save(True)
                             created_doc = new_doc
-                            testdata_doc = frappe.get_doc(
-                                "Test Data", testdata)
+                            # testdata_doc = frappe.get_doc(
+                            #     "Test Data", testdata)
                             # testdata_doc.test_record_name = created_doc.name
                             # testdata_doc.status = 'CREATED'
                             # testdata_doc.save()
-                            create_test_run_log(
-                                run_name, testdata, created_doc.name)
+                            # create_test_run_log(
+                            #     run_name, testdata, created_doc.name)
                         except frappe.DuplicateEntryError as e:
                             created_doc = resolve_duplicate_entry_error(
                                 e, testdata_doc, run_name)
@@ -97,7 +83,11 @@ class TestDataGenerator():
                             # created_doc = frappe.get_doc(doctype, docname)
                             # create_test_run_log(
                             #     run_name, testdata, created_doc.name)
-
+                        except frappe.UniqueValidationError as e:
+                            created_doc = resolve_unique_validation_error(
+                                e, testdata_doc, run_name)
+                        create_test_run_log(
+                            run_name, testdata, created_doc.name)
                     self.set_record_name_child_table(
                         created_doc, testdata_doc, run_name=run_name)
             except Exception as e:
@@ -200,34 +190,18 @@ class TestDataGenerator():
                                 child_doc = self.create_testdata(
                                     declared_field_doc.linkfield_name, run_name)
                                 try:
-                                    try:
-                                        child_doc.save()
-                                        child_testdata_doc = frappe.get_doc(
-                                            'Test Data', declared_field_doc.linkfield_name)
-                                        # child_testdata_doc.test_record_name = child_doc.name
-                                        # child_testdata_doc.status = 'CREATED'  # Recently added this line
-                                        # child_testdata_doc.save()
-                                        create_test_run_log(
-                                            run_name, child_testdata_doc.name, child_doc.name)
+                                    child_doc.save()
+                                    # child_testdata_doc = frappe.get_doc(
+                                    #     'Test Data', declared_field_doc.linkfield_name)
+                                    # child_testdata_doc.test_record_name = child_doc.name
+                                    # child_testdata_doc.status = 'CREATED'  # Recently added this line
+                                    # child_testdata_doc.save()
 
-                                        new_doc.set(field_doc.fieldname,
-                                                    child_doc.name)
-                                    except frappe.UniqueValidationError as e:
-                                        child_testdata_doc = frappe.get_doc(
-                                            'Test Data', declared_field_doc.linkfield_name)
-                                        child_doc = resolve_unique_validation_error(
-                                            e, child_testdata_doc, run_name)
-                                        # child_testdata_doc.test_record_name = child_doc.name
-                                        # child_testdata_doc.status = 'CREATED'  # Recently added this line
-                                        # child_testdata_doc.save()
-                                        create_test_run_log(
-                                            run_name, child_testdata_doc.name, child_doc.name)
-
-                                        new_doc.set(field_doc.fieldname,
-                                                    child_doc.name)
+                                    # new_doc.set(field_doc.fieldname,
+                                    #             child_doc.name)
                                 except frappe.DuplicateEntryError as e:
-                                    child_testdata_doc = frappe.get_doc(
-                                        'Test Data', declared_field_doc.linkfield_name)
+                                    # child_testdata_doc = frappe.get_doc(
+                                    #     'Test Data', declared_field_doc.linkfield_name)
                                     child_doc = resolve_duplicate_entry_error(
                                         e, child_testdata_doc, run_name)
 
@@ -243,9 +217,14 @@ class TestDataGenerator():
                                     # child_testdata_doc.save()
                                     # create_test_run_log(
                                     #     run_name, child_testdata_doc.name, child_doc.name)
+                                except frappe.UniqueValidationError as e:
+                                    child_doc = resolve_unique_validation_error(
+                                        e, child_testdata_doc, run_name)
 
-                                    new_doc.set(field_doc.fieldname,
-                                                child_doc.name)
+                                create_test_run_log(
+                                    run_name, child_testdata_doc.name, child_doc.name)
+                                new_doc.set(field_doc.fieldname,
+                                            child_doc.name)
 
                             elif (declared_field_doc.docfield_code_value == "Code"):
                                 if declared_field_doc.docfield_code and not declared_field_doc.linkfield_name:
