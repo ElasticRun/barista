@@ -248,8 +248,8 @@ class TestDataGenerator():
                                     new_doc.set(declared_field_doc.docfield_fieldname, str(
                                         declared_field_doc.docfield_value))
 
-                    self.assign_random_value(
-                        flag_field, field_doc, new_doc, declared_field_doc)
+                    # self.assign_random_value(
+                    #     flag_field, field_doc, new_doc, declared_field_doc)
 
                 return new_doc
         except Exception as e:
