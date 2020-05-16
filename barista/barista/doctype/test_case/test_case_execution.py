@@ -91,7 +91,6 @@ class TestCaseExecution():
                     testcase_doc.test_data, run_name)
                 error_message = None
             if (testcase_doc.testcase_type == "CREATE"):
-                start_time = time.time()
                 try:
                     if new_record_doc:
                         try:
@@ -132,7 +131,6 @@ class TestCaseExecution():
 
             elif (testcase_doc.testcase_type == "UPDATE"):
                 try:
-                    start_time = time.time()
                     create_new = False
                     if testcase_doc.testcase_doctype != testdata_doc.doctype_name:
                         value_from_test_record_doc = frappe.db.get_value(
@@ -318,10 +316,8 @@ class TestCaseExecution():
                 testdata_generator.set_record_name_child_table(
                     new_record_doc, testcase_doc, create_new, run_name)
             elif (testcase_doc.testcase_type == "READ"):
-                start_time = time.time()
                 pass
             elif (testcase_doc.testcase_type == "DELETE"):
-                start_time = time.time()
                 try:
                     record_doc = frappe.get_doc(
                         testdata_doc.doctype_name, testdata_doc_test_record_name)
@@ -361,7 +357,6 @@ class TestCaseExecution():
                         "\033[0;31;91m    >>> Error in applying Workflow - "+str(e))
 
             elif (testcase_doc.testcase_type == "FUNCTION"):
-                start_time = time.time()
                 kwargs = {}
                 try:
                     for param in testcase_doc.function_parameters:
