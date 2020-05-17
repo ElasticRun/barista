@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2020-05-17 13:46:17.880171",
+ "modified": "2020-05-17 16:43:25.095107",
  "modified_by": "Administrator",
  "module": "Barista",
  "name": "test-coverage",
@@ -19,5 +19,5 @@
  "standard": "Yes",
  "style": null,
  "system_page": 0,
- "title": "Test Coverage"
+ "title": "Barista Test Coverage"
 }
