@@ -128,10 +128,4 @@ Barista uses Coverage.py  to track the coverage while test execution and publish
 
 Code coverage of the new change which is going to be released is important information to verify. To achieve this we are integrating with repositories like Gitlab from where we can get details of the change in a merge request and cross verify it with the test code coverage. This can ensure the change which is getting released has been tested and is part of the test cases.
 
-  
 
-<h2>Contribute</h2>
-
- 
-
-We are in the process of creating a repository on GitHub and making this app available to the entire ERPNext community for them to use it and contribute.
