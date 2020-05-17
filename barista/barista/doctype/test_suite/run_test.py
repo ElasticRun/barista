@@ -14,6 +14,8 @@ import shutil
 import sqlite3
 import click
 import sys
+import os
+from pathlib import Path
 from coverage.numbits import register_sqlite_functions
 
 
@@ -29,14 +31,14 @@ class RunTest():
               app_name + " *************\n\n")
         if len(suites) == 0:
             suites = frappe.get_all("Test Suite", filters={
-                                    'app_name': app_name}, order_by='creation asc')
+                'app_name': app_name}, order_by='creation asc')
         else:
             suite_name = []
             for suite in suites:
                 suite_name.append({'name': suite})
             suites = suite_name
 
-        run_name_path = run_name.replace(' ', '_').replace('-', '_')
+        run_name_path = run_name.replace(' ', '__').replace('-', '_')
         barista_app_path = f"{frappe.get_app_path('barista')}/public/test-coverage/{run_name_path}/"
         data_file_path = str(f"{barista_app_path}{app_name}.coverage")
 
@@ -56,7 +58,7 @@ class RunTest():
             try:
                 generatorObj.create_pretest_data(suite.get('name'), run_name)
                 testcases = frappe.get_list('Testcase Item', filters={
-                                            'parent': suite.get('name')}, fields=["testcase"], order_by="idx")
+                    'parent': suite.get('name')}, fields=["testcase"], order_by="idx")
                 total_testcases = len(testcases)
                 testcase_srno = 0
                 for testcase in testcases:
@@ -243,17 +245,17 @@ def fix_series():
 # bench execute barista.barista.doctype.test_suite.run_test.run_test --kwargs "{'app_name':'velocityduos','suites':[]}"
 def run_test(app_name, suites=[]):
     print('''
-            This commmand is deprecated.
-        ''', end='')
+			This commmand is deprecated.
+		''', end='')
     print('''
-            Please use bench execute barista.run --kwargs "{'app_name':'velocityduos','suites':[],'reset_testdata':0,'clear_testresult':0,'run_name':'Release 1'}"
-        ''', end='')
+			Please use bench execute barista.run --kwargs "{'app_name':'velocityduos','suites':[],'reset_testdata':0,'clear_testresult':0,'run_name':'Release 1'}"
+		''', end='')
     print('''
-            app_name is mandatory while all other parameters are optional
-        ''', end='')
+			app_name is mandatory while all other parameters are optional
+		''', end='')
     print('''
-            You can use bench execute barista.run --kwargs "{'app_name':'velocityduos'}"
-        ''')
+			You can use bench execute barista.run --kwargs "{'app_name':'velocityduos'}"
+		''')
     return
     # RunTest().run_complete_suite(app_name, suites)
 
@@ -306,3 +308,49 @@ def safe_cast(value, value_type, default):
         return value_type(value)
     except Exception:
         return default
+
+
+@frappe.whitelist()
+def get_test_coverage():
+    # bench execute barista.barista.doctype.test_suite.run_test.get_test_coverage
+    test_coverage_lst = []
+    try:
+        barista_app_path = frappe.get_app_path('barista')
+        test_coverage_path = f"{barista_app_path}/public/test-coverage"
+
+        paths = sorted(Path(test_coverage_path).iterdir(),
+                       key=os.path.getmtime)
+
+        for path in paths:
+            if path.is_dir():
+                path_parts = str(path).split('/')
+                d = path_parts.pop()
+                run_name = d.replace('__', ' ').replace('_', '-')
+                test_coverage_lst.append({
+                    'coverage_path': f"/assets/barista/test-coverage/{d}/index.html",
+                    'test_run_name': run_name
+                })
+    except Exception as e:
+        print('error-', e)
+        frappe.log_error(frappe.get_traceback(), 'barista-get_test_coverage')
+
+    return test_coverage_lst
+
+
+@frappe.whitelist()
+def delete_test_coverage(run_name):
+    # barista.barista.doctype.test_suite.run_test.delete_test_coverage
+    try:
+        run_name_path = run_name.replace(' ', '__').replace('-', '_')
+        barista_app_path = f"{frappe.get_app_path('barista')}/public/test-coverage/{run_name_path}/"
+
+        shutil.rmtree(barista_app_path, ignore_errors=True)
+        frappe.db.sql('''
+					delete from `tabTest Run Log` where test_run_name=%(run_name)s
+		''', {'run_name': run_name}, auto_commit=1)
+        frappe.db.sql('''
+					delete from `tabTest Result` where test_run_name=%(run_name)s
+		''', {'run_name': run_name}, auto_commit=1)
+    except Exception:
+        frappe.log_error(frappe.get_traceback(),
+                         'barista-delete_test_coverage')

@@ -75,5 +75,16 @@ def get_data():
                     "label": "Test Run Log Test Data Statistics"
                 }
             ]
+        },
+        {
+            "label": _('Test Coverage'),
+            "items": [
+                {
+                    'type': "doctype",
+                    'name': 'Test Result',
+                    'link': '#test-coverage',
+                    "label": "Test Coverage"
+                }
+            ]
         }
     ]
