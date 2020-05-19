@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2020-05-17 13:46:15.319127",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2020-05-17 16:43:25.095107",
+ "modified_by": "Administrator",
+ "module": "Barista",
+ "name": "test-coverage",
+ "owner": "Administrator",
+ "page_name": "Test Coverage",
+ "roles": [
+  {
+   "role": "All"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Barista Test Coverage"
+}

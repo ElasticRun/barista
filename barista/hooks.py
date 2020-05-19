@@ -131,4 +131,6 @@ fixtures = [
 
 after_migrate = [
     'barista.barista.doctype.test_suite.run_test.fix_series',
+    'barista.barista.doctype.test_suite.run_test.fix_assertion_type_status',
+    'barista.barista.doctype.test_suite.run_test.fix_testcase_type_status',
 ]

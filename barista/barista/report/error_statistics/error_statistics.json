@@ -1,0 +1,26 @@
+{
+ "add_total_row": 0,
+ "creation": "2020-05-07 19:42:18.883697",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "ElasticRun",
+ "modified": "2020-05-07 20:00:05.588666",
+ "modified_by": "Administrator",
+ "module": "Barista",
+ "name": "Error Statistics",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "SELECT count(error) as 'Error Count',\n       replace(METHOD, 'barista-', '') as 'Error:Text:1500'\nFROM `tabError Log`\nWHERE METHOD LIKE 'barista%%'\nGROUP BY error\nORDER BY METHOD;",
+ "ref_doctype": "Error Log",
+ "report_name": "Error Statistics",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ]
+}

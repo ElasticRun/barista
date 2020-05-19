@@ -27,6 +27,11 @@ def get_data():
                     "type": "doctype",
                     "name": "Test Result",
                     "description": _("Test Result")
+                },
+                {
+                    "type": "doctype",
+                    "name": "Test Run Log",
+                    "description": _("Test Run Log")
                 }
             ]
 
@@ -48,7 +53,7 @@ def get_data():
                     "description": _("Types of Test Case on Doctype"),
                     "label": "Types of Test Case on Doctype"
                 },
-                 {
+                {
                     "type": "doctype",
                     "link": "query-report/Assertion Type Wise Test Cases",
                     "name": "Test Result",
@@ -61,6 +66,24 @@ def get_data():
                     "name": "Test Result",
                     "description": _("Test Execution Statistics"),
                     "label": "Test Execution Statistics"
+                },
+                {
+                    "type": "doctype",
+                    "link": "query-report/Test Run Log Test Data Statistics",
+                    "name": "Test Result",
+                    "description": _("Test Run Log Test Data Statistics"),
+                    "label": "Test Run Log Test Data Statistics"
+                }
+            ]
+        },
+        {
+            "label": _('Test Coverage'),
+            "items": [
+                {
+                    'type': "doctype",
+                    'name': 'Test Result',
+                    'link': '#test-coverage',
+                    "label": "Test Coverage"
                 }
             ]
         }

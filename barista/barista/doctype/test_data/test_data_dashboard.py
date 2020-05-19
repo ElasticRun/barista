@@ -13,7 +13,7 @@ def get_data():
         },
         'transactions': [
             {
-                'items': ['Test Case'],
+                'items': ['Test Case', 'Test Run Log'],
             },
             {
                 'items': ['Test Result']

@@ -19,4 +19,4 @@ class TestCase(Document):
             for row in self.update_fields:
                 if row.docfield_fieldname not in docfields:
                     frappe.throw(
-                        f"Invalid DocField {row.docfield_fieldname} in {self.testcase_doctype}")
+                        f"Invalid DocField {row.docfield_fieldname} in {self.testcase_doctype} of Test Case {self.name}")
