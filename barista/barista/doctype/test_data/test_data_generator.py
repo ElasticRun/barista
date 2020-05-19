@@ -48,9 +48,9 @@ class TestDataGenerator():
         for testdata in all_testdata:
             try:
                 testdata_doc = frappe.get_doc("Test Data", testdata)
-                if (testdata_doc.use_script == 1):
+                if (testdata_doc.create_using == 'Sql Script'):
                     self.create_testdata(testdata, run_name)
-                elif (testdata_doc.use_function == 1):
+                elif (testdata_doc.create_using == 'Function'):
                     self.create_testdata_function(testdata, run_name)
                 else:
                     new_doc = self.create_testdata(testdata, run_name)
@@ -87,10 +87,10 @@ class TestDataGenerator():
             current_fieldname = ''
             testdata_doc = frappe.get_doc('Test Data', testdata)
             # first check if use script is true
-            if (testdata_doc.use_script == 1):
+            if (testdata_doc.create_using == 'Sql Script'):
                 # if Yes run the script
                 frappe.db.sql(testdata_doc.insert_script, auto_commit=1)
-            elif (testdata_doc.use_function == 1):
+            elif (testdata_doc.create_using == 'Function'):
                 return self.create_testdata_function(testdata, run_name)
             else:
                 testdata_doc_test_record_name = frappe.db.get_value(

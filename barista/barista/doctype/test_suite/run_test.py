@@ -354,3 +354,8 @@ def delete_test_coverage(run_name):
     except Exception:
         frappe.log_error(frappe.get_traceback(),
                          'barista-delete_test_coverage')
+
+
+def fix_create_using():
+    frappe.db.sql(
+        "update `tabTest Data` set create_using='Data' where create_using is null or create_using=''", auto_commit=1)
