@@ -289,6 +289,27 @@ class TestDataGenerator():
                 if result:
                     test_record_to_save = result.get('name')
 
+            if len(self.conditions):
+                filter_dct = {}
+                for c in self.conditions:
+                    filter_dct[c.reference_field] = c.value
+                    if c.test_data:
+                        test_record_name = frappe.db.get_value(
+                            'Test Run Log', {'test_run_name': run_name, 'test_data': c.test_data}, 'test_record')
+                        test_record_doctype = frappe.db.get_value(
+                            'Test Data', c.test_data, 'doctype_name')
+                        test_record_doc = frappe.get_doc(
+                            test_record_doctype, test_record_name)
+                        if c.field:
+                            filter_dct[c.reference_field] = test_record_doc.get(
+                                c.field)
+                        else:
+                            filter_dct[c.reference_field] = test_record_doc.get(
+                                'name')
+                records = frappe.get_all(self.doctype_name, filter_dct)
+                if len(records) == 1:
+                    test_record_to_save = records[0]['name']
+
             create_test_run_log(run_name, testdata, test_record_to_save)
 
             generated_doc = frappe.get_doc(
