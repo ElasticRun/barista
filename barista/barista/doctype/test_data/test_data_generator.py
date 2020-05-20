@@ -315,9 +315,14 @@ class TestDataGenerator():
                             filter_dct[c.reference_field] = test_record_doc.get(
                                 'name')
 
-                records = frappe.get_all(testdata_doc.doctype_name, filter_dct)
-                if len(records) == 1:
-                    test_record_to_save = records[0]['name']
+                    records = frappe.get_all(
+                        c.reference_doctype, filter_dct, fields=['*'])
+                    if len(records):
+                        if not c.field_to_refer:
+                            c.field_to_refer = 'name'
+                        if records[0].get(c.field_to_refer):
+                            test_record_to_save = records[0].get(
+                                c.field_to_refer)
 
             create_test_run_log(run_name, testdata, test_record_to_save)
 
