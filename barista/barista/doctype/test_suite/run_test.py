@@ -20,6 +20,9 @@ from coverage.numbits import register_sqlite_functions
 
 
 error_log_title_len = 1000
+yellow = '\033[0;33;93m'
+green = '\033[0;32;92m'
+red = '\033[0;31;91m'
 
 
 class RunTest():
@@ -27,7 +30,7 @@ class RunTest():
     def run_complete_suite(self, app_name, suites=[], run_name=None):
         start_time = time.time()
         alter_error_log()
-        print("\033[0;33;93m************ Running all test cases for App - " +
+        print(f"{yellow}************ Running all Test Cases for App - " +
               app_name + " *************\n\n")
         if len(suites) == 0:
             suites = frappe.get_all("Test Suite", filters={
@@ -53,7 +56,7 @@ class RunTest():
         suite_srno = 0
         for suite in suites:
             suite_srno += 1
-            print("\033[0;32;92m************ Suite - " +
+            print(f"{green}************ Suite - " +
                   suite.get('name') + " *************\n\n")
             try:
                 generatorObj.create_pretest_data(suite.get('name'), run_name)
@@ -69,12 +72,13 @@ class RunTest():
             except Exception as e:
                 frappe.log_error(frappe.get_traceback(
                 ), ('barista-Suite Execution Failed-'+suite.get('name')+'-'+str(e))[:error_log_title_len])
+
                 print(
-                    "\033[0;31;91mAn Error occurred which will cause false test case result in the suite - " + str(suite.get('name')))
-                print("\033[0;31;91m*************ERROR****************")
+                    f"{red}An Error occurred which will cause false test case result in the suite - " + str(suite.get('name')))
+                print(f"{red}*************ERROR****************")
                 print(
-                    "\033[0;31;91m The error encountered is - " + str(e) + "\n")
-                print("\033[0;31;91m*************ERROR****************")
+                    f"{red}The error encountered is - " + str(e) + "\n")
+                print(f"{red}*************ERROR****************")
 
         objCoverage.stop()
         objCoverage.save()
@@ -84,7 +88,7 @@ class RunTest():
             directory=barista_app_path, skip_empty=True, omit=['*test_*'])
 
         print(
-            f"\033[0;33;93m************ Execution ends. Verify coverage at - /assets/barista/test-coverage/{run_name_path}/index.html")
+            f"{green}************ Execution ends. Verify coverage at - /assets/barista/test-coverage/{run_name_path}/index.html")
 
         end_time = round(time.time() - start_time, 2)
         time_uom = 'seconds'
@@ -210,7 +214,7 @@ def alter_error_log():
 
 # bench execute barista.barista.doctype.test_suite.run_test.fix_series
 def fix_series():
-    print('Previous Series-', frappe.db.sql(
+    print(f'{yellow}Previous Series-', frappe.db.sql(
         """select * from `tabSeries` where name in ('TestData-','TestCase-')""", as_dict=1))
     test_data_series = frappe.db.sql_list(
         """select * from `tabSeries` where name='TestData-';""")
@@ -238,26 +242,8 @@ def fix_series():
         frappe.db.sql(
             f"""update `tabSeries` set current={max_test_case_series} where name="TestCase-";""", auto_commit=1)
 
-    print('Current Series-', frappe.db.sql(
+    print(f'{yellow}Current Series-', frappe.db.sql(
         """select * from `tabSeries` where name in ('TestData-','TestCase-')""", as_dict=1))
-
-
-# bench execute barista.barista.doctype.test_suite.run_test.run_test --kwargs "{'app_name':'velocityduos','suites':[]}"
-def run_test(app_name, suites=[]):
-    print('''
-			This commmand is deprecated.
-		''', end='')
-    print('''
-			Please use bench execute barista.run --kwargs "{'app_name':'velocityduos','suites':[],'reset_testdata':0,'clear_testresult':0,'run_name':'Release 1'}"
-		''', end='')
-    print('''
-			app_name is mandatory while all other parameters are optional
-		''', end='')
-    print('''
-			You can use bench execute barista.run --kwargs "{'app_name':'velocityduos'}"
-		''')
-    return
-    # RunTest().run_complete_suite(app_name, suites)
 
 
 def fix_assertion_type_status():
@@ -331,7 +317,6 @@ def get_test_coverage():
                     'test_run_name': run_name
                 })
     except Exception as e:
-        print('error-', e)
         frappe.log_error(frappe.get_traceback(), 'barista-get_test_coverage')
 
     return test_coverage_lst

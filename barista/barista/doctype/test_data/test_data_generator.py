@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils.jinja import validate_template, render_template
 import ast
 import json
 import requests
@@ -36,6 +37,8 @@ import datetime
 import dateutil
 
 error_log_title_len = 1000
+yellow = '\033[0;33;93m'
+red = '\033[0;31;91m'
 
 
 class TestDataGenerator():
@@ -44,7 +47,7 @@ class TestDataGenerator():
         all_testdata = frappe.db.sql_list(
             """select distinct td.name from `tabTest Data` td join `tabTestdata Item` tdi on tdi.test_data=td.name where tdi.parent=%(parent)s order by tdi.idx""", {'parent': suite})
         if len(all_testdata) != 0:
-            print('\033[0;33;93m Creating Pre-Test Data')
+            print(f'{yellow}Creating Pre-Test Data')
         for testdata in all_testdata:
             try:
                 testdata_doc = frappe.get_doc("Test Data", testdata)
@@ -78,7 +81,7 @@ class TestDataGenerator():
                 frappe.log_error(frappe.get_traceback(
                 ), (f'barista-TestDataGenerator-{testdata}-{str(e)}')[:error_log_title_len])
         if len(all_testdata) != 0:
-            print('\033[0;33;93m Pre-Test Data created successfully')
+            print(f'{yellow}Pre-Test Data created successfully')
         print('')
         frappe.db.commit()
 
@@ -253,10 +256,15 @@ class TestDataGenerator():
 
             for param in testdata_doc.function_parameters:
                 key = param.parameter
-                if param.value and param.value.strip()[0] in ['{', '[']:
+
+                if param.value and param.value.strip()[0] in ['{', '['] and '{{' not in param.value:
                     value = eval(param.value)
+                elif param.value and '{{' in param.value:
+                    value = self.resolve_jinja(
+                        param.value, param.test_data, run_name)
                 else:
                     value = param.value
+
                 kwargs[key] = value
                 if param.test_data:
                     test_record_name = frappe.db.get_value(
@@ -268,7 +276,7 @@ class TestDataGenerator():
                             test_record_doctype, test_record_name)
                         if param.is_object:
                             kwargs[key] = test_record_doc.as_dict()
-                        else:
+                        elif param.field and not param.value:
                             kwargs[key] = test_record_doc.get(
                                 param.field)
 
@@ -289,9 +297,9 @@ class TestDataGenerator():
                 if result:
                     test_record_to_save = result.get('name')
 
-            if len(self.conditions):
+            if len(testdata_doc.conditions):
                 filter_dct = {}
-                for c in self.conditions:
+                for c in testdata_doc.conditions:
                     filter_dct[c.reference_field] = c.value
                     if c.test_data:
                         test_record_name = frappe.db.get_value(
@@ -306,7 +314,8 @@ class TestDataGenerator():
                         else:
                             filter_dct[c.reference_field] = test_record_doc.get(
                                 'name')
-                records = frappe.get_all(self.doctype_name, filter_dct)
+
+                records = frappe.get_all(testdata_doc.doctype_name, filter_dct)
                 if len(records) == 1:
                     test_record_to_save = records[0]['name']
 
@@ -318,6 +327,28 @@ class TestDataGenerator():
             frappe.log_error(frappe.get_traceback(
             ), (f'barista-TestDataGenerator-{testdata}-Function-[{method}]-'+str(e))[:error_log_title_len])
         return generated_doc
+
+    def resolve_jinja(self, jinja, testdata, run_name):
+        resolved_jinja = ''
+        try:
+            context_dict = {}
+            test_record_name = frappe.db.get_value(
+                'Test Run Log', {'test_run_name': run_name, 'test_data': testdata}, 'test_record')
+            test_record_doctype = frappe.db.get_value(
+                'Test Data', testdata, 'doctype_name')
+            context = frappe.get_doc(
+                test_record_doctype, test_record_name).as_dict()
+            context_dict = {"doc": context}
+            try:
+                validate_template(jinja)
+                resolved_jinja = render_template(
+                    jinja, context_dict)
+            except Exception as e:
+                print(f"{red}       >>>> Error in Json Parameter\n      ", str(e))
+        except Exception as e:
+            frappe.log_error(frappe.get_traceback(
+            ), (f'barista-TestDataGenerator-{testdata}-Jinja-'+str(e))[:error_log_title_len])
+        return resolved_jinja
 
     def set_record_name_child_table(self, created_doc, parent_doc, create_new_child=False, run_name=None):
         parenttype = None
