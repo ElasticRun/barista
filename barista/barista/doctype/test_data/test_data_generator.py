@@ -294,7 +294,7 @@ class TestDataGenerator():
             if testdata_doc.eval_function_result:
                 test_record_to_save = eval(testdata_doc.eval_function_result)
             else:
-                if result:
+                if result and type(result) != str:
                     test_record_to_save = result.get('name')
 
             if len(testdata_doc.conditions):
@@ -316,7 +316,7 @@ class TestDataGenerator():
                                 'name')
 
                     records = frappe.get_all(
-                        c.reference_doctype, filter_dct, fields=['*'])
+                        c.reference_doctype, filters=filter_dct, fields=["*"])
                     if len(records):
                         if not c.field_to_refer:
                             c.field_to_refer = 'name'
