@@ -490,13 +490,12 @@ class TestCaseExecution():
             validation_doctype = frappe.get_all(assertion_doc.doctype_name, filters={
                 assertion_doc.reference_field: filter_field_value})
             if (len(validation_doctype) == record_count):
-                records = [doc['name'] for doc in validation_doctype]
+                records = [str(doc['name']) for doc in validation_doctype]
                 # Assertion is successful
                 assertion_result = frappe.new_doc("Assertion Result")
                 assertion_result.assertion = assertion_doc.name
                 assertion_result.assertion_status = "Passed"
-                assertion_result.assertion_result = "Record found - " + \
-                    ','.join(records)
+                assertion_result.assertion_result = f"Record found - {','.join(records)}"
                 print("\033[0;32;92m       >>>> Assertion Passed")
             else:
                 assertion_result.assertion_status = "Failed"
