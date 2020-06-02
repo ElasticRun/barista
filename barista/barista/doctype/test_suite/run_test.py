@@ -344,3 +344,8 @@ def delete_test_coverage(run_name):
 def fix_create_using():
     frappe.db.sql(
         "update `tabTest Data` set create_using='Data' where create_using is null or create_using=''", auto_commit=1)
+
+
+def fix_object_type():
+    frappe.db.sql(
+        "update `tabFunction Parameter` set object_type='json' where object_type is null or object_type=''", auto_commit=1)

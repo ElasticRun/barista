@@ -275,7 +275,10 @@ class TestDataGenerator():
                         test_record_doc = frappe.get_doc(
                             test_record_doctype, test_record_name)
                         if param.is_object:
-                            kwargs[key] = test_record_doc.as_dict()
+                            if param.object_type == 'dict':
+                                kwargs[key] = test_record_doc.as_dict()
+                            elif param.object_type == 'json':
+                                kwargs[key] = test_record_doc.as_json()
                         elif param.field and not param.value:
                             kwargs[key] = test_record_doc.get(
                                 param.field)

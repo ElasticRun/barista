@@ -316,7 +316,10 @@ class TestCaseExecution():
                             test_record_doc = frappe.get_doc(
                                 test_record_doctype, test_record_name)
                             if param.is_object == 1:
-                                kwargs[parameter] = test_record_doc.as_dict()
+                                if param.object_type == 'dict':
+                                    kwargs[parameter] = test_record_doc.as_dict()
+                                elif param.object_type == 'json':
+                                    kwargs[parameter] = test_record_doc.as_json()
                             else:
                                 kwargs[parameter] = test_record_doc.get(
                                     param.field)
