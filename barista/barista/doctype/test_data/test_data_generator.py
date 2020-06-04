@@ -254,6 +254,10 @@ class TestDataGenerator():
             testdata_doc = frappe.get_doc('Test Data', testdata)
             method = testdata_doc.function_name
 
+            if frappe.db.get_value('Test Run Log',{'test_data':testdata,'test_run_name':run_name},'test_record'):
+                create_test_run_log(run_name,testdata,frappe.db.get_value('Test Run Log',{'test_data':testdata,'test_run_name':run_name},'test_record'))
+                return frappe.get_doc(testdata_doc.doctype_name,frappe.db.get_value('Test Run Log',{'test_data':testdata,'test_run_name':run_name},'test_record'))
+
             for param in testdata_doc.function_parameters:
                 key = param.parameter
 
