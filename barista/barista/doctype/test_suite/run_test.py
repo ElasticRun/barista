@@ -214,36 +214,40 @@ def alter_error_log():
 
 # bench execute barista.barista.doctype.test_suite.run_test.fix_series
 def fix_series():
+    bs = ''
+    if frappe.conf.get('barista_series'):
+        bs = f"{frappe.conf.get('barista_series')}-"
+
     print(f'{yellow}Previous Series-', frappe.db.sql(
-        """select * from `tabSeries` where name in ('TestData-','TestCase-')""", as_dict=1))
+        f"""select * from `tabSeries` where name in ('{bs}TestData-','{bs}TestCase-')""", as_dict=1))
     test_data_series = frappe.db.sql_list(
-        """select * from `tabSeries` where name='TestData-';""")
+        f"""select * from `tabSeries` where name='{bs}TestData-';""")
     max_test_data_series = frappe.db.sql_list(
-        """select ifnull(max(name),'TestData-0') from `tabTest Data`;""")
+        f"""select ifnull(max(name),'{bs}TestData-0') from `tabTest Data`;""")
     if len(max_test_data_series):
-        max_test_data_series = int(max_test_data_series[0].split('-')[1])
+        max_test_data_series = int(max_test_data_series[0].split('-')[-1])
     if len(test_data_series) == 0:
         frappe.db.sql(
-            f"""Insert into `tabSeries` (name,current) values ('TestData-',{max_test_data_series});""", auto_commit=1)
+            f"""Insert into `tabSeries` (name,current) values ('{bs}TestData-',{max_test_data_series});""", auto_commit=1)
     else:
         frappe.db.sql(
-            f"""update `tabSeries` set current={max_test_data_series} where name="TestData-";""", auto_commit=1)
+            f"""update `tabSeries` set current={max_test_data_series} where name="{bs}TestData-";""", auto_commit=1)
 
     test_case_series = frappe.db.sql_list(
-        """select * from `tabSeries` where name='TestCase-';""")
+        f"""select * from `tabSeries` where name='{bs}TestCase-';""")
     max_test_case_series = frappe.db.sql_list(
-        """select ifnull(max(name),'TestCase-0') from `tabTest Case`;""")
+        f"""select ifnull(max(name),'{bs}TestCase-0') from `tabTest Case`;""")
     if len(max_test_case_series):
-        max_test_case_series = int(max_test_case_series[0].split('-')[1])
+        max_test_case_series = int(max_test_case_series[0].split('-')[-1])
     if len(test_case_series) == 0:
         frappe.db.sql(
-            f"""Insert into `tabSeries` (name,current) values ('TestCase-',{max_test_case_series});""", auto_commit=1)
+            f"""Insert into `tabSeries` (name,current) values ('{bs}TestCase-',{max_test_case_series});""", auto_commit=1)
     else:
         frappe.db.sql(
-            f"""update `tabSeries` set current={max_test_case_series} where name="TestCase-";""", auto_commit=1)
+            f"""update `tabSeries` set current={max_test_case_series} where name="{bs}TestCase-";""", auto_commit=1)
 
     print(f'{yellow}Current Series-', frappe.db.sql(
-        """select * from `tabSeries` where name in ('TestData-','TestCase-')""", as_dict=1))
+        f"""select * from `tabSeries` where name in ('{bs}TestData-','{bs}TestCase-')""", as_dict=1))
 
 
 def fix_assertion_type_status():

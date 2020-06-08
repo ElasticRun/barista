@@ -8,6 +8,16 @@ from frappe.model.document import Document
 
 
 class TestCase(Document):
+    def autoname(self):
+        bs = ''
+        if frappe.conf.get('barista_series'):
+            bs = f"{frappe.conf.get('barista_series')}-"
+        
+        if not self.naming_series:
+            self.naming_series = 'TestCase-'
+            
+        self.naming_series = f"{bs}{self.naming_series}"
+
     def validate(self):
         if self.testcase_doctype:
             docfields = [docfield.fieldname for docfield in frappe.get_meta(

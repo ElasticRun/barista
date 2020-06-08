@@ -37,6 +37,16 @@ import dateutil
 
 
 class TestData(Document):
+    def autoname(self):
+        bs = ''
+        if frappe.conf.get('barista_series'):
+            bs = f"{frappe.conf.get('barista_series')}-"
+        
+        if not self.naming_series:
+            self.naming_series = 'TestData-'
+            
+        self.naming_series = f"{bs}{self.naming_series}"
+
     def validate(self):
         docfields = [docfield.fieldname for docfield in frappe.get_meta(
             self.doctype_name).fields]
