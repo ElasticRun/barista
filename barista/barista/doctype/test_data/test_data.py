@@ -42,7 +42,7 @@ class TestData(Document):
         if frappe.conf.get('barista_series'):
             bs = f"{frappe.conf.get('barista_series')}-"
         
-        if not self.naming_series:
+        if self.naming_series:
             self.naming_series = 'TestData-'
             
         self.naming_series = f"{bs}{self.naming_series}"
