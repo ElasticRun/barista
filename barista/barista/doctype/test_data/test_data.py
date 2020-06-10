@@ -53,8 +53,8 @@ class TestData(Document):
         docfields.append('docstatus')
         docfields.append('name')
         docfields.append('parent')
-
-        for row in self.docfield_value:
-            if row.docfield_fieldname not in docfields:
-                frappe.throw(
-                    f"Invalid DocField {row.docfield_fieldname} in {self.doctype_name} of {self.name}")
+        if self.create_using == 'Data':
+            for row in self.docfield_value:
+                if row.docfield_fieldname not in docfields:
+                    frappe.throw(
+                        f"Invalid DocField {row.docfield_fieldname} in {self.doctype_name} of {self.name}")
