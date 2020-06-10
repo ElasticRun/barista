@@ -57,4 +57,4 @@ class TestData(Document):
         for row in self.docfield_value:
             if row.docfield_fieldname not in docfields:
                 frappe.throw(
-                    f"Invalid DocField {row.docfield_fieldname} in {self.doctype_name}")
+                    f"Invalid DocField {row.docfield_fieldname} in {self.doctype_name} of {self.name}")
