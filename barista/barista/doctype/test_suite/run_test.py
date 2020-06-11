@@ -29,7 +29,7 @@ class RunTest():
     # Run all the suites for the given app
     def run_complete_suite(self, app_name, suites=[], run_name=None):
         start_time = time.time()
-        alter_error_log()
+        
         print(f"{yellow}************ Running all Test Cases for App - " +
               app_name + " *************\n\n")
         if len(suites) == 0:
@@ -201,6 +201,8 @@ def read_file(file_path):
 
 
 def alter_error_log():
+    # barista.barista.doctype.test_suite.run_test.alter_error_log
+    print('Barista is altering the table `tabError Log`')
     frappe.db.sql("""UPDATE `tabDocField`
 							SET fieldtype="Small Text"
 							WHERE parent= "Error Log"
@@ -208,7 +210,7 @@ def alter_error_log():
 							AND label= "Title";""", auto_commit=1)
     frappe.db.sql(
         """ALTER TABLE `tabError Log` CHANGE `method` `method` text;""", auto_commit=1)
-    if frappe.conf.get('developer_mode') == 1:
+    if bool(frappe.conf.get('developer_mode')):
         frappe.get_doc('DocType', 'Error Log').save(True)
 
 
