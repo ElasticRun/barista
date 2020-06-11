@@ -29,7 +29,7 @@ class RunTest():
     # Run all the suites for the given app
     def run_complete_suite(self, app_name, suites=[], run_name=None):
         start_time = time.time()
-        
+        alter_error_log()
         print(f"{yellow}************ Running all Test Cases for App - " +
               app_name + " *************\n\n")
         if len(suites) == 0:
@@ -203,6 +203,7 @@ def read_file(file_path):
 def alter_error_log():
     # barista.barista.doctype.test_suite.run_test.alter_error_log
     print('Barista is altering the table `tabError Log`')
+    frappe.db.sql('TRUNCATE `tabError Log`;')
     frappe.db.sql("""UPDATE `tabDocField`
 							SET fieldtype="Small Text"
 							WHERE parent= "Error Log"
@@ -222,12 +223,20 @@ def fix_series():
 
     print(f'{yellow}Previous Series-', frappe.db.sql(
         f"""select * from `tabSeries` where name in ('{bs}TestData-','{bs}TestCase-')""", as_dict=1))
+
+    test_data_lst = []
+    for test_data in frappe.get_all('Test Data'):
+        test_data_lst.append(int(test_data['name'].split('-')[-1]))
+
+    max_test_data_series = max(test_data_lst)
+    
+    # max_test_data_series = frappe.db.sql_list(
+    #     f"""select ifnull(max(name),'{bs}TestData-0') from `tabTest Data`;""")
+    # if len(max_test_data_series):
+    #     max_test_data_series = int(max_test_data_series[0].split('-')[-1])
     test_data_series = frappe.db.sql_list(
         f"""select * from `tabSeries` where name='{bs}TestData-';""")
-    max_test_data_series = frappe.db.sql_list(
-        f"""select ifnull(max(name),'{bs}TestData-0') from `tabTest Data`;""")
-    if len(max_test_data_series):
-        max_test_data_series = int(max_test_data_series[0].split('-')[-1])
+
     if len(test_data_series) == 0:
         frappe.db.sql(
             f"""Insert into `tabSeries` (name,current) values ('{bs}TestData-',{max_test_data_series});""", auto_commit=1)
@@ -235,12 +244,19 @@ def fix_series():
         frappe.db.sql(
             f"""update `tabSeries` set current={max_test_data_series} where name="{bs}TestData-";""", auto_commit=1)
 
+    test_case_lst = []
+    for test_case in frappe.get_all('Test Case'):
+        test_case_lst.append(int(test_case['name'].split('-')[-1]))
+    
+    max_test_case_series = max(test_case_lst)
+    
+    # max_test_case_series = frappe.db.sql_list(
+    #     f"""select ifnull(max(name),'{bs}TestCase-0') from `tabTest Case`;""")
+    # if len(max_test_case_series):
+    #     max_test_case_series = int(max_test_case_series[0].split('-')[-1])
     test_case_series = frappe.db.sql_list(
         f"""select * from `tabSeries` where name='{bs}TestCase-';""")
-    max_test_case_series = frappe.db.sql_list(
-        f"""select ifnull(max(name),'{bs}TestCase-0') from `tabTest Case`;""")
-    if len(max_test_case_series):
-        max_test_case_series = int(max_test_case_series[0].split('-')[-1])
+
     if len(test_case_series) == 0:
         frappe.db.sql(
             f"""Insert into `tabSeries` (name,current) values ('{bs}TestCase-',{max_test_case_series});""", auto_commit=1)

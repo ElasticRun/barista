@@ -135,5 +135,5 @@ after_migrate = [
     'barista.barista.doctype.test_suite.run_test.fix_testcase_type_status',
     'barista.barista.doctype.test_suite.run_test.fix_create_using',
     'barista.barista.doctype.test_suite.run_test.fix_object_type',
-    'barista.barista.doctype.test_suite.run_test.alter_error_log'
+    # 'barista.barista.doctype.test_suite.run_test.alter_error_log'
 ]
