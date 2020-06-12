@@ -17,12 +17,13 @@ import sys
 import os
 from pathlib import Path
 from coverage.numbits import register_sqlite_functions
-
+from tabulate import tabulate
 
 error_log_title_len = 1000
 yellow = '\033[0;33;93m'
 green = '\033[0;32;92m'
 red = '\033[0;31;91m'
+white = '\033[0;37m'
 
 
 class RunTest():
@@ -202,8 +203,8 @@ def read_file(file_path):
 
 def alter_error_log():
     # barista.barista.doctype.test_suite.run_test.alter_error_log
-    print('Barista is altering the table `tabError Log`')
-    frappe.db.sql('TRUNCATE `tabError Log`;')
+    print(f'{yellow}Barista is altering the table `tabError Log`')
+    # frappe.db.sql('TRUNCATE `tabError Log`;')
     frappe.db.sql("""UPDATE `tabDocField`
 							SET fieldtype="Small Text"
 							WHERE parent= "Error Log"
@@ -211,6 +212,11 @@ def alter_error_log():
 							AND label= "Title";""", auto_commit=1)
     frappe.db.sql(
         """ALTER TABLE `tabError Log` CHANGE `method` `method` text;""", auto_commit=1)
+
+    print(f'{yellow}Barista is turning ON Developer Mode{white}')
+    from frappe.installer import update_site_config
+    update_site_config('developer_mode', True)
+
     if bool(frappe.conf.get('developer_mode')):
         frappe.get_doc('DocType', 'Error Log').save(True)
 
@@ -221,8 +227,9 @@ def fix_series():
     if frappe.conf.get('barista_series'):
         bs = f"{frappe.conf.get('barista_series')}-"
 
-    print(f'{yellow}Previous Series-', frappe.db.sql(
-        f"""select * from `tabSeries` where name in ('{bs}TestData-','{bs}TestCase-')""", as_dict=1))
+    previous_series = frappe.db.sql(
+        f"""select * from `tabSeries` where name in ('{bs}TestData-','{bs}TestCase-')""", as_dict=1)
+    
 
     test_data_lst = []
     for test_data in frappe.get_all('Test Data'):
@@ -264,8 +271,13 @@ def fix_series():
         frappe.db.sql(
             f"""update `tabSeries` set current={max_test_case_series} where name="{bs}TestCase-";""", auto_commit=1)
 
-    print(f'{yellow}Current Series-', frappe.db.sql(
-        f"""select * from `tabSeries` where name in ('{bs}TestData-','{bs}TestCase-')""", as_dict=1))
+    current_series = frappe.db.sql(
+        f"""select * from `tabSeries` where name in ('{bs}TestData-','{bs}TestCase-')""", as_dict=1)
+        
+    print(f'{yellow}Barista is fixing Test Data and Test Case series:\nPrevious Series-\n',end='')
+    print(tabulate(previous_series,headers="keys",tablefmt="fancy_grid"))
+    print(f'{yellow}Current Series-\n',end='')
+    print(tabulate(current_series,headers="keys",tablefmt="fancy_grid"))
 
 
 def fix_assertion_type_status():
