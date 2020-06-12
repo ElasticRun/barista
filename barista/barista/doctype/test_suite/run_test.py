@@ -43,7 +43,9 @@ class RunTest():
             suites = suite_name
 
         run_name_path = run_name.replace(' ', '__').replace('-', '_')
-        barista_app_path = f"{frappe.get_app_path('barista')}/public/test-coverage/{run_name_path}/"
+        # barista_app_path = f"{frappe.get_app_path('barista')}/public/test-coverage/{run_name_path}/"
+        barista_app_path = f'{frappe.get_site_path()}/public/files/test-coverage/{run_name_path}/'
+        
         data_file_path = str(f"{barista_app_path}{app_name}.coverage")
 
         shutil.rmtree(barista_app_path, ignore_errors=True)
@@ -89,7 +91,7 @@ class RunTest():
             directory=barista_app_path, skip_empty=True, omit=['*test_*'])
 
         print(
-            f"{green}************ Execution ends. Verify coverage at - /assets/barista/test-coverage/{run_name_path}/index.html")
+            f"{green}************ Execution ends. Verify coverage at - /files/test-coverage/{run_name_path}/index.html")
 
         end_time = round(time.time() - start_time, 2)
         time_uom = 'seconds'
@@ -335,8 +337,9 @@ def get_test_coverage():
     # bench execute barista.barista.doctype.test_suite.run_test.get_test_coverage
     test_coverage_lst = []
     try:
-        barista_app_path = frappe.get_app_path('barista')
-        test_coverage_path = f"{barista_app_path}/public/test-coverage"
+        # barista_app_path = frappe.get_app_path('barista')
+        barista_app_path = frappe.get_site_path()
+        test_coverage_path = f"{barista_app_path}/public/files/test-coverage"
 
         paths = sorted(Path(test_coverage_path).iterdir(),
                        key=os.path.getmtime)
@@ -347,7 +350,7 @@ def get_test_coverage():
                 d = path_parts.pop()
                 run_name = d.replace('__', ' ').replace('_', '-')
                 test_coverage_lst.append({
-                    'coverage_path': f"/assets/barista/test-coverage/{d}/index.html",
+                    'coverage_path': f"/files/test-coverage/{d}/index.html",
                     'test_run_name': run_name
                 })
     except Exception as e:
@@ -361,7 +364,8 @@ def delete_test_coverage(run_name):
     # barista.barista.doctype.test_suite.run_test.delete_test_coverage
     try:
         run_name_path = run_name.replace(' ', '__').replace('-', '_')
-        barista_app_path = f"{frappe.get_app_path('barista')}/public/test-coverage/{run_name_path}/"
+        # barista_app_path = f"{frappe.get_app_path('barista')}/public/test-coverage/{run_name_path}/"
+        barista_app_path = f'{frappe.get_site_path()}/public/files/test-coverage/{run_name_path}/'
 
         shutil.rmtree(barista_app_path, ignore_errors=True)
         frappe.db.sql('''
