@@ -140,6 +140,7 @@ class TestDataGenerator():
                                 child_doc = self.create_testdata(
                                     declared_field_doc.linkfield_name, run_name)
                                 if child_doc:
+                                    child_doc.parent_doc = new_doc
                                     create_test_run_log(
                                         run_name, child_testdata_doc.name, child_doc.name)
 

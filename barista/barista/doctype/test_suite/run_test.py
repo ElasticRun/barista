@@ -30,7 +30,7 @@ class RunTest():
     # Run all the suites for the given app
     def run_complete_suite(self, app_name, suites=[], run_name=None):
         start_time = time.time()
-        alter_error_log()
+        # alter_error_log()
         print(f"{yellow}************ Running all Test Cases for App - " +
               app_name + " *************\n\n")
         if len(suites) == 0:
