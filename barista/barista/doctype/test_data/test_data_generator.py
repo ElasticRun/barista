@@ -56,7 +56,7 @@ class TestDataGenerator():
                 elif (testdata_doc.create_using == 'Function'):
                     self.create_testdata_function(testdata, run_name)
                 else:
-                    new_doc = self.create_testdata(testdata, run_name)
+                    new_doc, error_message = self.create_testdata(testdata, run_name)
                     if testdata_doc.doctype_type == 'Transaction':
                         new_doc.save(True)
                         created_doc = new_doc
@@ -86,8 +86,10 @@ class TestDataGenerator():
         frappe.db.commit()
 
     def create_testdata(self, testdata, run_name):
+        current_fieldname = ''
+        error_message = ''
+        new_doc = None
         try:
-            current_fieldname = ''
             testdata_doc = frappe.get_doc('Test Data', testdata)
             # first check if use script is true
             if (testdata_doc.create_using == 'Sql Script'):
@@ -99,112 +101,114 @@ class TestDataGenerator():
                 testdata_doc_test_record_name = frappe.db.get_value(
                     'Test Run Log', {'test_run_name': run_name, 'test_data': testdata}, 'test_record')
                 if (testdata_doc_test_record_name):
-                    created_doc_earlier = frappe.get_doc(
+                    new_doc = frappe.get_doc(
                         testdata_doc.doctype_name, testdata_doc_test_record_name)
-                    return created_doc_earlier
+                    # return created_doc_earlier
+                else:
+                    # start creating the insert statement
+                    new_doc = frappe.get_doc(
+                        {"doctype": testdata_doc.doctype_name})
+                    fields = frappe.get_meta(testdata_doc.doctype_name).fields
+                    declared_fields = frappe.get_list('Testdatafield', filters={
+                                                    'parent': testdata_doc.name})
+                    # for each field
+                    for field in fields:
+                        # check if the field values are in provided.. use it
+                        field_doc = field
+                        flag_field = False
 
-                # start creating the insert statement
-                new_doc = frappe.get_doc(
-                    {"doctype": testdata_doc.doctype_name})
-                fields = frappe.get_meta(testdata_doc.doctype_name).fields
-                declared_fields = frappe.get_list('Testdatafield', filters={
-                                                  'parent': testdata_doc.name})
-                # for each field
-                for field in fields:
-                    # check if the field values are in provided.. use it
-                    field_doc = field
-                    flag_field = False
+                        for declared_field in declared_fields:
+                            declared_field_doc = frappe.get_doc(
+                                'Testdatafield', declared_field['name'])
+                            current_fieldname = declared_field_doc.docfield_fieldname
+                            if (declared_field_doc.docfield_fieldname == "docstatus"):
+                                if (declared_field_doc.docfield_value is None):
+                                    declared_field_doc.docfield_value = 0
+                                new_doc.set(declared_field_doc.docfield_fieldname, int(
+                                    declared_field_doc.docfield_value))
+                            elif(declared_field_doc.docfield_fieldname == field_doc.fieldname):
+                                flag_field = True
+                                if (declared_field_doc.is_default):
+                                    # ignore
+                                    pass
+                                elif (field_doc.fieldtype == "Table"):
+                                    # if it is table then user will have to add multiple rows for multiple records.
+                                    child_testdata_doc = frappe.get_doc(
+                                        'Test Data', declared_field_doc.linkfield_name)
+                                    if (child_testdata_doc.doctype_type == "Transaction"):
+                                        create_test_run_log(
+                                            run_name, child_testdata_doc.name, None)
+                                    # each test data field will link to one record. create a new record
+                                    child_doc, error_message = self.create_testdata(
+                                        declared_field_doc.linkfield_name, run_name)
+                                    if child_doc:
+                                        child_doc.parent_doc = new_doc
+                                        create_test_run_log(
+                                            run_name, child_testdata_doc.name, child_doc.name)
 
-                    for declared_field in declared_fields:
-                        declared_field_doc = frappe.get_doc(
-                            'Testdatafield', declared_field['name'])
-                        current_fieldname = declared_field_doc.docfield_fieldname
-                        if (declared_field_doc.docfield_fieldname == "docstatus"):
-                            if (declared_field_doc.docfield_value is None):
-                                declared_field_doc.docfield_value = 0
-                            new_doc.set(declared_field_doc.docfield_fieldname, int(
-                                declared_field_doc.docfield_value))
-                        elif(declared_field_doc.docfield_fieldname == field_doc.fieldname):
-                            flag_field = True
-                            if (declared_field_doc.is_default):
-                                # ignore
-                                pass
-                            elif (field_doc.fieldtype == "Table"):
-                                # if it is table then user will have to add multiple rows for multiple records.
-                                child_testdata_doc = frappe.get_doc(
-                                    'Test Data', declared_field_doc.linkfield_name)
-                                if (child_testdata_doc.doctype_type == "Transaction"):
-                                    create_test_run_log(
-                                        run_name, child_testdata_doc.name, None)
-                                # each test data field will link to one record. create a new record
-                                child_doc = self.create_testdata(
-                                    declared_field_doc.linkfield_name, run_name)
-                                if child_doc:
-                                    child_doc.parent_doc = new_doc
+                                        child_doc.parentfield = field_doc.fieldname
+                                        new_doc.get(field_doc.fieldname).append(
+                                            child_doc)
+                                    else:
+                                        frappe.throw(
+                                            f'Child Doc is None. Test Data of Child {declared_field_doc.linkfield_name}. Test Data of Parent {testdata}')
+
+                                # link parent to this record
+                                elif ("Link" in field_doc.fieldtype and declared_field_doc.docfield_code_value == "Fixed Value"):
+                                    new_doc.set(field_doc.fieldname,
+                                                declared_field_doc.docfield_value)
+                                elif ("Link" in field_doc.fieldtype):
+                                    child_testdata_doc = frappe.get_doc(
+                                        'Test Data', declared_field_doc.linkfield_name)
+                                    if (child_testdata_doc.doctype_type == "Transaction"):
+                                        create_test_run_log(
+                                            run_name, child_testdata_doc.name, None)
+
+                                    child_doc, error_message = self.create_testdata(
+                                        declared_field_doc.linkfield_name, run_name)
+                                    try:
+                                        child_doc.save()
+                                    except frappe.DuplicateEntryError as e:
+                                        child_doc = resolve_duplicate_entry_error(
+                                            e, child_testdata_doc, run_name)
+                                    except frappe.UniqueValidationError as e:
+                                        child_doc = resolve_unique_validation_error(
+                                            e, child_testdata_doc, run_name)
+
                                     create_test_run_log(
                                         run_name, child_testdata_doc.name, child_doc.name)
+                                    new_doc.set(field_doc.fieldname,
+                                                child_doc.name)
 
-                                    child_doc.parentfield = field_doc.fieldname
-                                    new_doc.get(field_doc.fieldname).append(
-                                        child_doc)
+                                elif (declared_field_doc.docfield_code_value == "Code"):
+                                    if declared_field_doc.docfield_code and not declared_field_doc.linkfield_name:
+                                        new_doc.set(declared_field_doc.docfield_fieldname, eval(
+                                            str(declared_field_doc.docfield_code)))
+                                    if not declared_field_doc.docfield_code and declared_field_doc.linkfield_name:
+                                        value = frappe.db.get_value(
+                                            'Test Run Log', {'test_run_name': run_name, 'test_data': declared_field_doc.linkfield_name}, 'test_record')
+                                        new_doc.set(
+                                            declared_field_doc.docfield_fieldname, value)
                                 else:
-                                    frappe.throw(
-                                        f'Child Doc is None. Test Data of Child {declared_field_doc.linkfield_name}. Test Data of Parent {testdata}')
+                                    if field_doc.fieldtype in ['Currency', 'Float', 'Percent']:
+                                        new_doc.set(declared_field_doc.docfield_fieldname, float(
+                                            declared_field_doc.docfield_value))
+                                    elif field_doc.fieldtype == 'Int':
+                                        new_doc.set(declared_field_doc.docfield_fieldname, int(
+                                            declared_field_doc.docfield_value))
+                                    else:
+                                        new_doc.set(declared_field_doc.docfield_fieldname, str(
+                                            declared_field_doc.docfield_value))
 
-                            # link parent to this record
-                            elif ("Link" in field_doc.fieldtype and declared_field_doc.docfield_code_value == "Fixed Value"):
-                                new_doc.set(field_doc.fieldname,
-                                            declared_field_doc.docfield_value)
-                            elif ("Link" in field_doc.fieldtype):
-                                child_testdata_doc = frappe.get_doc(
-                                    'Test Data', declared_field_doc.linkfield_name)
-                                if (child_testdata_doc.doctype_type == "Transaction"):
-                                    create_test_run_log(
-                                        run_name, child_testdata_doc.name, None)
+                        # self.assign_random_value(
+                        #     flag_field, field_doc, new_doc, declared_field_doc)
 
-                                child_doc = self.create_testdata(
-                                    declared_field_doc.linkfield_name, run_name)
-                                try:
-                                    child_doc.save()
-                                except frappe.DuplicateEntryError as e:
-                                    child_doc = resolve_duplicate_entry_error(
-                                        e, child_testdata_doc, run_name)
-                                except frappe.UniqueValidationError as e:
-                                    child_doc = resolve_unique_validation_error(
-                                        e, child_testdata_doc, run_name)
-
-                                create_test_run_log(
-                                    run_name, child_testdata_doc.name, child_doc.name)
-                                new_doc.set(field_doc.fieldname,
-                                            child_doc.name)
-
-                            elif (declared_field_doc.docfield_code_value == "Code"):
-                                if declared_field_doc.docfield_code and not declared_field_doc.linkfield_name:
-                                    new_doc.set(declared_field_doc.docfield_fieldname, eval(
-                                        str(declared_field_doc.docfield_code)))
-                                if not declared_field_doc.docfield_code and declared_field_doc.linkfield_name:
-                                    value = frappe.db.get_value(
-                                        'Test Run Log', {'test_run_name': run_name, 'test_data': declared_field_doc.linkfield_name}, 'test_record')
-                                    new_doc.set(
-                                        declared_field_doc.docfield_fieldname, value)
-                            else:
-                                if field_doc.fieldtype in ['Currency', 'Float', 'Percent']:
-                                    new_doc.set(declared_field_doc.docfield_fieldname, float(
-                                        declared_field_doc.docfield_value))
-                                elif field_doc.fieldtype == 'Int':
-                                    new_doc.set(declared_field_doc.docfield_fieldname, int(
-                                        declared_field_doc.docfield_value))
-                                else:
-                                    new_doc.set(declared_field_doc.docfield_fieldname, str(
-                                        declared_field_doc.docfield_value))
-
-                    # self.assign_random_value(
-                    #     flag_field, field_doc, new_doc, declared_field_doc)
-
-                return new_doc
+                    # return new_doc
         except Exception as e:
+            error_message = str(error_message)
             frappe.log_error(frappe.get_traceback(
             ), (f'barista-TestDataGenerator-{testdata}-DocTypeField-[{current_fieldname}]-'+str(e))[:error_log_title_len])
+        return new_doc, error_message
 
     def assign_random_value(self, flag_field, field_doc, new_doc, declared_field_doc):
         if(flag_field == False and not field_doc.fetch_from):
@@ -246,6 +250,7 @@ class TestDataGenerator():
 
     def create_testdata_function(self, testdata, run_name):
         generated_doc = None
+        error_message = ''
         try:
             args = []
             kwargs = {}
@@ -254,7 +259,7 @@ class TestDataGenerator():
 
             testdata_doc = frappe.get_doc('Test Data', testdata)
             method = testdata_doc.function_name
-
+            print("\033[0;33;93m   >>> Executing Function --",method)
             if frappe.db.get_value('Test Run Log',{'test_data':testdata,'test_run_name':run_name},'test_record'):
                 create_test_run_log(run_name,testdata,frappe.db.get_value('Test Run Log',{'test_data':testdata,'test_run_name':run_name},'test_record'))
                 return frappe.get_doc(testdata_doc.doctype_name,frappe.db.get_value('Test Run Log',{'test_data':testdata,'test_run_name':run_name},'test_record'))
@@ -337,9 +342,11 @@ class TestDataGenerator():
             generated_doc = frappe.get_doc(
                 testdata_doc.doctype_name, test_record_to_save)
         except Exception as e:
+            error_message = str(e)
+            print("\033[0;31;91m       >>>> Execution of function failed\n       Error occurred :", str(e))
             frappe.log_error(frappe.get_traceback(
             ), (f'barista-TestDataGenerator-{testdata}-Function-[{method}]-'+str(e))[:error_log_title_len])
-        return generated_doc
+        return generated_doc, error_message
 
     def resolve_jinja(self, jinja, testdata, run_name):
         resolved_jinja = ''

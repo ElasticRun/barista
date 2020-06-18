@@ -47,10 +47,11 @@ error_log_title_len = 1000
 
 class TestCaseExecution():
     def run_testcase(self, testcase, test_suite, testcase_srno, total_testcases, suite_srno, total_suites, run_name):
+        error_message = ''
         try:
             start_time = time.time()
             function_result = None
-
+            
             # Populate generic test result fields
             test_result_doc = frappe.new_doc("Test Result")
             test_result_doc.test_run_name = run_name
@@ -85,9 +86,9 @@ class TestCaseExecution():
                     testdata_doc_test_record_name = None
                     create_test_run_log(run_name, testcase_doc.test_data, None)
                 # get record document
-                new_record_doc = testdata_generator.create_testdata(
+                new_record_doc, error_message = testdata_generator.create_testdata(
                     testcase_doc.test_data, run_name)
-                error_message = None
+                
             if (testcase_doc.testcase_type == "CREATE"):
                 try:
                     if new_record_doc:
@@ -112,7 +113,7 @@ class TestCaseExecution():
                 except Exception as e:
                     frappe.log_error(frappe.get_traceback(
                     ), ('barista-CREATE-'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
-                    error_message = str(e)
+                    error_message += '\n' + str(e)
                     print('\033[0;31;91m   Error occurred ---', str(e))
 
             elif (testcase_doc.testcase_type == "UPDATE"):
@@ -187,7 +188,7 @@ class TestCaseExecution():
                                     "Test Data", update_field_doc.linkfield_name)
                                 if(child_testdata_doc.doctype_type == "Transaction"):
                                     create_new = True
-                                child_doc = testdata_generator.create_testdata(
+                                child_doc, error_message = testdata_generator.create_testdata(
                                     update_field_doc.linkfield_name, run_name)
 
                                 child_doc.parentfield = field_doc.fieldname
@@ -206,7 +207,7 @@ class TestCaseExecution():
                                     create_test_run_log(
                                         run_name, child_testdata_doc.name, None)
 
-                                child_doc = testdata_generator.create_testdata(
+                                child_doc, error_message = testdata_generator.create_testdata(
                                     update_field_doc.linkfield_name, run_name)
                                 try:
                                     if child_doc:
@@ -253,7 +254,7 @@ class TestCaseExecution():
                 except Exception as e:
                     frappe.log_error(frappe.get_traceback(
                     ), ('barista-UPDATE-'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
-                    error_message = str(e)
+                    error_message += '\n' + str(e)
                     print('\033[0;31;91m   Error occurred ---', str(e))
 
                 testdata_generator.set_record_name_child_table(
@@ -268,7 +269,7 @@ class TestCaseExecution():
                 except Exception as e:
                     frappe.log_error(frappe.get_traceback(
                     ), ('barista-'+testcase_doc.name+'-DELETE-'+str(e))[:error_log_title_len])
-                    error_message = str(e)
+                    error_message += '\n' + str(e)
                     print(
                         "\033[0;31;91m    >>> Error in deleting - "+str(e))
             elif (testcase_doc.testcase_type == "WORKFLOW"):
@@ -291,7 +292,7 @@ class TestCaseExecution():
                 except Exception as e:
                     frappe.log_error(frappe.get_traceback(), (f"""barista-WORKFLOW-{testcase_doc.name}-{str(
 						e)}-DocType-[{testdata_doc.doctype_name}]-WorkflowState-[{current_workflow_state}]-Action-[{testcase_doc.workflow_state}]""")[:error_log_title_len])
-                    error_message = str(e)
+                    error_message += '\n' + str(e)
                     print(
                         "\033[0;31;91m    >>> Error in applying Workflow - "+str(e))
 
@@ -363,7 +364,7 @@ class TestCaseExecution():
                 except Exception as e:
                     frappe.log_error(frappe.get_traceback(
                     ), ('barista-FUNCTION-'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
-                    error_message = str(e)
+                    error_message += '\n' + str(e)
                     print(
                         "\033[0;31;91m       >>>> Execution of function failed\n       Error occurred :", str(e))
 
