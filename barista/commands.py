@@ -19,7 +19,16 @@ def run_barista(context, app_name, suite=[], run_name='Pass-1'):
     print('Test Run Name - ', run_name)
     RunTest().run_complete_suite(app_name, list(suite), run_name)
 
+@click.command('clear-error-log')
+@pass_context
+def clear_error_log(context):
+    site = get_site(context)
+    frappe.init(site=site)
+    frappe.connect(site)
+    frappe.db.sql('TRUNCATE `tabError Log`;',auto_commit=1)
+    print('`Error Log` cleared successfully')
 
 commands = [
-    run_barista
+    run_barista,
+    clear_error_log,
 ]
