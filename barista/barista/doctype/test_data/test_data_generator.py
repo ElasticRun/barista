@@ -35,6 +35,7 @@ import unittest
 import random
 import datetime
 import dateutil
+import string
 
 error_log_title_len = 1000
 yellow = '\033[0;33;93m'

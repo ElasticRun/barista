@@ -39,6 +39,8 @@ import random
 import datetime
 import dateutil
 import time
+import string
+import random
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
