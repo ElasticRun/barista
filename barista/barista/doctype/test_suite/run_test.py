@@ -45,7 +45,7 @@ class RunTest():
         run_name_path = run_name.replace(' ', '__').replace('-', '_')
         # barista_app_path = f"{frappe.get_app_path('barista')}/public/test-coverage/{run_name_path}/"
         barista_app_path = f'{frappe.get_site_path()}/public/files/test-coverage/{run_name_path}/'
-        
+
         data_file_path = str(f"{barista_app_path}{app_name}.coverage")
 
         shutil.rmtree(barista_app_path, ignore_errors=True)
@@ -231,14 +231,13 @@ def fix_series():
 
     previous_series = frappe.db.sql(
         f"""select * from `tabSeries` where name in ('{bs}TestData-','{bs}TestCase-')""", as_dict=1)
-    
 
     test_data_lst = []
     for test_data in frappe.get_all('Test Data'):
         test_data_lst.append(int(test_data['name'].split('-')[-1]))
 
     max_test_data_series = max(test_data_lst)
-    
+
     # max_test_data_series = frappe.db.sql_list(
     #     f"""select ifnull(max(name),'{bs}TestData-0') from `tabTest Data`;""")
     # if len(max_test_data_series):
@@ -256,9 +255,9 @@ def fix_series():
     test_case_lst = []
     for test_case in frappe.get_all('Test Case'):
         test_case_lst.append(int(test_case['name'].split('-')[-1]))
-    
+
     max_test_case_series = max(test_case_lst)
-    
+
     # max_test_case_series = frappe.db.sql_list(
     #     f"""select ifnull(max(name),'{bs}TestCase-0') from `tabTest Case`;""")
     # if len(max_test_case_series):
@@ -275,11 +274,11 @@ def fix_series():
 
     current_series = frappe.db.sql(
         f"""select * from `tabSeries` where name in ('{bs}TestData-','{bs}TestCase-')""", as_dict=1)
-        
-    print(f'{yellow}Barista is fixing Test Data and Test Case series:\nPrevious Series-\n',end='')
-    print(tabulate(previous_series,headers="keys",tablefmt="fancy_grid"))
-    print(f'{yellow}Current Series-\n',end='')
-    print(tabulate(current_series,headers="keys",tablefmt="fancy_grid"))
+
+    print(f'{yellow}Barista is fixing Test Data and Test Case series:\nPrevious Series-\n', end='')
+    print(tabulate(previous_series, headers="keys", tablefmt="fancy_grid"))
+    print(f'{yellow}Current Series-\n', end='')
+    print(tabulate(current_series, headers="keys", tablefmt="fancy_grid"))
 
 
 def fix_assertion_type_status():
@@ -341,22 +340,31 @@ def get_test_coverage():
         barista_app_path = frappe.get_site_path()
         test_coverage_path = f"{barista_app_path}/public/files/test-coverage"
 
-        paths = sorted(Path(test_coverage_path).iterdir(),
-                       key=os.path.getmtime)
-
-        for path in paths:
-            if path.is_dir():
-                path_parts = str(path).split('/')
-                d = path_parts.pop()
-                run_name = d.replace('__', ' ').replace('_', '-')
-                test_coverage_lst.append({
-                    'coverage_path': f"/files/test-coverage/{d}/index.html",
-                    'test_run_name': run_name
-                })
+        process_paths(test_coverage_path, test_coverage_lst)
+    except OSError as o:
+        frappe.log_error(frappe.get_traceback(),
+                         'barista-get_test_coverage-OSError')
+        test_coverage_path = './site1.docker/public/files/test-coverage'
+        process_paths(test_coverage_path, test_coverage_lst)
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), 'barista-get_test_coverage')
 
     return test_coverage_lst
+
+
+def process_paths(directory_path, test_coverage_lst):
+    paths = sorted(Path(directory_path).iterdir(),
+                   key=os.path.getmtime)
+
+    for path in paths:
+        if path.is_dir():
+            path_parts = str(path).split('/')
+            d = path_parts.pop()
+            run_name = d.replace('__', ' ').replace('_', '-')
+            test_coverage_lst.append({
+                'coverage_path': f"/files/test-coverage/{d}/index.html",
+                'test_run_name': run_name
+            })
 
 
 @frappe.whitelist()
