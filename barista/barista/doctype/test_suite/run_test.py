@@ -232,7 +232,7 @@ def fix_series():
     previous_series = frappe.db.sql(
         f"""select * from `tabSeries` where name in ('{bs}TestData-','{bs}TestCase-')""", as_dict=1)
 
-    test_data_lst = [1]
+    test_data_lst = [0]
     for test_data in frappe.get_all('Test Data'):
         test_data_lst.append(int(test_data['name'].split('-')[-1]))
 
@@ -252,7 +252,7 @@ def fix_series():
         frappe.db.sql(
             f"""update `tabSeries` set current={max_test_data_series} where name="{bs}TestData-";""", auto_commit=1)
 
-    test_case_lst = [1]
+    test_case_lst = [0]
     for test_case in frappe.get_all('Test Case'):
         test_case_lst.append(int(test_case['name'].split('-')[-1]))
 
