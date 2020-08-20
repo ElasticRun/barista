@@ -50,12 +50,16 @@ error_log_title_len = 1000
 class TestCaseExecution():
     def run_testcase(self, testcase, test_suite, testcase_srno, total_testcases, suite_srno, total_suites, run_name):
         error_message = ''
+        test_result_doc = frappe.new_doc("Test Result")
+        new_record_doc = frappe._dict()
+        testdata_doc = frappe._dict()
+        testdata_doc_test_record_name = None
         try:
             start_time = time.time()
             function_result = None
             
             # Populate generic test result fields
-            test_result_doc = frappe.new_doc("Test Result")
+            
             test_result_doc.test_run_name = run_name
             test_result_doc.test_suite = test_suite
             test_result_doc.action = "Test Case"
@@ -119,8 +123,9 @@ class TestCaseExecution():
                     print('\033[0;31;91m   Error occurred ---', str(e))
 
             elif (testcase_doc.testcase_type == "UPDATE"):
+                create_new = False
                 try:
-                    create_new = False
+                    
                     if testcase_doc.testcase_doctype != testdata_doc.doctype_name:
                         value_from_test_record_doc = frappe.db.get_value(
                             testdata_doc.doctype_name, testdata_doc_test_record_name, testcase_doc.test_data_docfield)
@@ -156,7 +161,7 @@ class TestCaseExecution():
                         testcase_doc.testcase_doctype).fields
 
                     for update_field in update_fields:
-
+                        field_doc = frappe._dict()
                         update_field_doc = frappe.get_doc(
                             "Testdatafield", update_field['name'])
 
@@ -275,9 +280,10 @@ class TestCaseExecution():
                     print(
                         "\033[0;31;91m    >>> Error in deleting - "+str(e))
             elif (testcase_doc.testcase_type == "WORKFLOW"):
+                current_workflow_state = None
                 try:
                     start_time = time.time()
-                    current_workflow_state = None
+                    
                     if(new_record_doc and new_record_doc.name == None):
                         current_workflow_state = new_record_doc.workflow_state
                         try:
@@ -300,6 +306,8 @@ class TestCaseExecution():
 
             elif (testcase_doc.testcase_type == "FUNCTION"):
                 kwargs = {}
+                context_dict = {}
+                resolved_jinja = ' '
                 try:
                     for param in testcase_doc.function_parameters:
                         parameter = param.parameter
@@ -330,24 +338,23 @@ class TestCaseExecution():
                     print("\033[0;33;93m   >>> Executing Function --",
                           testcase_doc.function_name)
                     if testcase_doc.json_parameter and testcase_doc.json_parameter.strip() != '':
-                        context_dict = {}
-                        resolved_jinja = ' '
-                        if testcase_doc.testcase_doctype and testcase_doc.test_data:
-                            test_record_name = frappe.db.get_value(
-                                'Test Run Log', {'test_run_name': run_name, 'test_data': testcase_doc.test_data}, 'test_record')
-
-                            context = frappe.get_doc(
-                                testcase_doc.testcase_doctype, test_record_name).as_dict()
-                            context_dict = {"doc": context}
+                        
                         try:
+                            if testcase_doc.testcase_doctype and testcase_doc.test_data:
+                                test_record_name = frappe.db.get_value(
+                                    'Test Run Log', {'test_run_name': run_name, 'test_data': testcase_doc.test_data}, 'test_record')
+
+                                context = frappe.get_doc(
+                                    testcase_doc.testcase_doctype, test_record_name).as_dict()
+                                context_dict = {"doc": context}
                             validate_template(testcase_doc.json_parameter)
                             resolved_jinja = render_template(
                                 testcase_doc.json_parameter, context_dict)
+                            kwargs.update(eval(str(resolved_jinja)))
                         except Exception as e:
+                            frappe.log_error(frappe.get_traceback(), ('barista-FUNCTION-'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
                             print(
                                 "\033[0;31;91m       >>>> Error in Json Parameter\n      ", str(e))
-
-                        kwargs.update(eval(str(resolved_jinja)))
 
                     method = testcase_doc.function_name
                     if method and '.' in method:
@@ -390,7 +397,6 @@ class TestCaseExecution():
             test_result_doc.test_case_execution = "Execution Failed"
             test_result_doc.execution_result = str(e)
             test_result_doc.test_case_status = "Failed"
-            test_result_doc.save()
         finally:
             print("\033[0;36;96m>> " + "Execution Ended \n\n")
             test_result_doc.save()
@@ -401,6 +407,9 @@ class TestCaseExecution():
 
         value_type = 'Fixed Value'
         record_count = 1
+        testdata_doc_test_record_name = None
+        validation_doctype = []
+        testdata_doc = frappe._dict()
 
         if assertion_doc.value_type:
             value_type = assertion_doc.value_type
@@ -416,10 +425,11 @@ class TestCaseExecution():
         assertion_result = frappe.new_doc("Assertion Result")
         assertion_result.assertion = assertion_doc.name
         assertion_result.assertion_status = "Passed"
-        testdata_doc = frappe.get_doc(
-            'Test Data', testcase_doc.test_data)
-        testdata_doc_test_record_name = frappe.db.get_value(
-            'Test Run Log', {'test_run_name': run_name, 'test_data': testcase_doc.test_data}, 'test_record')
+        if testcase_doc.test_data:
+            testdata_doc = frappe.get_doc(
+                'Test Data', testcase_doc.test_data)
+            testdata_doc_test_record_name = frappe.db.get_value(
+                'Test Run Log', {'test_run_name': run_name, 'test_data': testcase_doc.test_data}, 'test_record')
         if(assertion_doc.assertion_type != "RESPONSE" and assertion_doc.assertion_type != "ERROR"):
             validation_doctype = frappe.get_all(assertion_doc.doctype_name, filters={
                 assertion_doc.reference_field: testdata_doc_test_record_name})
