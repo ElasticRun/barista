@@ -340,6 +340,7 @@ class TestCaseExecution():
                     if testcase_doc.json_parameter and testcase_doc.json_parameter.strip() != '':
                         
                         try:
+                            testcase_doc.json_parameter = testcase_doc.json_parameter.replace('null', 'None').replace('true', 'True').replace('false', 'False')
                             if testcase_doc.testcase_doctype and testcase_doc.test_data:
                                 test_record_name = frappe.db.get_value(
                                     'Test Run Log', {'test_run_name': run_name, 'test_data': testcase_doc.test_data}, 'test_record')
