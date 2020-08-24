@@ -386,7 +386,6 @@ class TestCaseExecution():
             if len(assertions) == 0:
                 test_result_doc.execution_result = 'Assertions are not present in the TestCase. Please add atleast one assertion.'
                 test_result_doc.test_case_status = "Failed"
-                test_result_doc.save()
 
             for assertion in assertions:
                 self.process_assertion(
@@ -400,7 +399,7 @@ class TestCaseExecution():
             test_result_doc.test_case_status = "Failed"
         finally:
             print("\033[0;36;96m>> " + "Execution Ended \n\n")
-            test_result_doc.save()
+            test_result_doc.save(True)
 
     def process_assertion(self, assertion, testcase_doc, run_name, error_message, function_result, test_result_doc):
         assertion_doc = frappe.get_doc("Assertion", assertion['name'])
@@ -628,7 +627,7 @@ class TestCaseExecution():
         assertion_result.parentfield = "assertion_results"
         test_result_doc.get("assertion_results").append(
             assertion_result)
-        test_result_doc.save()
+        # test_result_doc.save(True)
 
 
 def get_execution_time(start_time):
