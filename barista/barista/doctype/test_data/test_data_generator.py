@@ -353,13 +353,14 @@ class TestDataGenerator():
         resolved_jinja = ''
         try:
             context_dict = {}
-            test_record_name = frappe.db.get_value(
-                'Test Run Log', {'test_run_name': run_name, 'test_data': testdata}, 'test_record')
-            test_record_doctype = frappe.db.get_value(
-                'Test Data', testdata, 'doctype_name')
-            context = frappe.get_doc(
-                test_record_doctype, test_record_name).as_dict()
-            context_dict = {"doc": context}
+            if testdata:
+                test_record_name = frappe.db.get_value(
+                    'Test Run Log', {'test_run_name': run_name, 'test_data': testdata}, 'test_record')
+                test_record_doctype = frappe.db.get_value(
+                    'Test Data', testdata, 'doctype_name')
+                context = frappe.get_doc(
+                    test_record_doctype, test_record_name).as_dict()
+                context_dict = {"doc": context}
             try:
                 validate_template(jinja)
                 resolved_jinja = render_template(
