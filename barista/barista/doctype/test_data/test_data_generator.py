@@ -268,7 +268,7 @@ class TestDataGenerator():
             for param in testdata_doc.function_parameters:
                 key = param.parameter
 
-                if param.value and param.value.strip()[0] in ['{', '['] and '{{' not in param.value:
+                if param.value and param.value.strip()[0] in ['{', '['] and '{{' not in param.value and param.type == "json":
                     value = eval(param.value)
                 elif param.value and '{{' in param.value:
                     value = self.resolve_jinja(
@@ -352,7 +352,7 @@ class TestDataGenerator():
     def resolve_jinja(self, jinja, testdata, run_name):
         resolved_jinja = ''
         try:
-            context_dict = {}
+            context_dict = {"doc": {}}
             if testdata:
                 test_record_name = frappe.db.get_value(
                     'Test Run Log', {'test_run_name': run_name, 'test_data': testdata}, 'test_record')

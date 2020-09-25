@@ -64,6 +64,7 @@ class TestCaseExecution():
             test_result_doc.test_suite = test_suite
             test_result_doc.action = "Test Case"
             testcase_doc = frappe.get_doc("Test Case", testcase)
+            frappe.set_user(testcase_doc.run_as or 'Administrator')
             testcase_doc.testcase_type = testcase_doc.testcase_type.upper()
             test_result_doc.test_case = testcase_doc.name
             test_result_doc.test_data_id = testcase_doc.test_data
@@ -99,7 +100,7 @@ class TestCaseExecution():
                 try:
                     if new_record_doc:
                         try:
-                            new_record_doc.save()
+                            new_record_doc.save(True)
                         except frappe.DuplicateEntryError as e:
                             new_record_doc = resolve_duplicate_entry_error(
                                 e, testdata_doc, run_name)
@@ -145,7 +146,7 @@ class TestCaseExecution():
                     # create the record if already not created
                     if(new_record_doc and new_record_doc.name == None):
                         try:
-                            new_record_doc.save()
+                            new_record_doc.save(True)
                         except frappe.UniqueValidationError as e:
                             new_record_doc = resolve_unique_validation_error(
                                 e, testdata_doc, run_name)
@@ -218,7 +219,7 @@ class TestCaseExecution():
                                     update_field_doc.linkfield_name, run_name)
                                 try:
                                     if child_doc:
-                                        child_doc.save()
+                                        child_doc.save(True)
                                     else:
                                         frappe.throw(
                                             f"Child Doc is None. Test Data of Child {update_field_doc.linkfield_name}. Test Data of Parent {testdata_doc.name}")
@@ -249,7 +250,7 @@ class TestCaseExecution():
                                     update_field_doc.docfield_fieldname, update_field_doc.docfield_value)
                     try:
                         if new_record_doc:
-                            new_record_doc.save()
+                            new_record_doc.save(True)
                             print("\033[0;33;93m    >>> Test Data updated")
                         else:
                             frappe.throw(
@@ -287,7 +288,7 @@ class TestCaseExecution():
                     if(new_record_doc and new_record_doc.name == None):
                         current_workflow_state = new_record_doc.workflow_state
                         try:
-                            new_record_doc = new_record_doc.save()
+                            new_record_doc = new_record_doc.save(True)
                         except frappe.UniqueValidationError as e:
                             new_record_doc = resolve_unique_validation_error(
                                 e, testdata_doc, run_name)
@@ -296,8 +297,12 @@ class TestCaseExecution():
                         create_test_run_log(
                             run_name, testdata_doc.name, new_record_doc.name)
                     apply_workflow(new_record_doc, testcase_doc.workflow_state)
+                    # from erpnow.superflow.superflow import apply_superflow
+                    # apply_superflow(
+                    #     new_record_doc, testcase_doc.workflow_state)
                     print("\033[0;32;92m    >>> Workflow Applied")
                 except Exception as e:
+                    # frappe.db.rollback()
                     frappe.log_error(frappe.get_traceback(), (f"""barista-WORKFLOW-{testcase_doc.name}-{str(
 						e)}-DocType-[{testdata_doc.doctype_name}]-WorkflowState-[{current_workflow_state}]-Action-[{testcase_doc.workflow_state}]""")[:error_log_title_len])
                     error_message += '\n' + str(e)
@@ -366,7 +371,6 @@ class TestCaseExecution():
                             frappe.log_error(frappe.get_traceback(), ('barista-FUNCTION-'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
                             print(
                                 "\033[0;31;91m       >>>> Error in Json Parameter\n      ", str(e))
-
                     method = testcase_doc.function_name
                     if method and '.' in method:
                         args = []
@@ -396,6 +400,11 @@ class TestCaseExecution():
             if len(assertions) == 0:
                 test_result_doc.execution_result = 'Assertions are not present in the TestCase. Please add atleast one assertion.'
                 test_result_doc.test_case_status = "Failed"
+                test_result_doc.save(True)
+            frappe.db.commit()
+            # Sleep For Time
+            if testcase_doc.wait_for:
+                time.sleep(testcase_doc.wait_for)
 
             for assertion in assertions:
                 self.process_assertion(
@@ -410,6 +419,8 @@ class TestCaseExecution():
         finally:
             print("\033[0;36;96m>> " + "Execution Ended \n\n")
             test_result_doc.save(True)
+            frappe.set_user("Administrator")
+            
 
     def process_assertion(self, assertion, testcase_doc, run_name, error_message, function_result, test_result_doc):
         assertion_doc = frappe.get_doc("Assertion", assertion['name'])
@@ -637,7 +648,7 @@ class TestCaseExecution():
         assertion_result.parentfield = "assertion_results"
         test_result_doc.get("assertion_results").append(
             assertion_result)
-        # test_result_doc.save(True)
+        test_result_doc.save(True)
 
 
 def get_execution_time(start_time):
