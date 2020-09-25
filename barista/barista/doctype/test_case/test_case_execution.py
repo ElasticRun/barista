@@ -311,10 +311,10 @@ class TestCaseExecution():
                 try:
                     for param in testcase_doc.function_parameters:
                         parameter = param.parameter
-
-                        if param.value and param.value.strip()[0] in ['{', '[']:
+                        value = None
+                        if param.value and (param.value.strip()[0] in ['{', '[']) and ('{{' not in param.value):
                             value = eval(param.value)
-                        else:
+                        elif '{{' not in param.value:
                             value = param.value
                         kwargs[parameter] = value
 
@@ -331,9 +331,19 @@ class TestCaseExecution():
                                     kwargs[parameter] = test_record_doc.as_dict()
                                 elif param.object_type == 'json':
                                     kwargs[parameter] = test_record_doc.as_json()
+                            elif param.field:
+                                kwargs[parameter] = test_record_doc.get(param.field)
                             else:
-                                kwargs[parameter] = test_record_doc.get(
-                                    param.field)
+                                try:
+                                    if '{{' in param.value:
+                                        context_dict = {'doc':test_record_doc.as_dict()}
+                                        validate_template(param.value)
+                                        resolved_jinja = render_template(param.value, context_dict)
+                                        kwargs[parameter] = eval(str(resolved_jinja))
+                                except Exception as e:
+                                    frappe.log_error(frappe.get_traceback(), ('barista-FUNCTION-'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
+                                    print(
+                                        "\033[0;31;91m       >>>> Error in Function Parameter\n      ", str(e))
 
                     print("\033[0;33;93m   >>> Executing Function --",
                           testcase_doc.function_name)
