@@ -319,7 +319,7 @@ class TestCaseExecution():
                         value = None
                         if param.value and (param.value.strip()[0] in ['{', '[']) and ('{{' not in param.value):
                             value = eval(param.value)
-                        elif '{{' not in param.value:
+                        elif param.value and '{{' not in param.value:
                             value = param.value
                         kwargs[parameter] = value
 
