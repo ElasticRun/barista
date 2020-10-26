@@ -52,7 +52,7 @@ class RunTest():
 
         generatorObj = TestDataGenerator()
         objCoverage = coverage.Coverage(source=[frappe.get_app_path(
-            app_name)], data_file=data_file_path, omit=['*test_*'], config_file=False)
+            app_name)], data_file=None, omit=['*test_*'], config_file=False)
         objCoverage.erase()
         objCoverage.start()
         total_suites = len(suites)
@@ -217,7 +217,7 @@ def alter_error_log():
 
     print(f'{yellow}Barista is turning ON Developer Mode{white}')
     from frappe.installer import update_site_config
-    update_site_config('developer_mode', True)
+    update_site_config('developer_mode', 1)
 
     if bool(frappe.conf.get('developer_mode')):
         frappe.get_doc('DocType', 'Error Log').save(True)
