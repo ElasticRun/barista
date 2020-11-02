@@ -206,6 +206,7 @@ def read_file(file_path):
 def alter_error_log():
     # barista.barista.doctype.test_suite.run_test.alter_error_log
     print(f'{yellow}Barista is altering the table `tabError Log`')
+    frappe.db.sql("""ALTER TABLE `tabError Log` DROP INDEX IF EXISTS `index_on_method`;""")
     # frappe.db.sql('TRUNCATE `tabError Log`;')
     frappe.db.sql("""UPDATE `tabDocField`
 							SET fieldtype="Small Text"
