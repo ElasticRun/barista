@@ -429,6 +429,7 @@ class TestCaseExecution():
         value_type = 'Fixed Value'
         record_count = 1
         testdata_doc_test_record_name = None
+        test_record_doc = None
         validation_doctype = []
         testdata_doc = frappe._dict()
 
@@ -449,11 +450,9 @@ class TestCaseExecution():
         if testcase_doc.test_data:
             testdata_doc = frappe.get_doc(
                 'Test Data', testcase_doc.test_data)
-            testdata_doc_test_record_name = frappe.db.get_value(
-                'Test Run Log', {'test_run_name': run_name, 'test_data': testcase_doc.test_data}, 'test_record')
+            testdata_doc_test_record_name = frappe.db.get_value('Test Run Log', {'test_run_name': run_name, 'test_data': testcase_doc.test_data}, 'test_record')
         if(assertion_doc.assertion_type != "RESPONSE" and assertion_doc.assertion_type != "ERROR"):
-            validation_doctype = frappe.get_all(assertion_doc.doctype_name, filters={
-                assertion_doc.reference_field: testdata_doc_test_record_name})
+            validation_doctype = frappe.get_all(assertion_doc.doctype_name, filters={assertion_doc.reference_field: testdata_doc_test_record_name})
         if (assertion_doc.assertion_type == "FIELD VALUE"):
             if (len(validation_doctype) != 1):
                 assertion_result.assertion_status = "Failed"
@@ -516,12 +515,11 @@ class TestCaseExecution():
             filter_field_to_refer = 'name'
             if assertion_doc.docfield_name and assertion_doc.docfield_name.strip() != '':
                 filter_field_to_refer = assertion_doc.docfield_name
-            test_record_doc = frappe.get_doc(
-                testdata_doc.doctype_name, testdata_doc_test_record_name)
+            if testdata_doc_test_record_name:
+                test_record_doc = frappe.get_doc(testdata_doc.doctype_name, testdata_doc_test_record_name)
 
             if test_record_doc:
-                filter_field_value = test_record_doc.get(
-                    filter_field_to_refer)
+                filter_field_value = test_record_doc.get(filter_field_to_refer)
             else:
                 filter_field_value = ''
             validation_doctype = frappe.get_all(assertion_doc.doctype_name, filters={
