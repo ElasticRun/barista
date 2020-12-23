@@ -273,6 +273,8 @@ class TestDataGenerator():
                 elif param.value and '{{' in param.value:
                     value = self.resolve_jinja(
                         param.value, param.test_data, run_name)
+                elif param.value and param.type == 'eval':
+                    value = eval(param.value)
                 else:
                     value = param.value
 
