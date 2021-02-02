@@ -13,6 +13,10 @@ from frappe.modules.export_file import export_to_files
 
 
 class TestSuite(Document):
+	def before_save(self):
+		if self.module:
+			self.module = self.module.strip().replace(' ','_').upper()
+
 	def on_update(self):
 		if self.is_standard == "Yes" and frappe.local.conf.developer_mode and not frappe.flags.in_migrate:
 			export_to_files(record_list=[[self.doctype, self.name]], record_module="barista", create_init=True)
