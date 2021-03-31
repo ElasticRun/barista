@@ -34,6 +34,11 @@ def truncate(number, decimals=0):
 @frappe.whitelist()
 def barista_job():
 
+    disable_execution = frappe.utils.cint(frappe.db.get_value('Barista Job Setting','Barista Job Setting','disable_execution'))
+
+    if disable_execution:
+      return
+
     # send do not refresh email
     send_do_not_refresh_mail()
 
