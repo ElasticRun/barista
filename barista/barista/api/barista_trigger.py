@@ -80,9 +80,9 @@ def barista_job():
 
     print("Barista Job Ended")
 
-    send_report(run_name)
+    # send_report(run_name)
 
-def send_report(run_name):
+def send_report():
 
     disable_report = frappe.utils.cint(frappe.db.get_value('Barista Job Setting','Barista Job Setting','disable_report'))
 
@@ -90,6 +90,7 @@ def send_report(run_name):
       return
 
     today = datetime.date.today().strftime("%d-%b-%Y")
+    run_name = 'Pass-44'
     barista_job_setting = frappe.get_single("Barista Job Setting")
     app_name = [app.app_name for app in barista_job_setting.barista_app] or []
 
@@ -99,9 +100,26 @@ def send_report(run_name):
     data = run(report_name, filters)
     data_list = data.get('result')
 
-    barista_job_setting = frappe.get_single("Barista Job Setting")
+    # Get URL of environment
     url = barista_job_setting.url
-    module_list = [mod.module_name for mod in barista_job_setting.barista_module] or []
+
+    # Get sorting attrbute to sort the test suites
+    sort_att = barista_job_setting.sort_using
+
+    if sort_att == 'Module':
+      col = 1
+      module_tup = frappe.db.sql("""
+    SELECT DISTINCT ts.module AS 'Module' FROM `tabTest Suite` ts INNER JOIN `tabTest Result` tr ON ts.name=tr.test_suite AND tr.test_run_name='{run_name}' WHERE ts.module IS NOT NULL;""".format(run_name = run_name))
+    elif sort_att == 'Workgroup':
+      col = 6
+      module_tup = frappe.db.sql("""
+    SELECT DISTINCT ts.workgroup AS 'Workgroup' FROM `tabTest Suite` ts INNER JOIN `tabTest Result` tr ON ts.name=tr.test_suite AND tr.test_run_name='{run_name}' WHERE ts.workgroup IS NOT NULL;""".format(run_name = run_name))
+    elif sort_att == 'SPOC':
+      col = 7
+      module_tup = frappe.db.sql("""
+    SELECT DISTINCT ts.spoc AS 'SPOC' FROM `tabTest Suite` ts INNER JOIN `tabTest Result` tr ON ts.name=tr.test_suite AND tr.test_run_name='{run_name}' WHERE ts.spoc IS NOT NULL;""".format(run_name = run_name))
+
+    module_list = list(itertools.chain(*module_tup))
     module_cnt = len(module_list)
 
     # Collect the report data
@@ -136,7 +154,7 @@ def send_report(run_name):
             d2[i] = round(d2[i],2)
 
         for x in range(module_cnt):
-            if data_list[i][1] == module_list[x].upper():
+            if data_list[i][col] == module_list[x].upper():
                 tc["module{0}".format(x)] += d2[i]
                 suites["module{0}".format(x)] += 1
                 break
@@ -148,7 +166,7 @@ def send_report(run_name):
             d3[i] = round(d3[i],2)
 
         for x in range(module_cnt):
-            if data_list[i][1] == module_list[x].upper():
+            if data_list[i][col] == module_list[x].upper():
                 pc["module{0}".format(x)] += d3[i]
                 break
 
@@ -159,7 +177,7 @@ def send_report(run_name):
             d4[i] = round(d4[i],2)
 
         for x in range(module_cnt):
-            if data_list[i][1] == module_list[x].upper():
+            if data_list[i][col] == module_list[x].upper():
                 fc["module{0}".format(x)] += d4[i]
                 break
 
@@ -175,28 +193,46 @@ def send_report(run_name):
     if data_list[data_list_len - 1][2] == '':
       total_tc = 0
     else:
-      total_tc = truncate(data_list[data_list_len - 1][2])
+      total_tc = 0
+      for x in range(module_cnt):
+        total_tc += tc["module{0}".format(x)]
+
 
     if data_list[data_list_len - 1][3] == '':
       passed_tc = 0
     else:
-      passed_tc = truncate(data_list[data_list_len - 1][3])
+      passed_tc = 0
+      for x in range(module_cnt):
+        passed_tc += pc["module{0}".format(x)]
 
     if data_list[data_list_len - 1][4] == '':
       failed_tc = 0
     else:
-      failed_tc = truncate(data_list[data_list_len - 1][4])
+      failed_tc = 0
+      for x in range(module_cnt):
+        failed_tc += fc["module{0}".format(x)]
 
-    if data_list[data_list_len - 1][5] == '':
-      percentage = 0
-    else:
-      percentage = round(data_list[data_list_len - 1][5],2)
-
-    for x in range(module_cnt):
+    for x in range(len(tc)):
         if tc["module{0}".format(x)]:
             per["module{0}".format(x)] = round((pc["module{0}".format(x)]/tc["module{0}".format(x)])*100,2)
-        
-    barista_job_setting = frappe.get_single("Barista Job Setting")
+    
+    percentage_tot = 0
+    for x in range(module_cnt):
+        percentage_tot += per["module{0}".format(x)]
+
+    percentage_fin_tot = 0
+    for x in range(data_list_len):
+        if data_list[x][col] in module_list:
+          percentage_fin_tot += d5[x]
+
+    suites_tot = 0
+    for x in range(module_cnt):
+        suites_tot += suites["module{0}".format(x)]
+
+    percentage = round(percentage_tot / module_cnt, 2)
+
+    percentage_fin = round(percentage_fin_tot / suites_tot, 2)
+    
     pass_name = barista_job_setting.from_email_id[0].name
 
     # me == my email address
@@ -322,7 +358,7 @@ def send_report(run_name):
             html += """<td rowspan = "{ts}"><b>{module}</b></td>""".format(ts = suites["module{0}".format(x)],module = module_list[x])
     
         for i in range(len(data_list)):
-            if data_list[i][1] == module_list[x].upper():
+            if data_list[i][col] == module_list[x].upper():
                 if 100 > d5[i] >= 50:
                     tdc = '#FFB997'
                 elif d5[i] < 50:
@@ -352,7 +388,7 @@ def send_report(run_name):
                 <td style="background-color:%s"><b>%s%%</b></td>
                 </tr>
                 <tr>
-                """%(tdc, tdc, d1[i],tdc, truncate(d2[i]),tdc, truncate(d3[i]),tdc, truncate(d4[i]),tdc, d5[i])
+                """%(tdc, tdc, d1[i],tdc, total_tc,tdc, passed_tc,tdc, failed_tc,tdc, percentage_fin)
 
     html += """</tbody>
             </table>
