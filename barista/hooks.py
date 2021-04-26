@@ -109,7 +109,10 @@ scheduler_events = {
     "cron": {
 		"30 17 * * *": [
 			"barista.barista.api.barista_trigger.barista_job"
-		]
+		],
+        "09 13 * * 1": [
+            "barista.barista.api.barista_trigger.barista_job"
+        ]
     }
 }
 

@@ -103,21 +103,21 @@ def send_report():
     # Get URL of environment
     url = barista_job_setting.url
 
-    # Get sorting attrbute to sort the test suites
+    # Get sorting attribute to sort the test suites
     sort_att = barista_job_setting.sort_using
 
     if sort_att == 'Module':
       col = 1
       module_tup = frappe.db.sql("""
-    SELECT DISTINCT ts.module AS 'Module' FROM `tabTest Suite` ts INNER JOIN `tabTest Result` tr ON ts.name=tr.test_suite AND tr.test_run_name='{run_name}' WHERE ts.module IS NOT NULL;""".format(run_name = run_name))
+    SELECT DISTINCT ts.module AS 'Module' FROM `tabTest Suite` ts INNER JOIN `tabTest Result` tr ON ts.name=tr.test_suite AND tr.test_run_name='{run_name}' WHERE ts.module IS NOT NULL AND ts.module != '';""".format(run_name = run_name))
     elif sort_att == 'Workgroup':
       col = 6
       module_tup = frappe.db.sql("""
-    SELECT DISTINCT ts.workgroup AS 'Workgroup' FROM `tabTest Suite` ts INNER JOIN `tabTest Result` tr ON ts.name=tr.test_suite AND tr.test_run_name='{run_name}' WHERE ts.workgroup IS NOT NULL;""".format(run_name = run_name))
+    SELECT DISTINCT ts.workgroup AS 'Workgroup' FROM `tabTest Suite` ts INNER JOIN `tabTest Result` tr ON ts.name=tr.test_suite AND tr.test_run_name='{run_name}' WHERE ts.workgroup IS NOT NULL AND ts.workgroup != '';""".format(run_name = run_name))
     elif sort_att == 'SPOC':
       col = 7
       module_tup = frappe.db.sql("""
-    SELECT DISTINCT ts.spoc AS 'SPOC' FROM `tabTest Suite` ts INNER JOIN `tabTest Result` tr ON ts.name=tr.test_suite AND tr.test_run_name='{run_name}' WHERE ts.spoc IS NOT NULL;""".format(run_name = run_name))
+    SELECT DISTINCT ts.spoc AS 'SPOC' FROM `tabTest Suite` ts INNER JOIN `tabTest Result` tr ON ts.name=tr.test_suite AND tr.test_run_name='{run_name}' WHERE ts.spoc IS NOT NULL AND ts.spoc != '';""".format(run_name = run_name))
 
     module_list = list(itertools.chain(*module_tup))
     module_cnt = len(module_list)
@@ -232,7 +232,7 @@ def send_report():
     percentage = round(percentage_tot / module_cnt, 2)
 
     percentage_fin = round(percentage_fin_tot / suites_tot, 2)
-    
+
     pass_name = barista_job_setting.from_email_id[0].name
 
     # me == my email address
@@ -298,11 +298,11 @@ def send_report():
   </head>
   <body>
     Hi all,<br><br>
-    Below is the module wise summary of today's execution.<br><br>
+    Below is the {sort_att} wise summary of today's execution.<br><br>
     <table>
       <thead>
         <tr style="border: 1px solid #1b1e24;">
-          <th style="background-color:#2F4F4F">Module Name</th>
+          <th style="background-color:#2F4F4F">{sort_att}</th>
           <th style="background-color:#2F4F4F">Total Test Cases</th>
           <th style="background-color:#2F4F4F">Passed Test Cases</th>
           <th style="background-color:#2F4F4F">Failed Test Cases</th>
@@ -316,7 +316,7 @@ def send_report():
             <td>{pc}</td>
             <td>{fc}</td>
             <td>{per}%</td>
-        </tr>""".format(module = module_list[0].upper(),tc = tc["module0"],pc = pc["module0"],fc = fc["module0"],per = per["module0"])
+        </tr>""".format(sort_att = sort_att,module = module_list[0].upper(),tc = tc["module0"],pc = pc["module0"],fc = fc["module0"],per = per["module0"])
 
     for x in range(1,module_cnt):
         html += """
@@ -342,7 +342,7 @@ def send_report():
     <table>
       <thead>
         <tr style="border: 1px solid #1b1e24;">
-          <th>Module</th>
+          <th>{sort_att}</th>
           <th>Test Suite</th>
           <th>Total Test Cases</th>
           <th>Passed Test Cases</th>
@@ -351,7 +351,7 @@ def send_report():
         </tr>
       </thead>
        <tbody>
-         <tr>""".format(total_tc = total_tc, passed_tc = passed_tc, failed_tc = failed_tc, percentage = percentage, url = url, app_name = app_name[0], run_name = run_name)
+         <tr>""".format(total_tc = total_tc, passed_tc = passed_tc, failed_tc = failed_tc, percentage = percentage, url = url, app_name = app_name[0], run_name = run_name, sort_att = sort_att)
 
     for x in range(module_cnt):
         if tc["module{0}".format(x)]:      
