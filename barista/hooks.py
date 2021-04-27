@@ -110,7 +110,7 @@ scheduler_events = {
 		"30 17 * * *": [
 			"barista.barista.api.barista_trigger.barista_job"
 		],
-        "09 13 * * 1": [
+        "00 12 * * 3": [
             "barista.barista.api.barista_trigger.barista_job"
         ]
     }

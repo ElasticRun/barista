@@ -80,9 +80,9 @@ def barista_job():
 
     print("Barista Job Ended")
 
-    # send_report(run_name)
+    send_report(run_name)
 
-def send_report():
+def send_report(run_name):
 
     disable_report = frappe.utils.cint(frappe.db.get_value('Barista Job Setting','Barista Job Setting','disable_report'))
 
@@ -90,7 +90,6 @@ def send_report():
       return
 
     today = datetime.date.today().strftime("%d-%b-%Y")
-    run_name = 'Pass-44'
     barista_job_setting = frappe.get_single("Barista Job Setting")
     app_name = [app.app_name for app in barista_job_setting.barista_app] or []
 
