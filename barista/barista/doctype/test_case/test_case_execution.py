@@ -163,7 +163,7 @@ class TestCaseExecution():
                     for update_field in testcase_doc.update_fields:
                         field_doc = frappe._dict()
                         update_field_doc = frappe.get_doc(
-                            "Testdatafield", update_field['name'])
+                            "Testdatafield", update_field.name)
 
                         for field in fields:
                             if field.fieldname == update_field_doc.docfield_fieldname:
