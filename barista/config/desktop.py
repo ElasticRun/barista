@@ -6,8 +6,8 @@ def get_data():
 	return [
 		{
 			"module_name": "Barista",
-			"color": "grey",
-			"icon": "octicon octicon-file-directory",
+			"color": "blue",
+			"icon": "fa fa-flask",
 			"type": "module",
 			"label": _("Barista")
 		}
