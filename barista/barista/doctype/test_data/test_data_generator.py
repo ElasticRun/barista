@@ -365,8 +365,7 @@ class TestDataGenerator():
                 context_dict = {"doc": context}
                 
             try:
-                validate_template(jinja)
-                context_dict = self.fetch_context(jinja, context_dict, run_name)
+                jinja, context_dict = self.fetch_context(jinja, context_dict, run_name)
                 resolved_jinja = render_template(
                     jinja, context_dict)
             except Exception as e:
@@ -404,13 +403,16 @@ class TestDataGenerator():
     
     def fetch_context(self, value, context_dict, run_name):
         """Fetches the Context For all TestData"""
-        for data in re.findall('{{([^.]*)',value):
+        for data in list(set(re.findall('{{([^.]*)',value))):
             if frappe.db.exists("Test Data", data):
+                i = 1
                 test_record_name = frappe.db.get_value('Test Run Log', {'test_run_name': run_name, 'test_data': data}, ['test_data_doctype','test_record'])
                 if test_record_name:
-                    context_dict[data] = frappe.get_doc(test_record_name[0], test_record_name[1]).as_dict()
+                    key = f"doc{i}"
+                    context_dict[key] = frappe.get_doc(test_record_name[0], test_record_name[1]).as_dict()
+                    value = value.replace(data, key)
         
-        return context_dict
+        return (value, context_dict)
 
 def create_test_run_log(run_name, test_data, test_record):
     try:
