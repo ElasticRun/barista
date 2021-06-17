@@ -347,8 +347,8 @@ class TestCaseExecution():
                                 try:
                                     if '{{' in param.value:
                                         context_dict = {'doc':test_record_doc.as_dict()}
-                                        validate_template(param.value)
-                                        resolved_jinja = render_template(param.value, context_dict)
+                                        jinja, context_dict = self.fetch_context(param.value, context_dict, run_name)
+                                        resolved_jinja = render_template(jinja, context_dict)
                                         kwargs[parameter] = eval(str(resolved_jinja))
                                 except Exception as e:
 
@@ -657,6 +657,18 @@ class TestCaseExecution():
             assertion_result)
         test_result_doc.save(True)
 
+    def fetch_context(self, value, context_dict, run_name):
+        """Fetches the Context For all TestData"""
+        for data in list(set(re.findall('{{([^.]*)',value))):
+            i = 1
+            if frappe.db.exists("Test Data", data):
+                test_record_name = frappe.db.get_value('Test Run Log', {'test_run_name': run_name, 'test_data': data}, ['test_data_doctype','test_record'])
+                if test_record_name:
+                    key = f"doc{i}"
+                    context_dict[key] = frappe.get_doc(test_record_name[0], test_record_name[1]).as_dict()
+                    value = value.replace(data, key)
+        
+        return (value, context_dict)
 
 def get_execution_time(start_time):
     end_time = round(time.time() - start_time, 4)
@@ -666,3 +678,5 @@ def get_execution_time(start_time):
         time_uom = 'minutes'
 
     return str(end_time)+' '+time_uom
+
+
