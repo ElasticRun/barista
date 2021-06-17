@@ -157,15 +157,13 @@ class TestCaseExecution():
                             run_name, testdata_doc.name, new_record_doc.name)
 
                     # now take the fields to be updated
-                    update_fields = frappe.get_list("Testdatafield", filters={
-                        "parent": testcase_doc.name})
                     fields = frappe.get_meta(
                         testcase_doc.testcase_doctype).fields
 
-                    for update_field in update_fields:
+                    for update_field in testcase_doc.update_fields:
                         field_doc = frappe._dict()
                         update_field_doc = frappe.get_doc(
-                            "Testdatafield", update_field['name'])
+                            "Testdatafield", update_field.name)
 
                         for field in fields:
                             if field.fieldname == update_field_doc.docfield_fieldname:
@@ -235,7 +233,7 @@ class TestCaseExecution():
                                 create_test_run_log(
                                     run_name, child_testdata_doc.name, child_doc.name)
                                 new_record_doc.set(
-                                    field_doc.fieldname, child_doc.name)
+                                    field_doc.fieldname, child_doc.get(update_field_doc.linkfield_key or "name"))
                             # for rest of data type.. either it should be code or fixed value
                             elif (update_field_doc.docfield_code_value == "Code"):
                                 if update_field_doc.docfield_code and not update_field_doc.linkfield_name:
@@ -300,9 +298,6 @@ class TestCaseExecution():
                         create_test_run_log(
                             run_name, testdata_doc.name, new_record_doc.name)
                     apply_workflow(new_record_doc, testcase_doc.workflow_state)
-                    # from erpnow.superflow.superflow import apply_superflow
-                    # apply_superflow(
-                    #     new_record_doc, testcase_doc.workflow_state)
                     print("\033[0;32;92m    >>> Workflow Applied")
                 except Exception as e:
                     frappe.db.rollback()

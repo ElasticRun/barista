@@ -179,7 +179,7 @@ class TestDataGenerator():
                                     create_test_run_log(
                                         run_name, child_testdata_doc.name, child_doc.name)
                                     new_doc.set(field_doc.fieldname,
-                                                child_doc.name)
+                                                child_doc.get(declared_field_doc.linkfield_key or 'name'))
 
                                 elif (declared_field_doc.docfield_code_value == "Code"):
                                     if declared_field_doc.docfield_code and not declared_field_doc.linkfield_name:
