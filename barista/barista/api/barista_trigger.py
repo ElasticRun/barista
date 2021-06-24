@@ -5,7 +5,6 @@ import coverage
 import shutil
 import warnings
 from barista.barista.doctype.test_suite.run_test import resolve_run_name
-import latte
 import itertools
 from barista.barista.doctype.test_suite.run_test import RunTest
 from frappe.desk.query_report import run
