@@ -50,7 +50,7 @@ error_log_title_len = 1000
 class TestCaseExecution():
     def run_testcase(self, testcase, test_suite, testcase_srno, total_testcases, suite_srno, total_suites, run_name):
         error_message = ''
-        test_result_doc = frappe.new_doc("Test Result")
+        test_result_doc = frappe.get_doc({"doctype":"Test Result"})
         new_record_doc = frappe._dict()
         testdata_doc = frappe._dict()
         testdata_doc_test_record_name = None
@@ -118,6 +118,7 @@ class TestCaseExecution():
                         frappe.throw(
                             f'Test Data {testcase_doc.test_data} generated None doc. Please check Test Data {testcase_doc.test_data}')
                 except Exception as e:
+                    frappe.db.rollback()
                     frappe.log_error(frappe.get_traceback(
                     ), ('barista-CREATE-'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
                     error_message += '\n' + str(e)
@@ -156,15 +157,13 @@ class TestCaseExecution():
                             run_name, testdata_doc.name, new_record_doc.name)
 
                     # now take the fields to be updated
-                    update_fields = frappe.get_list("Testdatafield", filters={
-                        "parent": testcase_doc.name})
                     fields = frappe.get_meta(
                         testcase_doc.testcase_doctype).fields
 
-                    for update_field in update_fields:
+                    for update_field in testcase_doc.update_fields:
                         field_doc = frappe._dict()
                         update_field_doc = frappe.get_doc(
-                            "Testdatafield", update_field['name'])
+                            "Testdatafield", update_field.name)
 
                         for field in fields:
                             if field.fieldname == update_field_doc.docfield_fieldname:
@@ -234,7 +233,7 @@ class TestCaseExecution():
                                 create_test_run_log(
                                     run_name, child_testdata_doc.name, child_doc.name)
                                 new_record_doc.set(
-                                    field_doc.fieldname, child_doc.name)
+                                    field_doc.fieldname, child_doc.get(update_field_doc.linkfield_key or "name"))
                             # for rest of data type.. either it should be code or fixed value
                             elif (update_field_doc.docfield_code_value == "Code"):
                                 if update_field_doc.docfield_code and not update_field_doc.linkfield_name:
@@ -260,6 +259,7 @@ class TestCaseExecution():
                             e, testdata_doc, run_name)
 
                 except Exception as e:
+                    frappe.db.rollback()
                     frappe.log_error(frappe.get_traceback(
                     ), ('barista-UPDATE-'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
                     error_message += '\n' + str(e)
@@ -275,6 +275,7 @@ class TestCaseExecution():
                         testdata_doc.doctype_name, testdata_doc_test_record_name)
                     record_doc.delete()
                 except Exception as e:
+                    frappe.db.rollback()
                     frappe.log_error(frappe.get_traceback(
                     ), ('barista-'+testcase_doc.name+'-DELETE-'+str(e))[:error_log_title_len])
                     error_message += '\n' + str(e)
@@ -297,12 +298,9 @@ class TestCaseExecution():
                         create_test_run_log(
                             run_name, testdata_doc.name, new_record_doc.name)
                     apply_workflow(new_record_doc, testcase_doc.workflow_state)
-                    # from erpnow.superflow.superflow import apply_superflow
-                    # apply_superflow(
-                    #     new_record_doc, testcase_doc.workflow_state)
                     print("\033[0;32;92m    >>> Workflow Applied")
                 except Exception as e:
-                    # frappe.db.rollback()
+                    frappe.db.rollback()
                     frappe.log_error(frappe.get_traceback(), (f"""barista-WORKFLOW-{testcase_doc.name}-{str(
 						e)}-DocType-[{testdata_doc.doctype_name}]-WorkflowState-[{current_workflow_state}]-Action-[{testcase_doc.workflow_state}]""")[:error_log_title_len])
                     error_message += '\n' + str(e)
@@ -344,10 +342,11 @@ class TestCaseExecution():
                                 try:
                                     if '{{' in param.value:
                                         context_dict = {'doc':test_record_doc.as_dict()}
-                                        validate_template(param.value)
-                                        resolved_jinja = render_template(param.value, context_dict)
+                                        jinja, context_dict = self.fetch_context(param.value, context_dict, run_name)
+                                        resolved_jinja = render_template(jinja, context_dict)
                                         kwargs[parameter] = eval(str(resolved_jinja))
                                 except Exception as e:
+
                                     frappe.log_error(frappe.get_traceback(), ('barista-FUNCTION-'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
                                     print(
                                         "\033[0;31;91m       >>>> Error in Function Parameter\n      ", str(e))
@@ -370,6 +369,7 @@ class TestCaseExecution():
                                 testcase_doc.json_parameter, context_dict)
                             kwargs.update(eval(str(resolved_jinja)))
                         except Exception as e:
+                            frappe.db.rollback()
                             frappe.log_error(frappe.get_traceback(), ('barista-FUNCTION-'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
                             print(
                                 "\033[0;31;91m       >>>> Error in Json Parameter\n      ", str(e))
@@ -388,6 +388,7 @@ class TestCaseExecution():
                             method, **kwargs)
                     print("\033[0;32;92m     >>> Function Executed")
                 except Exception as e:
+                    frappe.db.rollback()
                     frappe.log_error(frappe.get_traceback(
                     ), ('barista-FUNCTION-'+testcase_doc.name+'-'+str(e))[:error_log_title_len])
                     error_message += '\n' + str(e)
@@ -413,6 +414,7 @@ class TestCaseExecution():
                     assertion, testcase_doc, run_name, error_message, function_result, test_result_doc)
 
         except Exception as e:
+            frappe.db.rollback()
             frappe.log_error(frappe.get_traceback(
             ), ('barista-Critical Error-'+testcase+'-'+str(e))[:error_log_title_len])
             test_result_doc.test_case_execution = "Execution Failed"
@@ -650,6 +652,18 @@ class TestCaseExecution():
             assertion_result)
         test_result_doc.save(True)
 
+    def fetch_context(self, value, context_dict, run_name):
+        """Fetches the Context For all TestData"""
+        for data in list(set(re.findall('{{([^.]*)',value))):
+            i = 1
+            if frappe.db.exists("Test Data", data):
+                test_record_name = frappe.db.get_value('Test Run Log', {'test_run_name': run_name, 'test_data': data}, ['test_data_doctype','test_record'])
+                if test_record_name:
+                    key = f"doc{i}"
+                    context_dict[key] = frappe.get_doc(test_record_name[0], test_record_name[1]).as_dict()
+                    value = value.replace(data, key)
+        
+        return (value, context_dict)
 
 def get_execution_time(start_time):
     end_time = round(time.time() - start_time, 4)
@@ -659,3 +673,5 @@ def get_execution_time(start_time):
         time_uom = 'minutes'
 
     return str(end_time)+' '+time_uom
+
+

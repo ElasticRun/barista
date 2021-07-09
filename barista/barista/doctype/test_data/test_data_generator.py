@@ -180,7 +180,7 @@ class TestDataGenerator():
                                     create_test_run_log(
                                         run_name, child_testdata_doc.name, child_doc.name)
                                     new_doc.set(field_doc.fieldname,
-                                                child_doc.name)
+                                                child_doc.get(declared_field_doc.linkfield_key or 'name'))
 
                                 elif (declared_field_doc.docfield_code_value == "Code"):
                                     if declared_field_doc.docfield_code and not declared_field_doc.linkfield_name:
@@ -364,8 +364,9 @@ class TestDataGenerator():
                 context = frappe.get_doc(
                     test_record_doctype, test_record_name).as_dict()
                 context_dict = {"doc": context}
+                
             try:
-                validate_template(jinja)
+                jinja, context_dict = self.fetch_context(jinja, context_dict, run_name)
                 resolved_jinja = render_template(
                     jinja, context_dict)
             except Exception as e:
@@ -400,7 +401,19 @@ class TestDataGenerator():
                             create_test_run_log(
                                 run_name, child_test_data_doc.name, child_records[child_record_index].name)
                 child_record_index += 1
-
+    
+    def fetch_context(self, value, context_dict, run_name):
+        """Fetches the Context For all TestData"""
+        for data in list(set(re.findall('{{([^.]*)',value))):
+            if frappe.db.exists("Test Data", data):
+                i = 1
+                test_record_name = frappe.db.get_value('Test Run Log', {'test_run_name': run_name, 'test_data': data}, ['test_data_doctype','test_record'])
+                if test_record_name:
+                    key = f"doc{i}"
+                    context_dict[key] = frappe.get_doc(test_record_name[0], test_record_name[1]).as_dict()
+                    value = value.replace(data, key)
+        
+        return (value, context_dict)
 
 def create_test_run_log(run_name, test_data, test_record):
     try:
