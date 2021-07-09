@@ -79,9 +79,9 @@ def barista_job():
 
     print("Barista Job Ended")
 
-    send_report(run_name)
+    # send_report(run_name)
 
-def send_report(run_name):
+def send_report():
 
     disable_report = frappe.utils.cint(frappe.db.get_value('Barista Job Setting','Barista Job Setting','disable_report'))
 
@@ -89,6 +89,7 @@ def send_report(run_name):
       return
 
     today = datetime.date.today().strftime("%d-%b-%Y")
+    run_name = 'Pass-110'
     barista_job_setting = frappe.get_single("Barista Job Setting")
     app_name = [app.app_name for app in barista_job_setting.barista_app] or []
 
@@ -98,8 +99,10 @@ def send_report(run_name):
     data = run(report_name, filters)
     data_list = data.get('result')
 
-    # Get URL of environment
-    url = barista_job_setting.url
+    # Get URL and name of environment
+    # url = barista_job_setting.url
+    url = frappe.local.conf.barista_runtime
+    env = frappe.local.conf.barista_platform or ''
 
     # Get sorting attribute to sort the test suites
     sort_att = barista_job_setting.sort_using
@@ -235,15 +238,17 @@ def send_report(run_name):
 
     # me == my email address
     # you == recipient's email address
-    me = [from_email.from_email_id for from_email in barista_job_setting.from_email_id] or []
+    # me = [from_email.from_email_id for from_email in barista_job_setting.from_email_id] or []
+    me = barista_job_setting.from_email_id[0].from_email_id
+    me1 = ((me.split('@')[0]).replace('.',' ')).title()
     password = get_decrypted_password('From Email ID', pass_name, fieldname='password')
     you = [to.to_email_id for to in barista_job_setting.to_email_id] or []
     cc = [cc.cc_email_id for cc in barista_job_setting.cc_email_id] or []
 
     # Create message container - the correct MIME type is multipart/alternative.
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = "Barista Test Suites Execution Report - {today} , {run_name}".format(today = today, run_name = run_name)
-    msg['From'] = ", ".join(me)
+    msg['Subject'] = "{env} Barista Test Suites Execution Report - {today} , {run_name}".format(env = env, today = today, run_name = run_name)
+    msg['From'] = me1
     msg['To'] = ", ".join(you)
     msg['Cc'] = ", ".join(cc)
 
@@ -414,7 +419,7 @@ def send_report(run_name):
 
     mail.starttls()
 
-    mail.login(me[0], password)
+    mail.login(me, password)
     mail.send_message(msg)
     mail.quit()
 
@@ -432,7 +437,9 @@ def send_do_not_refresh_mail():
 
     # me == my email address
     # you == recipient's email address
-    me = [from_email.from_email_id for from_email in barista_job_setting.from_email_id] or []
+    # me = [from_email.from_email_id for from_email in barista_job_setting.from_email_id] or []
+    me = barista_job_setting.from_email_id[0].from_email_id
+    me1 = ((me.split('@')[0]).replace('.',' ')).title()
     password = get_decrypted_password('From Email ID', pass_name, fieldname='password')
     you = [to.to_email_id for to in barista_job_setting.to_email_id] or []
     cc = [cc.cc_email_id for cc in barista_job_setting.cc_email_id] or []
@@ -440,7 +447,7 @@ def send_do_not_refresh_mail():
     # Create message container - the correct MIME type is multipart/alternative.
     msg = MIMEMultipart('alternative')
     msg['Subject'] = "Please do not Refresh Doha Environment for 40 mins <EOM>"
-    msg['From'] = ", ".join(me)
+    msg['From'] = me1
     msg['To'] = ", ".join(you)
     msg['Cc'] = ", ".join(cc)
 
@@ -451,7 +458,7 @@ def send_do_not_refresh_mail():
 
     mail.starttls()
 
-    mail.login(me[0], password)
+    mail.login(me, password)
     mail.send_message(msg)
     mail.quit()
 
