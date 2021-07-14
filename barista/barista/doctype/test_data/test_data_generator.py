@@ -168,7 +168,7 @@ class TestDataGenerator():
                                     child_doc, error_message = self.create_testdata(
                                         declared_field_doc.linkfield_name, run_name)
                                     try:
-                                        if(child_doc.is_new()):
+                                        if(not child_doc.name):
                                             child_doc.save()
                                     except frappe.DuplicateEntryError as e:
                                         child_doc = resolve_duplicate_entry_error(
