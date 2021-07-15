@@ -100,9 +100,8 @@ def send_report():
     data_list = data.get('result')
 
     # Get URL and name of environment
-    # url = barista_job_setting.url
-    url = frappe.local.conf.barista_runtime
-    env = frappe.local.conf.barista_platform or ''
+    url = barista_job_setting.url or ''
+    env = barista_job_setting.platform or ''
 
     # Get sorting attribute to sort the test suites
     sort_att = barista_job_setting.sort_using
@@ -238,7 +237,6 @@ def send_report():
 
     # me == my email address
     # you == recipient's email address
-    # me = [from_email.from_email_id for from_email in barista_job_setting.from_email_id] or []
     me = barista_job_setting.from_email_id[0].from_email_id
     me1 = ((me.split('@')[0]).replace('.',' ')).title()
     password = get_decrypted_password('From Email ID', pass_name, fieldname='password')
