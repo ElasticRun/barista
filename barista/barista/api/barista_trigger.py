@@ -457,6 +457,7 @@ def send_do_not_refresh_mail():
 
     mail.login(me, password)
     mail.send_message(msg)
+    # current_fix
     mail.quit()
     # future_code
 
