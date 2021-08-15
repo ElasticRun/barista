@@ -458,5 +458,6 @@ def send_do_not_refresh_mail():
     mail.login(me, password)
     mail.send_message(msg)
     mail.quit()
+    # future_code
 
     print('------------------Request email sent-------------------')
