@@ -107,7 +107,7 @@ scheduler_events = {
 # 		"barista.tasks.monthly"
 # 	]
     "cron": {
-		"30 17 * * *": [
+		"15 16 * * *": [
 			"barista.barista.api.barista_trigger.barista_job"
 		]
         # "00 12 * * 3": [
