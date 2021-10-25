@@ -443,7 +443,7 @@ def send_do_not_refresh_mail():
 
     # Create message container - the correct MIME type is multipart/alternative.
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = "Please do not Refresh Doha Environment for 40 mins <EOM>"
+    msg['Subject'] = "Please do not Refresh Doha Environment for an Hour <EOM>"
     msg['From'] = me1
     msg['To'] = ", ".join(you)
     msg['Cc'] = ", ".join(cc)
