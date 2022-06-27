@@ -59,9 +59,8 @@ frappe.ui.form.on('Test Case', {
 				);
 				options.push("docstatus");
 				options.push("name");
-
-				frappe.meta.get_docfield("Assertion", "reference_field", cur_frm.doc.name).options = options;
-				frappe.meta.get_docfield("Assertion", "docfield_name", cur_frm.doc.name).options = options;
+				cur_frm.fields_dict.assertion.grid.update_docfield_property('reference_field', 'options', options);
+				cur_frm.fields_dict.assertion.grid.update_docfield_property('docfield_name', 'options', options);
 			});
 			cur_frm.refresh_fields();
 		}
@@ -145,8 +144,8 @@ frappe.ui.form.on("Assertion", {
 				options.push("docstatus");
 				options.push("name");
 				options.push("parent");
-				frappe.meta.get_docfield("Assertion", "reference_field", cur_frm.doc.name).options = options;
-				frappe.meta.get_docfield("Assertion", "docfield_name", cur_frm.doc.name).options = options;
+				cur_frm.fields_dict.assertion.grid.update_docfield_property('reference_field', 'options', options);
+				cur_frm.fields_dict.assertion.grid.update_docfield_property('docfield_name', 'options', options);
 			});
 			cur_frm.refresh_fields();
 		}

@@ -322,6 +322,11 @@ def resolve_run_name(run_name='Pass-1'):
                 f'Provided Run Name [{run_name}] already exists. Please provide other Run Name.')
             sys.exit(1)
     else:
+        frappe.get_doc({
+            "run_name":run_name,
+            "doctype": "Run Name",
+        }).db_insert()
+        frappe.db.commit()
         return run_name
 
 

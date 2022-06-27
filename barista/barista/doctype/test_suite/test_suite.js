@@ -3,11 +3,13 @@
 
 frappe.ui.form.on('Test Suite', {
     refresh: function(frm) {
+        debugger
         cur_frm.doc.testcase.forEach((test_case) => {
             // Get the test-case row, in which 'info' button is to be added:
             let fieldDiv = $(`.frappe-control[data-fieldname='testcase']`);
-
+            console.log(fieldDiv);
             // Check if there's a button already present:
+            debugger
             if (!fieldDiv.find(`.test_case-details-${test_case.idx}`).length){
                 
                 // get the div at end of the row, and add a info-button-div:
