@@ -8,8 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "workgroup",
-  "workgroup_owner",
-  "workgroup_owner_fullname"
+  "workgroup_owner"
  ],
  "fields": [
   {
@@ -20,21 +19,13 @@
   },
   {
    "fieldname": "workgroup_owner",
-   "fieldtype": "Link",
-   "label": "WorkGroup Owner",
-   "options": "User"
-  },
-  {
-   "fetch_from": "workgroup_owner.full_name",
-   "fetch_if_empty": 1,
-   "fieldname": "workgroup_owner_fullname",
    "fieldtype": "Data",
-   "label": "WorkGroup Owner FullName"
+   "label": "WorkGroup Owner"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-27 14:37:42.611334",
+ "modified": "2022-06-27 19:42:58.804832",
  "modified_by": "Administrator",
  "module": "Barista",
  "name": "Workgroup",

@@ -3,27 +3,28 @@
 
 frappe.ui.form.on('Test Suite', {
     refresh: function(frm) {
-        debugger
+        // debugger
         cur_frm.doc.testcase.forEach((test_case) => {
             // Get the test-case row, in which 'info' button is to be added:
             let fieldDiv = $(`.frappe-control[data-fieldname='testcase']`);
             console.log(fieldDiv);
             // Check if there's a button already present:
-            debugger
+            // debugger
             if (!fieldDiv.find(`.test_case-details-${test_case.idx}`).length){
                 
                 // get the div at end of the row, and add a info-button-div:
                 let divToAppend = fieldDiv.find(`.grid-row[data-idx=${test_case.idx}]`);
+                let colToAppend = divToAppend.find(`.static-area`)[1]
                 let infoDiv = `
-                    <span class="enable-history glyphicon glyphicon-info-sign test_case-${test_case.idx}" style="color: grey; float: right"></span>
+                    <div class="enable-history fa fa-info-circle test_case-${test_case.idx}" style="color: grey; float: right"></div>
                 `;
                 let divPresent = fieldDiv.find(
-                    `.glyphicon.glyphicon-info-sign.test_case-${test_case.idx}`
+                    `.fa.fa-info-circle.test_case-${test_case.idx}`
                 );
                 
                 // Prepend the info-button-div:
                 if (!divPresent.length) {
-                    divPresent = $(infoDiv).prependTo(divToAppend);
+                    divPresent = $(infoDiv).prependTo(colToAppend);
                     divPresent.removeClass(`test_case-${test_case.idx}`);
                 }
 
@@ -64,7 +65,7 @@ function get_test_case_info(test_case) {
 			      });
 			dialog.show_message("<div style='color:#000000 !important'>"+r.message+"</div>");
 			dialog.show()
-			dialog.$wrapper.find('.modal-dialog').css({"width":"850px","color":""});
+			dialog.$wrapper.find('.modal-dialog').css({"width":"1000px","color":""});
 		}
 	});
 }

@@ -132,7 +132,7 @@ class TestDataGenerator():
                                 if (declared_field_doc.is_default):
                                     # ignore
                                     pass
-                                elif (field_doc.fieldtype == "Table"):
+                                elif (field_doc.fieldtype in ["Table", "Table MultiSelect"]):
                                     # if it is table then user will have to add multiple rows for multiple records.
                                     child_testdata_doc = frappe.get_doc(
                                         'Test Data', declared_field_doc.linkfield_name)
@@ -240,7 +240,7 @@ class TestDataGenerator():
                 value = "Frappe@12345"
             elif (field_doc.fieldtype == "Percent"):
                 value = round(random.uniform(0, 100), 2)
-            elif ("Link" in field_doc.fieldtype or field_doc.fieldtype == "Table"):
+            elif ("Link" in field_doc.fieldtype or field_doc.fieldtype in ["Table", "Table MultiSelect"]):
                 # it looks like table or link field is not declared by user... test data generation failed..
                 pass
             elif("Attach" in field_doc.fieldtype):
@@ -381,11 +381,11 @@ class TestDataGenerator():
         if created_doc:
             parenttype = created_doc.doctype
         new_record_fields = frappe.db.sql(
-            f"select fieldname from `tabDocField` where parent = '{parenttype}'and fieldtype = 'Table'", as_dict=True)
+            f"select fieldname from `tabDocField` where parent = '{parenttype}'and fieldtype in ('Table','Table MultiSelect')", as_dict=True)
         for new_record_field in new_record_fields:
             child_records = created_doc.get(new_record_field.fieldname)
             test_data_field_values = frappe.db.sql('select linkfield_name from `tabTestdatafield` where docfield_fieldname = "' +
-                                                   new_record_field.fieldname + '" and parent = "' + parent_doc.name + '" order by idx', as_dict=True)
+                                                new_record_field.fieldname + '" and parent = "' + parent_doc.name + '" order by idx', as_dict=True)
             child_record_index = 0
             for test_data_field_value in test_data_field_values:
                 if child_record_index < len(child_records):

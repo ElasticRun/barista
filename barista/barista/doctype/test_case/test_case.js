@@ -15,6 +15,8 @@ frappe.ui.form.on('Test Case', {
 							return d.fieldname;
 						} else if (d.fieldname && d.fieldtype == 'Table') {
 							return d.fieldname;
+						} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
+							return d.fieldname;
 						}
 						return null;
 					}
@@ -52,6 +54,8 @@ frappe.ui.form.on('Test Case', {
 						if (d.fieldname && frappe.model.no_value_type.indexOf(d.fieldtype) === -1) {
 							return d.fieldname;
 						} else if (d.fieldname && d.fieldtype == 'Table') {
+							return d.fieldname;
+						} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
 							return d.fieldname;
 						}
 						return null;
@@ -107,6 +111,8 @@ frappe.ui.form.on('Testdatafield', {
 							return d.fieldname;
 						} else if (d.fieldname && d.fieldtype == 'Table') {
 							return d.fieldname;
+						} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
+							return d.fieldname;
 						}
 
 						return null;
@@ -137,6 +143,8 @@ frappe.ui.form.on("Assertion", {
 							return d.fieldname;
 						} else if (d.fieldname && d.fieldtype == 'Table') {
 							return d.fieldname;
+						} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
+							return d.fieldname;
 						}
 						return null;
 					}
@@ -160,12 +168,15 @@ function addTestCaseDocFields(cur_frm) {
 					return d.fieldname;
 				} else if (d.fieldname && d.fieldtype == 'Table') {
 					return d.fieldname;
+				} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
+					return d.fieldname;
 				}
 				return null;
 			}
 		);
 		options.push("name");
 		cur_frm.fields_dict.test_case_docfield.df.options = options;
+		cur_frm.fields_dict.update_fields.grid.update_docfield_property('docfield_fieldname', 'options', options);
 		cur_frm.refresh_field("test_case_docfield")
 
 	});
@@ -190,6 +201,8 @@ function addTestDataDocFields(cur_frm) {
 						if (d.fieldname && frappe.model.no_value_type.indexOf(d.fieldtype) === -1) {
 							return d.fieldname;
 						} else if (d.fieldname && d.fieldtype == 'Table') {
+							return d.fieldname;
+						} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
 							return d.fieldname;
 						}
 						return null;

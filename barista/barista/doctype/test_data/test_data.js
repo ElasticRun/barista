@@ -27,6 +27,8 @@ function loadOptionsFromDoctype() {
 					return d.fieldname;
 				} else if (d.fieldname && d.fieldtype == 'Table') {
 					return d.fieldname;
+				} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
+					return d.fieldname;
 				}
 				return null;
 			}
@@ -52,6 +54,8 @@ frappe.ui.form.on('Testdatafield', {
 						if (d.fieldname && frappe.model.no_value_type.indexOf(d.fieldtype) === -1) {
 							return d.fieldname;
 						} else if (d.fieldname && d.fieldtype == 'Table') {
+							return d.fieldname;
+						} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
 							return d.fieldname;
 						}
 						return null;
@@ -96,6 +100,9 @@ frappe.ui.form.on("Test Data", "doctype_name", function (frm, cdt, cdn) {
 								if (d.fieldname && frappe.model.no_value_type.indexOf(d.fieldtype) === -1) {
 									return d.fieldname;
 								} else if (d.fieldname && d.fieldtype == 'Table') {
+									tableFields.push(d.fieldname);
+									return d.fieldname;
+								} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
 									tableFields.push(d.fieldname);
 									return d.fieldname;
 								}

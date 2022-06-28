@@ -13,6 +13,9 @@ from frappe.modules.export_file import export_to_files
 
 
 class TestSuite(Document):
+	def autoname(self):
+		self.name = self.suite_name.replace(' ', '_').lower()
+
 	def before_save(self):
 		if self.module:
 			self.module = self.module.strip().replace(' ','_').upper()
