@@ -41,7 +41,9 @@ def get_test_case_info(test_case):
 	# Get relevant data to pass to the template:
 	test_case_doc = frappe.get_doc("Test Case", test_case).as_dict()
 	assertions = test_case_doc.get("assertion", {})
-	test_data_name, test_data_description = frappe.get_value("Test Data", test_case_doc.test_data, ['name', 'description'])
+	test_data_name, test_data_description = '', ''
+	if test_case_doc.test_data:
+		test_data_name, test_data_description = frappe.get_value("Test Data", test_case_doc.test_data, ['name', 'description'])
 
 	# render template and fill JINJA values:
 	rendered_info = frappe.render_template('barista/barista/doctype/test_case/templates/test_case_info.html',

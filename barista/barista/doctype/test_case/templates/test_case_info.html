@@ -50,7 +50,11 @@
         <label>Test Data: </label>
     </div>
     <div class="col-xs-9">
-        <label><a href="/desk#Form/Test Data/{{ test_data_name }}" style=" color: #f47920;">{{ test_data_description or ''}}</a></label>
+        {% if test_data_name %}
+            <label><a href="/desk#Form/Test Data/{{ test_data_name }}" style=" color: #f47920;">{{ test_data_description or ''}}</a></label>
+        {% else %}
+            <label>NA</label>
+        {% endif%}
     </div>
 </div>
 
