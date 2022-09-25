@@ -1,0 +1,145 @@
+<!-- Basic details -->
+<div class="row" style="font-size: 13px;">
+    <div class="col-xs-6">
+        <!-- name: -->
+        <div class="row">
+            <div class="col-xs-6 text-right">
+                <label>Test Case: </label>
+            </div>
+            <div class="col-xs-6">
+                <label><a href="/desk#Form/Test Case/{{ test_case_doc.name }}" style=" color: blue;">{{ test_case_doc.testcase_name or ''}}</a></label>
+            </div>
+        </div>
+        <!-- description: -->
+        <div class="row">
+            <div class="col-xs-6 text-right">
+                <label>Description: </label>
+            </div>
+            <div class="col-xs-6">
+                {{ test_case_doc.testcase_desc or ''}}
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-6">
+        <!-- type: -->
+        <div class="row">
+            <div class="col-xs-6 text-right">
+                <label>Test Case Type: </label>
+            </div>
+            <div class="col-xs-6">
+                {{ test_case_doc.testcase_type or ''}}
+            </div>
+        </div>
+        <!-- description: -->
+        <div class="row">
+            <div class="col-xs-6 text-right">
+                <label>Test Case Doctype: </label>
+            </div>
+            <div class="col-xs-6">
+                {{ test_case_doc.testcase_doctype or ''}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<br>
+
+<!-- Test Data -->
+<div class="row" style="font-size: 13px;">
+    <div class="col-xs-3 text-right">
+        <label>Test Data: </label>
+    </div>
+    <div class="col-xs-9">
+        {% if test_data_name %}
+            <label><a href="/desk#Form/Test Data/{{ test_data_name }}" style=" color: #f47920;">{{ test_data_description or ''}}</a></label>
+        {% else %}
+            <label>NA</label>
+        {% endif%}
+    </div>
+</div>
+
+<br>
+
+<!-- Assertions -->
+<label style="font-size: 13px;">ASSERTIONS:</label>
+<br>
+{% if assertions %}
+    {% for assertion in assertions %}
+        <div class="well" style="padding: 15px;">
+            <div class="container-fluid">
+                <!-- Assertion Type + Doctype -->
+                <div class="col-xs-6">
+                    <div class="row">
+                        <div class="col-xs-5 text-right">
+                            <label>Assertion Type:</label>
+                        </div>
+                        <div class="col-xs-7">
+                            {{assertion.assertion_type}}
+                        </div>
+                    </div>
+                    <div class="row" style="padding-top: 8px;">
+                        <div class="col-xs-5 text-right">
+                            <label>Doctype:</label>
+                        </div>
+                        <div class="col-xs-7">
+                            {{assertion.doctype_name}}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actual Assertion: -->
+                <div class="col-xs-6">
+                    <!-- Check Assertion Type and add relevant fields: -->
+                    {% set assertion_type = assertion.assertion_type %}
+
+                    {% if assertion_type in ["Field Value", "Record Validation"] %}
+                        {% set assertion_label = "DocField Name" %}
+                        {% set assertion_value = assertion.docfield_name %}
+
+                    {% elif assertion_type == "Workflow" %}
+                        {% set assertion_label = "Workflow State" %}
+                        {% set assertion_value = assertion.workflow_state %}
+                    
+                    {% elif assertion_type == "Response" %}
+                        {% set assertion_label = "Response Regex" %}
+                        {% set assertion_value = assertion.response_regex %}
+                    
+                    {% elif assertion_type == "Error" %}
+                        {% set assertion_label = "Error Message" %}
+                        {% set assertion_value = assertion.error_message %}
+                    {% endif %}
+                    <div class="row">
+                        <div class="col-xs-6 text-right">
+                            <label>{{assertion_label}}</label>
+                        </div>
+                        <div class="col-xs-6">
+                            {{assertion_value}}
+                        </div>
+                    </div>
+                    
+                    <!-- If assertion = Field value / Record validation : add docfield cell -->
+                    {% if assertion_type in ["Field Value", "Record Validation"] %}
+                    <div class="row" style="padding-top: 8px;">
+                            <div class="col-xs-6 text-right">
+                                <label>DocField Value:</label>
+                            </div>
+                            <div class="col-xs-6">
+                                {{assertion.docfield_value}}
+                            </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+{% else %}
+<div class="well" style="padding: 15px;">
+    No assertion added!
+</div>
+{% endif %}
+
+<br>
+
+<!-- Link to Test Case -->
+<label><a class="btn btn-primary btn-sm" href="/desk#Form/Test Case/{{ test_case_doc.name }}" role="button">Open Test Case - {{ test_case_doc.testcase_name or ''}}</a></label>

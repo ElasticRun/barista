@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import time
 import sys
 import frappe
+from frappe.model.rename_doc import rename_doc
 from barista.barista.doctype.test_suite.run_test import RunTest, resolve_run_name
 
 
@@ -219,3 +220,22 @@ def get_commands():
 
 
 commands = get_commands()
+
+
+def update_series():
+    # bench execute barista.update_series
+    bs = ''
+    if frappe.conf.get('barista_series'):
+        bs = f"{frappe.conf.get('barista_series')}-"
+
+    test_data_lst = frappe.get_all('Test Data')
+    for test_data in test_data_lst:
+        rename_doc(
+            'Test Data', test_data['name'], f"{bs}{test_data['name']}", force=True)
+
+    test_case_lst = frappe.get_all('Test Case')
+    for test_case in test_case_lst:
+        rename_doc(
+            'Test Case', test_case['name'], f"{bs}{test_case['name']}", force=True)
+
+    frappe.db.commit()

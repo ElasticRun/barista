@@ -90,7 +90,7 @@ app_license = "MIT"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
 # 	"all": [
 # 		"barista.tasks.all"
 # 	],
@@ -106,7 +106,15 @@ app_license = "MIT"
 # 	"monthly": [
 # 		"barista.tasks.monthly"
 # 	]
-# }
+    "cron": {
+		"15 16 * * *": [
+			"barista.barista.api.barista_trigger.barista_job"
+		]
+        # "00 12 * * 3": [
+        #     "barista.barista.api.barista_trigger.barista_job"
+        # ]
+    }
+}
 
 # Testing
 # -------
@@ -120,17 +128,25 @@ app_license = "MIT"
 # 	"frappe.desk.doctype.event.event.get_events": "barista.event.get_events"
 # }
 fixtures = [
-    "Test Data",
-    "Test Case",
-    "Test Suite",
-    # "Testcase Item",
-    # "Testdata Item",
-    # "Assertion",
-    # "Testdatafield"
+    {'doctype': "Test Data", 'filters': {'is_standard': 'No'}},
+    {'doctype': "Test Case", 'filters': {'is_standard': 'No'}},
+    {'doctype': "Test Suite", 'filters': {'is_standard': 'No'}}
+]
+
+before_migrate = [
+    'barista.barista.doctype.test_suite.run_test.alter_error_log'
 ]
 
 after_migrate = [
     'barista.barista.doctype.test_suite.run_test.fix_series',
     'barista.barista.doctype.test_suite.run_test.fix_assertion_type_status',
     'barista.barista.doctype.test_suite.run_test.fix_testcase_type_status',
+    'barista.barista.doctype.test_suite.run_test.fix_create_using',
+    'barista.barista.doctype.test_suite.run_test.fix_object_type',
+]
+
+standard_doctypes = [
+	'Test Case',
+    'Test Data',
+    'Test Suite'
 ]

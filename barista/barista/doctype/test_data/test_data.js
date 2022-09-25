@@ -10,25 +10,34 @@ frappe.ui.form.on('Test Data', {
 		$('textarea[data-fieldname=eval_function_result').css('height', '30px');
 		if (cur_frm.doc.doctype_name) {
 			if (cur_frm.doc.doctype_name) {
-				frappe.model.with_doctype(cur_frm.doc.doctype_name, function () {
-					var options = $.map(frappe.get_meta(cur_frm.doc.doctype_name).fields,
-						function (d) {
-							if (d.fieldname && frappe.model.no_value_type.indexOf(d.fieldtype) === -1) {
-								return d.fieldname;
-							} else if (d.fieldname && d.fieldtype == 'Table') {
-								return d.fieldname;
-							}
-							return null;
-						}
-					);
-					options.push("docstatus");
-					frappe.meta.get_docfield("Testdatafield", "docfield_fieldname", cur_frm.doc.name).options = options;
-				});
+				loadOptionsFromDoctype();
 			}
 		}
+	},
+	doctype_name: function (frm) {
+		loadOptionsFromDoctype();
 	}
 });
 
+function loadOptionsFromDoctype() {
+	frappe.model.with_doctype(cur_frm.doc.doctype_name, function () {
+		var options = $.map(frappe.get_meta(cur_frm.doc.doctype_name).fields,
+			function (d) {
+				if (d.fieldname && frappe.model.no_value_type.indexOf(d.fieldtype) === -1) {
+					return d.fieldname;
+				} else if (d.fieldname && d.fieldtype == 'Table') {
+					return d.fieldname;
+				} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
+					return d.fieldname;
+				}
+				return null;
+			}
+		);
+		options.push("docstatus");
+		options.push("name");
+		frappe.meta.get_docfield("Testdatafield", "docfield_fieldname", cur_frm.doc.name).options = options;
+	});
+}
 
 frappe.ui.form.on('Testdatafield', {
 	refresh: function (frm, cdt, cdn) {
@@ -45,6 +54,8 @@ frappe.ui.form.on('Testdatafield', {
 						if (d.fieldname && frappe.model.no_value_type.indexOf(d.fieldtype) === -1) {
 							return d.fieldname;
 						} else if (d.fieldname && d.fieldtype == 'Table') {
+							return d.fieldname;
+						} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
 							return d.fieldname;
 						}
 						return null;
@@ -89,6 +100,9 @@ frappe.ui.form.on("Test Data", "doctype_name", function (frm, cdt, cdn) {
 								if (d.fieldname && frappe.model.no_value_type.indexOf(d.fieldtype) === -1) {
 									return d.fieldname;
 								} else if (d.fieldname && d.fieldtype == 'Table') {
+									tableFields.push(d.fieldname);
+									return d.fieldname;
+								} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
 									tableFields.push(d.fieldname);
 									return d.fieldname;
 								}
@@ -193,4 +207,82 @@ frappe.ui.form.on("Function Parameter", "test_data", function (frm, cdt, cdn) {
 		});
 	});
 
+});
+
+frappe.ui.form.on("Test Data Condition", "test_data", function (frm, cdt, cdn) {
+	let row = locals[cdt][cdn];
+	let docFields = [];
+	if (!row.test_data) {
+		return;
+	}
+	frappe.db.get_value('Test Data', row.test_data, 'doctype_name').then((d) => {
+		let testDataDoctype = d.message.doctype_name;
+		frappe.model.with_doctype(testDataDoctype);
+		frappe.call({
+			method: 'frappe.desk.form.load.getdoctype',
+			args: {
+				'doctype': testDataDoctype,
+				'with_parent': 1
+			},
+			freeze: true,
+			callback: function (r) {
+				if (!r.exc) {
+					frappe.model.with_doctype(testDataDoctype, function () {
+						let fields = frappe.get_meta(testDataDoctype).fields;
+						let options = [];
+						fields.forEach((f) => {
+							if (!['Section Break', 'Column Break'].includes(f.fieldtype)) {
+								options.push(f.fieldname);
+							}
+						})
+						options.push("docstatus");
+						options.push('name');
+						options.push('doctype');
+						options.push('parent');
+						docFields = options;
+						frappe.meta.get_docfield("Test Data Condition", "field", cur_frm.doc.name).options = docFields;
+					});
+					cur_frm.refresh_fields();
+				}
+			}
+		});
+	});
+
+});
+frappe.ui.form.on("Test Data Condition", "reference_doctype", function (frm, cdt, cdn) {
+	let row = locals[cdt][cdn];
+	let docFields = [];
+	if (!row.reference_doctype) {
+		return;
+	}
+	frappe.model.with_doctype(row.reference_doctype);
+	frappe.call({
+		method: 'frappe.desk.form.load.getdoctype',
+		args: {
+			'doctype': row.reference_doctype,
+			'with_parent': 1
+		},
+		freeze: true,
+		callback: function (r) {
+			if (!r.exc) {
+				frappe.model.with_doctype(row.reference_doctype, function () {
+					let fields = frappe.get_meta(row.reference_doctype).fields;
+					let options = [];
+					fields.forEach((f) => {
+						if (!['Section Break', 'Column Break'].includes(f.fieldtype)) {
+							options.push(f.fieldname);
+						}
+					})
+					options.push("docstatus");
+					options.push('name');
+					options.push('doctype');
+					options.push('parent');
+					docFields = options;
+					frappe.meta.get_docfield("Test Data Condition", "reference_field", cur_frm.doc.name).options = docFields;
+					frappe.meta.get_docfield("Test Data Condition", "field_to_refer", cur_frm.doc.name).options = docFields;
+				});
+				cur_frm.refresh_fields();
+			}
+		}
+	});
 });

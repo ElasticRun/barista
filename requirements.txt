@@ -1,2 +1,2 @@
-frappe
-coverage==5.0.4
+coverage==5.2.1
+tabulate
