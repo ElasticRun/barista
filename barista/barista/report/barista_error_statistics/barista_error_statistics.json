@@ -8,15 +8,15 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": "ElasticRun",
- "modified": "2020-05-07 20:00:05.588666",
+ "modified": "2020-06-02 18:00:01.504873",
  "modified_by": "Administrator",
  "module": "Barista",
- "name": "Error Statistics",
+ "name": "Barista Error Statistics",
  "owner": "Administrator",
  "prepared_report": 0,
  "query": "SELECT count(error) as 'Error Count',\n       replace(METHOD, 'barista-', '') as 'Error:Text:1500'\nFROM `tabError Log`\nWHERE METHOD LIKE 'barista%%'\nGROUP BY error\nORDER BY METHOD;",
  "ref_doctype": "Error Log",
- "report_name": "Error Statistics",
+ "report_name": "Barista Error Statistics",
  "report_type": "Query Report",
  "roles": [
   {

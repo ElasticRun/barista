@@ -17,17 +17,21 @@ import sys
 import os
 from pathlib import Path
 from coverage.numbits import register_sqlite_functions
-
+from tabulate import tabulate
 
 error_log_title_len = 1000
+yellow = '\033[0;33;93m'
+green = '\033[0;32;92m'
+red = '\033[0;31;91m'
+white = '\033[0;37m'
 
 
 class RunTest():
     # Run all the suites for the given app
     def run_complete_suite(self, app_name, suites=[], run_name=None):
         start_time = time.time()
-        alter_error_log()
-        print("\033[0;33;93m************ Running all test cases for App - " +
+        # alter_error_log()
+        print(f"{yellow}************ Running all Test Cases for App - " +
               app_name + " *************\n\n")
         if len(suites) == 0:
             suites = frappe.get_all("Test Suite", filters={
@@ -39,21 +43,23 @@ class RunTest():
             suites = suite_name
 
         run_name_path = run_name.replace(' ', '__').replace('-', '_')
-        barista_app_path = f"{frappe.get_app_path('barista')}/public/test-coverage/{run_name_path}/"
+        # barista_app_path = f"{frappe.get_app_path('barista')}/public/test-coverage/{run_name_path}/"
+        barista_app_path = f'{frappe.get_site_path()}/public/files/test-coverage/{run_name_path}/'
+
         data_file_path = str(f"{barista_app_path}{app_name}.coverage")
 
         shutil.rmtree(barista_app_path, ignore_errors=True)
 
         generatorObj = TestDataGenerator()
         objCoverage = coverage.Coverage(source=[frappe.get_app_path(
-            app_name)], data_file=data_file_path, omit=['*test_*'], config_file=False)
+            app_name)], data_file=None, omit=['*test_*'], config_file=False)
         objCoverage.erase()
         objCoverage.start()
         total_suites = len(suites)
         suite_srno = 0
         for suite in suites:
             suite_srno += 1
-            print("\033[0;32;92m************ Suite - " +
+            print(f"{green}************ Suite - " +
                   suite.get('name') + " *************\n\n")
             try:
                 generatorObj.create_pretest_data(suite.get('name'), run_name)
@@ -69,12 +75,13 @@ class RunTest():
             except Exception as e:
                 frappe.log_error(frappe.get_traceback(
                 ), ('barista-Suite Execution Failed-'+suite.get('name')+'-'+str(e))[:error_log_title_len])
+
                 print(
-                    "\033[0;31;91mAn Error occurred which will cause false test case result in the suite - " + str(suite.get('name')))
-                print("\033[0;31;91m*************ERROR****************")
+                    f"{red}An Error occurred which will cause false test case result in the suite - " + str(suite.get('name')))
+                print(f"{red}*************ERROR****************")
                 print(
-                    "\033[0;31;91m The error encountered is - " + str(e) + "\n")
-                print("\033[0;31;91m*************ERROR****************")
+                    f"{red}The error encountered is - " + str(e) + "\n")
+                print(f"{red}*************ERROR****************")
 
         objCoverage.stop()
         objCoverage.save()
@@ -84,7 +91,7 @@ class RunTest():
             directory=barista_app_path, skip_empty=True, omit=['*test_*'])
 
         print(
-            f"\033[0;33;93m************ Execution ends. Verify coverage at - /assets/barista/test-coverage/{run_name_path}/index.html")
+            f"{green}************ Execution ends. Verify coverage at - /files/test-coverage/{run_name_path}/index.html")
 
         end_time = round(time.time() - start_time, 2)
         time_uom = 'seconds'
@@ -197,6 +204,10 @@ def read_file(file_path):
 
 
 def alter_error_log():
+    # barista.barista.doctype.test_suite.run_test.alter_error_log
+    print(f'{yellow}Barista is altering the table `tabError Log`')
+    frappe.db.sql("""ALTER TABLE `tabError Log` DROP INDEX IF EXISTS `index_on_method`;""")
+    # frappe.db.sql('TRUNCATE `tabError Log`;')
     frappe.db.sql("""UPDATE `tabDocField`
 							SET fieldtype="Small Text"
 							WHERE parent= "Error Log"
@@ -204,60 +215,71 @@ def alter_error_log():
 							AND label= "Title";""", auto_commit=1)
     frappe.db.sql(
         """ALTER TABLE `tabError Log` CHANGE `method` `method` text;""", auto_commit=1)
-    if frappe.conf.get('developer_mode') == 1:
+
+    print(f'{yellow}Barista is turning ON Developer Mode{white}')
+    from frappe.installer import update_site_config
+    update_site_config('developer_mode', 1)
+
+    if bool(frappe.conf.get('developer_mode')):
         frappe.get_doc('DocType', 'Error Log').save(True)
 
 
 # bench execute barista.barista.doctype.test_suite.run_test.fix_series
 def fix_series():
-    print('Previous Series-', frappe.db.sql(
-        """select * from `tabSeries` where name in ('TestData-','TestCase-')""", as_dict=1))
+    bs = ''
+    if frappe.conf.get('barista_series'):
+        bs = f"{frappe.conf.get('barista_series')}-"
+
+    previous_series = frappe.db.sql(
+        f"""select * from `tabSeries` where name in ('{bs}TestData-','{bs}TestCase-')""", as_dict=1)
+
+    test_data_lst = [0]
+    for test_data in frappe.get_all('Test Data'):
+        test_data_lst.append(int(test_data['name'].split('-')[-1]))
+
+    max_test_data_series = max(test_data_lst)
+
+    # max_test_data_series = frappe.db.sql_list(
+    #     f"""select ifnull(max(name),'{bs}TestData-0') from `tabTest Data`;""")
+    # if len(max_test_data_series):
+    #     max_test_data_series = int(max_test_data_series[0].split('-')[-1])
     test_data_series = frappe.db.sql_list(
-        """select * from `tabSeries` where name='TestData-';""")
-    max_test_data_series = frappe.db.sql_list(
-        """select ifnull(max(name),'TestData-0') from `tabTest Data`;""")
-    if len(max_test_data_series):
-        max_test_data_series = int(max_test_data_series[0].split('-')[1])
+        f"""select * from `tabSeries` where name='{bs}TestData-';""")
+
     if len(test_data_series) == 0:
         frappe.db.sql(
-            f"""Insert into `tabSeries` (name,current) values ('TestData-',{max_test_data_series});""", auto_commit=1)
+            f"""Insert into `tabSeries` (name,current) values ('{bs}TestData-',{max_test_data_series});""", auto_commit=1)
     else:
         frappe.db.sql(
-            f"""update `tabSeries` set current={max_test_data_series} where name="TestData-";""", auto_commit=1)
+            f"""update `tabSeries` set current={max_test_data_series} where name="{bs}TestData-";""", auto_commit=1)
 
+    test_case_lst = [0]
+    for test_case in frappe.get_all('Test Case'):
+        test_case_lst.append(int(test_case['name'].split('-')[-1]))
+
+    max_test_case_series = max(test_case_lst)
+
+    # max_test_case_series = frappe.db.sql_list(
+    #     f"""select ifnull(max(name),'{bs}TestCase-0') from `tabTest Case`;""")
+    # if len(max_test_case_series):
+    #     max_test_case_series = int(max_test_case_series[0].split('-')[-1])
     test_case_series = frappe.db.sql_list(
-        """select * from `tabSeries` where name='TestCase-';""")
-    max_test_case_series = frappe.db.sql_list(
-        """select ifnull(max(name),'TestCase-0') from `tabTest Case`;""")
-    if len(max_test_case_series):
-        max_test_case_series = int(max_test_case_series[0].split('-')[1])
+        f"""select * from `tabSeries` where name='{bs}TestCase-';""")
+
     if len(test_case_series) == 0:
         frappe.db.sql(
-            f"""Insert into `tabSeries` (name,current) values ('TestCase-',{max_test_case_series});""", auto_commit=1)
+            f"""Insert into `tabSeries` (name,current) values ('{bs}TestCase-',{max_test_case_series});""", auto_commit=1)
     else:
         frappe.db.sql(
-            f"""update `tabSeries` set current={max_test_case_series} where name="TestCase-";""", auto_commit=1)
+            f"""update `tabSeries` set current={max_test_case_series} where name="{bs}TestCase-";""", auto_commit=1)
 
-    print('Current Series-', frappe.db.sql(
-        """select * from `tabSeries` where name in ('TestData-','TestCase-')""", as_dict=1))
+    current_series = frappe.db.sql(
+        f"""select * from `tabSeries` where name in ('{bs}TestData-','{bs}TestCase-')""", as_dict=1)
 
-
-# bench execute barista.barista.doctype.test_suite.run_test.run_test --kwargs "{'app_name':'velocityduos','suites':[]}"
-def run_test(app_name, suites=[]):
-    print('''
-			This commmand is deprecated.
-		''', end='')
-    print('''
-			Please use bench execute barista.run --kwargs "{'app_name':'velocityduos','suites':[],'reset_testdata':0,'clear_testresult':0,'run_name':'Release 1'}"
-		''', end='')
-    print('''
-			app_name is mandatory while all other parameters are optional
-		''', end='')
-    print('''
-			You can use bench execute barista.run --kwargs "{'app_name':'velocityduos'}"
-		''')
-    return
-    # RunTest().run_complete_suite(app_name, suites)
+    print(f'{yellow}Barista is fixing Test Data and Test Case series:\nPrevious Series-\n', end='')
+    print(tabulate(previous_series, headers="keys", tablefmt="fancy_grid"))
+    print(f'{yellow}Current Series-\n', end='')
+    print(tabulate(current_series, headers="keys", tablefmt="fancy_grid"))
 
 
 def fix_assertion_type_status():
@@ -300,6 +322,11 @@ def resolve_run_name(run_name='Pass-1'):
                 f'Provided Run Name [{run_name}] already exists. Please provide other Run Name.')
             sys.exit(1)
     else:
+        frappe.get_doc({
+            "run_name":run_name,
+            "doctype": "Run Name",
+        }).db_insert()
+        frappe.db.commit()
         return run_name
 
 
@@ -315,26 +342,35 @@ def get_test_coverage():
     # bench execute barista.barista.doctype.test_suite.run_test.get_test_coverage
     test_coverage_lst = []
     try:
-        barista_app_path = frappe.get_app_path('barista')
-        test_coverage_path = f"{barista_app_path}/public/test-coverage"
+        # barista_app_path = frappe.get_app_path('barista')
+        barista_app_path = frappe.get_site_path()
+        test_coverage_path = f"{barista_app_path}/public/files/test-coverage"
 
-        paths = sorted(Path(test_coverage_path).iterdir(),
-                       key=os.path.getmtime)
-
-        for path in paths:
-            if path.is_dir():
-                path_parts = str(path).split('/')
-                d = path_parts.pop()
-                run_name = d.replace('__', ' ').replace('_', '-')
-                test_coverage_lst.append({
-                    'coverage_path': f"/assets/barista/test-coverage/{d}/index.html",
-                    'test_run_name': run_name
-                })
+        process_paths(test_coverage_path, test_coverage_lst)
+    except OSError as o:
+        frappe.log_error(frappe.get_traceback(),
+                         'barista-get_test_coverage-OSError')
+        test_coverage_path = './site1.docker/public/files/test-coverage'
+        process_paths(test_coverage_path, test_coverage_lst)
     except Exception as e:
-        print('error-', e)
         frappe.log_error(frappe.get_traceback(), 'barista-get_test_coverage')
 
     return test_coverage_lst
+
+
+def process_paths(directory_path, test_coverage_lst):
+    paths = sorted(Path(directory_path).iterdir(),
+                   key=os.path.getmtime)
+
+    for path in paths:
+        if path.is_dir():
+            path_parts = str(path).split('/')
+            d = path_parts.pop()
+            run_name = d.replace('__', ' ').replace('_', '-')
+            test_coverage_lst.append({
+                'coverage_path': f"/files/test-coverage/{d}/index.html",
+                'test_run_name': run_name
+            })
 
 
 @frappe.whitelist()
@@ -342,7 +378,8 @@ def delete_test_coverage(run_name):
     # barista.barista.doctype.test_suite.run_test.delete_test_coverage
     try:
         run_name_path = run_name.replace(' ', '__').replace('-', '_')
-        barista_app_path = f"{frappe.get_app_path('barista')}/public/test-coverage/{run_name_path}/"
+        # barista_app_path = f"{frappe.get_app_path('barista')}/public/test-coverage/{run_name_path}/"
+        barista_app_path = f'{frappe.get_site_path()}/public/files/test-coverage/{run_name_path}/'
 
         shutil.rmtree(barista_app_path, ignore_errors=True)
         frappe.db.sql('''
@@ -354,3 +391,13 @@ def delete_test_coverage(run_name):
     except Exception:
         frappe.log_error(frappe.get_traceback(),
                          'barista-delete_test_coverage')
+
+
+def fix_create_using():
+    frappe.db.sql(
+        "update `tabTest Data` set create_using='Data' where create_using is null or create_using=''", auto_commit=1)
+
+
+def fix_object_type():
+    frappe.db.sql(
+        "update `tabFunction Parameter` set object_type='json' where object_type is null or object_type=''", auto_commit=1)

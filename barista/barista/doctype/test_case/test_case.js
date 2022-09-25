@@ -15,6 +15,8 @@ frappe.ui.form.on('Test Case', {
 							return d.fieldname;
 						} else if (d.fieldname && d.fieldtype == 'Table') {
 							return d.fieldname;
+						} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
+							return d.fieldname;
 						}
 						return null;
 					}
@@ -53,15 +55,16 @@ frappe.ui.form.on('Test Case', {
 							return d.fieldname;
 						} else if (d.fieldname && d.fieldtype == 'Table') {
 							return d.fieldname;
+						} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
+							return d.fieldname;
 						}
 						return null;
 					}
 				);
 				options.push("docstatus");
 				options.push("name");
-
-				frappe.meta.get_docfield("Assertion", "reference_field", cur_frm.doc.name).options = options;
-				frappe.meta.get_docfield("Assertion", "docfield_name", cur_frm.doc.name).options = options;
+				cur_frm.fields_dict.assertion.grid.update_docfield_property('reference_field', 'options', options);
+				cur_frm.fields_dict.assertion.grid.update_docfield_property('docfield_name', 'options', options);
 			});
 			cur_frm.refresh_fields();
 		}
@@ -108,6 +111,8 @@ frappe.ui.form.on('Testdatafield', {
 							return d.fieldname;
 						} else if (d.fieldname && d.fieldtype == 'Table') {
 							return d.fieldname;
+						} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
+							return d.fieldname;
 						}
 
 						return null;
@@ -138,6 +143,8 @@ frappe.ui.form.on("Assertion", {
 							return d.fieldname;
 						} else if (d.fieldname && d.fieldtype == 'Table') {
 							return d.fieldname;
+						} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
+							return d.fieldname;
 						}
 						return null;
 					}
@@ -145,8 +152,8 @@ frappe.ui.form.on("Assertion", {
 				options.push("docstatus");
 				options.push("name");
 				options.push("parent");
-				frappe.meta.get_docfield("Assertion", "reference_field", cur_frm.doc.name).options = options;
-				frappe.meta.get_docfield("Assertion", "docfield_name", cur_frm.doc.name).options = options;
+				cur_frm.fields_dict.assertion.grid.update_docfield_property('reference_field', 'options', options);
+				cur_frm.fields_dict.assertion.grid.update_docfield_property('docfield_name', 'options', options);
 			});
 			cur_frm.refresh_fields();
 		}
@@ -161,12 +168,15 @@ function addTestCaseDocFields(cur_frm) {
 					return d.fieldname;
 				} else if (d.fieldname && d.fieldtype == 'Table') {
 					return d.fieldname;
+				} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
+					return d.fieldname;
 				}
 				return null;
 			}
 		);
 		options.push("name");
 		cur_frm.fields_dict.test_case_docfield.df.options = options;
+		cur_frm.fields_dict.update_fields.grid.update_docfield_property('docfield_fieldname', 'options', options);
 		cur_frm.refresh_field("test_case_docfield")
 
 	});
@@ -191,6 +201,8 @@ function addTestDataDocFields(cur_frm) {
 						if (d.fieldname && frappe.model.no_value_type.indexOf(d.fieldtype) === -1) {
 							return d.fieldname;
 						} else if (d.fieldname && d.fieldtype == 'Table') {
+							return d.fieldname;
+						} else if (d.fieldname && d.fieldtype == 'Table MultiSelect') {
 							return d.fieldname;
 						}
 						return null;

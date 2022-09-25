@@ -1,0 +1,49 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:workgroup",
+ "creation": "2022-06-27 14:35:35.932188",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "workgroup",
+  "workgroup_owner"
+ ],
+ "fields": [
+  {
+   "fieldname": "workgroup",
+   "fieldtype": "Data",
+   "label": "WorkGroup",
+   "unique": 1
+  },
+  {
+   "fieldname": "workgroup_owner",
+   "fieldtype": "Data",
+   "label": "WorkGroup Owner"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-06-27 19:42:58.804832",
+ "modified_by": "Administrator",
+ "module": "Barista",
+ "name": "Workgroup",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
