@@ -148,6 +148,9 @@ class TestDataGenerator():
                                             run_name, child_testdata_doc.name, child_doc.name)
 
                                         child_doc.parentfield = field_doc.fieldname
+                                        if not new_doc.get(field_doc.fieldname):
+                                            new_doc.set(field_doc.fieldname, [])
+                                            
                                         new_doc.get(field_doc.fieldname).append(
                                             child_doc)
                                     else:

@@ -188,7 +188,7 @@ class TestCaseExecution():
                             new_record_doc.set(update_field_doc.docfield_fieldname, int(
                                 update_field_doc.docfield_value))
                         elif new_record_doc:
-                            if (field_doc.fieldtype == "Table"):
+                            if (field_doc.fieldtype in ["Table", "Table MultiSelect"]):
                                 # if it is table then user will have to add multiple rows for multiple records.
                                 # each test data field will link to one record.
                                 child_testdata_doc = frappe.get_doc(
